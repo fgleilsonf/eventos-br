@@ -1,9 +1,9 @@
 {
-  "name": "admin-web",
-  "description": "Infinity Break - WebAdmin",
+  "name": "eventos-br",
+  "description": "Sistema web para criação de eventos",
   "private": true,
   "version": "1.0.0-beta",
-  "repository": "https://bitbucket.org/infinitybreaksoftware/admin-web",
+  "repository": "https://github.com/fgleilsonf/eventos-br",
   "dependencies": {
     "angular": "1.4.7",
     "angular-animate": "^1.4.8",

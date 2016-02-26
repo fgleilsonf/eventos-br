@@ -9,20 +9,10 @@
         <link rel="shortcut icon" href="/images/favicons/favicon.ico" type="image/ico" />
         <link rel="apple-touch-icon-precomposed" href="/images/favicons/apple-touch-icon-precomposed.png" />
 
-        <link rel="stylesheet" href="./assets/css/admin-web.min.css">
+        <link rel="stylesheet" href="./assets/css/eventos-br.min.css">
     </head>
 
     <body ng-class="{ 'sw-toggled': mactrl.layoutType === '1'}">
-        <!--<div class="four-zero">-->
-            <!--<h2>SEX!</h2>-->
-            <!--<small>Nah.. it's 404</small>-->
-
-            <!--<footer>-->
-                <!--<a href="index.html"><i class="zmdi zmdi-arrow-back"></i></a>-->
-                <!--<a href="index.html"><i class="zmdi zmdi-home"></i></a>-->
-            <!--</footer>-->
-        <!--</div>-->
-
         <header id="header"
                 data-current-skin={{mactrl.currentSkin}}
                 ng-controller="HeaderController as hctrl"
@@ -30,7 +20,6 @@
         </header>
 
         <section id="main">
-
             <aside id="sidebar"
                    ng-include="'views/template/sidebar-left.html'"
                    ng-class="{ 'toggled': mactrl.sidebarToggle.left}"></aside>
@@ -40,6 +29,6 @@
 
         <footer id="footer" ng-include="'views/template/footer.html'"></footer>
 
-        <script src="./assets/js/admin-web.js"></script>
+        <script src="./assets/js/eventos-br.js"></script>
     </body>
 </html>

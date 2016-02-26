@@ -1,4 +1,4 @@
-# Infinity Break - WebAdmin
+# Eventos BR - WebAdmin
 --------------------------
 
 ### Setup
