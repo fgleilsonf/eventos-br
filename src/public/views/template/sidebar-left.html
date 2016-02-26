@@ -1,0 +1,33 @@
+<div class="sidebar-inner c-overflow">
+    <div class="profile-menu">
+        <a href="" toggle-submenu>
+            <div class="profile-pic">
+                <img src="assets/img/perfil.jpg" alt="">
+            </div>
+            <div class="profile-info">
+                Gleilson Ferreira
+
+                <i class="zmdi zmdi-caret-down"></i>
+            </div>
+        </a>
+        <ul class="main-menu">
+            <li>
+                <a ui-sref="profile.about" ng-click="mactrl.sidebarStat($event)"><i class="zmdi zmdi-account"></i> Visualizar Perfil</a>
+            </li>
+            <li>
+                <a href=""><i class="zmdi zmdi-settings"></i> Configurações</a>
+            </li>
+            <li>
+                <a href=""><i class="zmdi zmdi-time-restore"></i> Sair</a>
+            </li>
+        </ul>
+    </div>
+    <ul class="main-menu">
+        <li ui-sref-active="active">
+            <a ui-sref="home"><i class="zmdi zmdi-home"></i> Home</a>
+        </li>
+        <li data-ui-sref-active="active">
+            <a ui-sref="events.add"><i class="zmdi zmdi-layers"></i> Eventos</a>
+        </li>
+    </ul>
+</div>

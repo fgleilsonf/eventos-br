@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html class="no-js" ng-app="webAdminApp" ng-controller="LayoutController as mactrl">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Eventos BR</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="shortcut icon" href="/images/favicons/favicon.ico" type="image/ico" />
+        <link rel="apple-touch-icon-precomposed" href="/images/favicons/apple-touch-icon-precomposed.png" />
+
+        <link rel="stylesheet" href="./assets/css/admin-web.min.css">
+    </head>
+
+    <body ng-class="{ 'sw-toggled': mactrl.layoutType === '1'}">
+        <!--<div class="four-zero">-->
+            <!--<h2>SEX!</h2>-->
+            <!--<small>Nah.. it's 404</small>-->
+
+            <!--<footer>-->
+                <!--<a href="index.html"><i class="zmdi zmdi-arrow-back"></i></a>-->
+                <!--<a href="index.html"><i class="zmdi zmdi-home"></i></a>-->
+            <!--</footer>-->
+        <!--</div>-->
+
+        <header id="header"
+                data-current-skin={{mactrl.currentSkin}}
+                ng-controller="HeaderController as hctrl"
+                ng-include="'views/template/header.html'">
+        </header>
+
+        <section id="main">
+
+            <aside id="sidebar"
+                   ng-include="'views/template/sidebar-left.html'"
+                   ng-class="{ 'toggled': mactrl.sidebarToggle.left}"></aside>
+
+            <div id="content" ui-view></div>
+        </section>
+
+        <footer id="footer" ng-include="'views/template/footer.html'"></footer>
+
+        <script src="./assets/js/admin-web.js"></script>
+    </body>
+</html>
