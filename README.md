@@ -1,4 +1,4 @@
-# Eventos BR - WebAdmin
+# Eventos BR
 --------------------------
 
 ### Setup
