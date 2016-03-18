@@ -8,7 +8,7 @@ var globalDependencies = [
     require('angular-sanitize'),
     require('angular-translate'),
     require('angular-loading-bar'),
-    require('oclazyload'), 
+    require('oclazyload'),
     require('angular-ui-bootstrap'),
     require('ng-table/dist/ng-table') && 'ngTable',
     require('angular-animate'),

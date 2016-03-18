@@ -13,9 +13,7 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
     $stateProvider
         .state('home', {
             url: "/home",
-            templateUrl: 'views/home/main.html',
-            controller: 'Home/MainController',
-            controllerAs: 'vm'
+            templateUrl: 'views/home/main.html'
         })
         .state ('events', {
             url: '/events',
@@ -27,8 +25,7 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
         })
         .state ('events.list', {
             url: '/list',
-            templateUrl: 'views/events/list.html',
-            controller: 'tableCtrl'
+            templateUrl: 'views/events/list.html'
         })
         .state ('profile', {
             url: '/profile',

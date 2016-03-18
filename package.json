@@ -61,6 +61,7 @@
     "lightgallery": "sachinchoolur/lightGallery",
     "animate.css": "daneden/animate.css",
     "flot.tooltip": "krzysu/flot.tooltip",
-    "CurvedLines": "MichaelZinsmaier/CurvedLines"
+    "CurvedLines": "MichaelZinsmaier/CurvedLines",
+    "bootstrap-datetimepicker": "Eonasdan/bootstrap-datetimepicker"
   }
 }

@@ -1,14 +1,15 @@
-<div class="card">
+
+<div class="card" ng-controller="AddEventController as addEventCtrl">
     <div class="card-header ch-alt">
-        <h2>Cadastro de evento <small>Preencha as informações do evento</small></h2>
+        <h2>Adicionar evento <small>Preencha as informações do evento</small></h2>
     </div>
 
     <div class="card-body card-padding">
 
         <div class="form-group fg-float m-b-30">
             <div class="fg-line">
-                <input type="text" class="form-control input-sm">
-                <label class="fg-label">Nome</label>
+                <input type="text" class="form-control input-sm" name="title" id="title">
+                <label class="fg-label">Título</label>
             </div>
         </div>
 
@@ -30,6 +31,13 @@
             <div class="fg-line">
                 <textarea class="form-control input-sm" auto-size></textarea>
                 <label class="fg-label">Final</label>
+            </div>
+        </div>
+
+        <div class="input-group form-group">
+            <span class="input-group-addon"><i class="zmdi zmdi-calendar"></i></span>
+            <div class="dtp-container fg-line">
+                <input type='text' class="form-control date-time-picker" placeholder="Click here...">
             </div>
         </div>
 
