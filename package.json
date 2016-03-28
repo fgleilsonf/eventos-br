@@ -62,6 +62,7 @@
     "animate.css": "daneden/animate.css",
     "flot.tooltip": "krzysu/flot.tooltip",
     "CurvedLines": "MichaelZinsmaier/CurvedLines",
-    "bootstrap-datetimepicker": "Eonasdan/bootstrap-datetimepicker"
+    "bootstrap-datetimepicker": "Eonasdan/bootstrap-datetimepicker",
+    "fullcalendar": "fullcalendar/fullcalendar"
   }
 }

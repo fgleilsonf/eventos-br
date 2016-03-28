@@ -6,8 +6,8 @@ require('./app')
 function RouteConfig($stateProvider, $urlRouterProvider) {
 
     $urlRouterProvider
-        .when('', 'home')
-        .when('/', 'home')
+        .when('', 'events.agenda')
+        .when('/', 'events.agenda')
         .otherwise('/errors/404');
 
     $stateProvider
@@ -22,6 +22,10 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
         .state ('events.add', {
             url: '/new',
             templateUrl: 'views/events/add.html'
+        })
+        .state ('events.agenda', {
+            url: '/agenda',
+            templateUrl: 'views/events/agenda.html'
         })
         .state ('events.list', {
             url: '/list',

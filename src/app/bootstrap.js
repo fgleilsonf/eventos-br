@@ -19,6 +19,8 @@ require('malihu-custom-scrollbar-plugin')($);
 require('bootstrap-notify/bootstrap-notify');
 require('bootstrap-datetimepicker');
 
+require('./assets/fullcalendar.min');
+
 require('./config');
 
 require('./services');

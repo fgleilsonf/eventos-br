@@ -7,6 +7,7 @@ require('./toggle-submenu');
 require('./c-overflow');
 require('./lightbox');
 require('./media-element');
+require('./calendar');
 
 require('./form');
 
