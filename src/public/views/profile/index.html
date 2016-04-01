@@ -1,7 +1,7 @@
 <div class="container">
 
     <div class="block-header">
-        <h2>Malinda Hollaway <small>Web/UI Developer, Dubai, United Arab Emirates</small></h2>
+        <h2>{{ mactrl.user.name }} <small>Informações do usuário</small></h2>
 
         <ul class="actions m-t-20 hidden-xs">
             <li class="dropdown" uib-dropdown>
@@ -24,12 +24,12 @@
         </ul>
     </div>
 
-    <div class="card" id="profile-main" data-ng-controller="profileCtrl as pctrl">
+    <div class="card" id="profile-main" ng-controller="profileCtrl as pctrl">
         <div class="pm-overview c-overflow">
             <div class="pmo-pic">
                 <div class="p-relative">
                     <a href="">
-                        <img class="img-responsive" src="assets/img/perfil.jpg" alt="">
+                        <img class="img-responsive" ng-src="{{ mactrl.user.profile_image }}" alt="">
                     </a>
 
                     <div class="dropdown pmop-message" uib-dropdown>

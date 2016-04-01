@@ -1,11 +1,13 @@
 <div class="sidebar-inner c-overflow">
-    <div class="profile-menu">
-        <a href="" toggle-submenu>
+    <div class="profile-menu" ng-show="mactrl.user">
+        <a href=""
+           ng-style="{'background': 'url('+ mactrl.user.cover_image + ') no-repeat'}"
+           toggle-submenu>
             <div class="profile-pic">
-                <img src="assets/img/perfil.jpg" alt="">
+                <img ng-src="{{ mactrl.user.profile_image }}" alt="">
             </div>
             <div class="profile-info">
-                Gleilson Ferreira
+                {{ mactrl.user.name }}
 
                 <i class="zmdi zmdi-caret-down"></i>
             </div>
@@ -23,11 +25,8 @@
         </ul>
     </div>
     <ul class="main-menu">
-        <li ui-sref-active="active">
-            <a ui-sref="home"><i class="zmdi zmdi-home"></i> Home</a>
-        </li>
         <li data-ui-sref-active="active">
-            <a ui-sref="events.add"><i class="zmdi zmdi-layers"></i> Eventos</a>
+            <a ui-sref="events.list"><i class="zmdi zmdi-layers"></i> Eventos</a>
         </li>
     </ul>
 </div>

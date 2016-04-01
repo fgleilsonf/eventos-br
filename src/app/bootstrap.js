@@ -30,8 +30,6 @@ require('./directives');
 require('./template');
 require('./home');
 require('./profile');
-require('./products');
 require('./events');
-require('./suppliers');
 
 module.exports = 'app';

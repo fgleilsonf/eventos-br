@@ -6,10 +6,34 @@ angular
     .module('webAdminApp')
     .controller('LayoutController', LayoutController);
 
-function LayoutController($timeout, $state, $scope, growlService){
+function LayoutController($timeout, $state, $scope, growlService, Facebook, userService) {
     //Welcome Message
-    growlService.growl('Bem vindo ao Eventos BR', 'inverse')
+    growlService.growl('Bem vindo ao Eventos BR', 'inverse');
 
+    var self = this;
+
+    self.getUser = function() {
+        userService.get().then(function(data) {
+            self.user = data;
+
+            self.user.cover_image = data.cover.source;
+            self.user.profile_image = data.picture.data.url;
+
+            console.log('self.user ', self.user );
+        });
+    };
+
+    self.login = function() {
+        Facebook.getLoginStatus(function(response) {
+            if(response.status === 'connected') {
+                self.getUser();
+            } else {
+                Facebook.login(function() {
+                    self.getUser();
+                });
+            }
+        });
+    };
 
     // Detact Mobile Browser
     if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
@@ -20,7 +44,7 @@ function LayoutController($timeout, $state, $scope, growlService){
     this.sidebarToggle = {
         left: false,
         right: false
-    }
+    };
 
     // By default template has a boxed layout
     this.layoutType = localStorage.getItem('ma-layout-status');
@@ -38,7 +62,7 @@ function LayoutController($timeout, $state, $scope, growlService){
         }
 
         console.log('this.sidebarToggle.left', this.sidebarToggle.left);
-    }
+    };
 
     //Listview Search (Check listview pages)
     this.listviewSearchStat = false;
@@ -73,5 +97,15 @@ function LayoutController($timeout, $state, $scope, growlService){
 
     this.skinSwitch = function (color) {
         this.currentSkin = color;
-    }
+    };
+
+    Facebook.getLoginStatus(function(response) {
+        if(response.status === 'connected') {
+            self.getUser();
+        }
+    });
+
+    self.logout = function() {
+        Facebook.logout();
+    };
 };

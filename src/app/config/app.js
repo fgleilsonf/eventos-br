@@ -12,7 +12,11 @@ var globalDependencies = [
     require('angular-ui-bootstrap'),
     require('ng-table/dist/ng-table') && 'ngTable',
     require('angular-animate'),
-    require('angular-input-masks')
+    require('angular-input-masks'),
+    require('angular-facebook') && 'facebook'
 ];
 
-module.exports = angular.module('webAdminApp', globalDependencies);
+module.exports = angular.module('webAdminApp', globalDependencies)
+    .config(function(FacebookProvider) {
+        FacebookProvider.init('1688366168081881');
+    });

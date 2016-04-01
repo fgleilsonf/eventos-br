@@ -63,6 +63,7 @@
     "flot.tooltip": "krzysu/flot.tooltip",
     "CurvedLines": "MichaelZinsmaier/CurvedLines",
     "bootstrap-datetimepicker": "Eonasdan/bootstrap-datetimepicker",
-    "fullcalendar": "fullcalendar/fullcalendar"
+    "fullcalendar": "fullcalendar/fullcalendar",
+    "angular-facebook": "Ciul/angular-facebook"
   }
 }
