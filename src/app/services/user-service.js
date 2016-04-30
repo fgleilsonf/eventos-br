@@ -7,7 +7,9 @@ angular
     .service('userService', UserService);
 
 function UserService(Facebook) {
-    this.get = function() {
+    var self = this;
+
+    self.get = function() {
         var url = '/me?fields=id,name,email,picture.type(large),cover';
         return Facebook.api(url, function(response) {
             return {
@@ -16,5 +18,12 @@ function UserService(Facebook) {
                 profile_image: response.picture.data.url
             };
         });
-    }
+    };
+
+    self.getFriends = function() {
+        var url = '/me/friends';
+        return Facebook.api(url, function(response) {
+            console.log('response', response);
+        });
+    };
 }

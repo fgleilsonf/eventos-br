@@ -11,6 +11,7 @@
     "angular-loading-bar": "^0.8.0",
     "angular-route": "^1.4.8",
     "angular-schema-form": "^0.8.8",
+    "angular-spotify": "^1.4.0",
     "angular-translate": "^2.8.1",
     "angular-ui-bootstrap": "^0.14.3",
     "angular-ui-router": "^0.2.15",
@@ -64,6 +65,9 @@
     "CurvedLines": "MichaelZinsmaier/CurvedLines",
     "bootstrap-datetimepicker": "Eonasdan/bootstrap-datetimepicker",
     "fullcalendar": "fullcalendar/fullcalendar",
-    "angular-facebook": "Ciul/angular-facebook"
+    "angular-facebook": "Ciul/angular-facebook",
+    "angular-chosen": "leocaseiro/angular-chosen",
+    "angular-summernote": "summernote/angular-summernote",
+    "jquery-ui": "jquery/jquery-ui"
   }
 }

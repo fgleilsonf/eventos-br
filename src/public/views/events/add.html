@@ -1,85 +1,108 @@
-
-<div class="card" ng-controller="AddEventController as addEventCtrl">
-    <div class="card-header ch-alt">
-        <h2>Adicionar evento <small>Preencha as informações do evento</small></h2>
+<div ng-controller="AddEventController as addEventCtrl">
+    <a class="btn btn-float btn-success m-btn" ng-click="addEventCtrl.save()">
+        <i class="zmdi zmdi-check"></i>
+    </a>
+    <div class="block-header">
+        <h2>Adicionar evento</h2>
     </div>
-
-    <div class="card-body card-padding">
-
-        <div class="form-group fg-float m-b-30">
-            <div class="fg-line">
-                <input type="text" class="form-control input-sm" name="title" id="title">
-                <label class="fg-label">Título</label>
+    <div class="card">
+        <div class="card-header ch-alt">
+            <h2>Informações</h2>
+        </div>
+        <div class="card-body card-padding">
+            <div class="form-group fg-float m-b-30">
+                <div class="fg-line">
+                    <input type="text" ng-model="addEventCtrl.event.title" class="form-control input-sm" name="title" id="title">
+                    <label class="fg-label">Título</label>
+                </div>
+            </div>
+            <p>Descrição</p>
+            <div class="form-group fg-float m-b-30">
+                <div summernote ng-model="addEventCtrl.event.message" height="250">
+                    <span style="font-weight: bold;">This is initial text.</span>
+                </div>
+            </div>
+            <div class="input-group form-group">
+                <span class="input-group-addon"><i class="zmdi zmdi-calendar"></i>&nbsp;Inicio: </span>
+                <div class="dtp-container fg-line">
+                    <input type="text" ng-model="addEventCtrl.event.start_date" name="start_date" id="start_date"
+                           class="form-control date-time-picker" placeholder="Inicio">
+                </div>
+                <span class="input-group-addon"><i class="zmdi zmdi-calendar"></i>&nbsp;Termino: </span>
+                <div class="dtp-container fg-line">
+                    <input ng-model="addEventCtrl.event.end_date" name="end_date" id="end_date"
+                           class="form-control date-time-picker" placeholder="Termino">
+                </div>
             </div>
         </div>
+    </div>
+    <div class="row">
+        <div class="col-s6 col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Localização <small>Informe o local do evento</small></h2>
+                </div>
+                <div class="card-body card-padding">
 
-        <div class="form-group fg-float m-b-30">
-            <div class="fg-line">
-                <input type="text" class="form-control input-sm">
-                <label class="fg-label">Descrição</label>
+                    <div class="form-group fg-float m-b-30">
+                        <div class="fg-line">
+                            <input type="text" class="form-control input-sm" name="location" id="location">
+                            <label class="fg-label">Endereço</label>
+                        </div>
+                    </div>
+                    <!--<button type="button" id="btnEndereco" name="btnEndereco" class="btn btn-primary">Mostrar no mapa</button>-->
+
+                    <div id="mapa" style="height: 400px; width: 500px">
+
+                        <form method="post" action="" id="">
+                            <fieldset>
+                    </div>
+
+                    <!--<button type="submit" class="btn btn-primary">Mostrar no mapa</button>-->
+
+                    <input type="hidden" id="txtLatitude" name="txtLatitude" />
+                    <input type="hidden" id="txtLongitude" name="txtLongitude" />
+                    </fieldset>
+                    </form>
+                </div>
             </div>
         </div>
-
-        <div class="form-group fg-float m-b-30">
-            <div class="fg-line">
-                <input type="text" class="form-control input-sm">
-                <label class="fg-label">Inicio</label>
-            </div>
-        </div>
-
-        <div class="form-group fg-float">
-            <div class="fg-line">
-                <textarea class="form-control input-sm" auto-size></textarea>
-                <label class="fg-label">Final</label>
-            </div>
-        </div>
-
-        <div class="input-group form-group">
-            <span class="input-group-addon"><i class="zmdi zmdi-calendar"></i></span>
-            <div class="dtp-container fg-line">
-                <input type='text' class="form-control date-time-picker" placeholder="Click here...">
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h2>Adicionar vídeos <small>Apenas vídeos com a URL do youtube é permitida</small></h2>
-            </div>
-
-            <div class="card-body card-padding">
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div class="input-group fg-float">
-                            <div class="fg-line">
-                                <input type="text" class="form-control">
-                                <label class="fg-label">Url do vídeo do youtube</label>
+        <div class="col-s6 col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Mídias <small>Vídeos e Imagens</small></h2>
+                </div>
+                <div class="card-body card-padding">
+                    <div class="row">
+                        <div class="col-sm-8 col-md-8">
+                            <div class="form-group">
+                                <div class="fg-line">
+                                    <input type="text" class="form-control input-sm" ng-model="addEventCtrl.urlYoutube"
+                                           placeholder="Url do vídeo">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 col-md-4">
+                            <button class="btn btn-primary" ng-disabled="!addEventCtrl.isYoutubeUrl();"
+                                    ng-click="addEventCtrl.addVideo();">
+                                <i class="zmdi zmdi-check"></i>
+                                Adicionar
+                            </button>
+                        </div>
+                    </div>
+                    <p class="c-red" ng-hide="addEventCtrl.event.videos.length">
+                        Os vídeos adicionados serão exibidos aqui.
+                        <br>Adicione vídeos informando a url do vídeo no youtube
+                    </p>
+                    <div class="row">
+                        <div class="col-sm-6" ng-repeat="video in addEventCtrl.event.videos">
+                            <div class="embed-responsive embed-responsive-16by9">
+                                <div youtube code="video.id"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-4">
-                        <div class="embed-responsive embed-responsive-16by9">
-                            <iframe class="embed-responsive-item" src="http://www.youtube.com/embed/aaZXDm3RXuo"></iframe>
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="embed-responsive embed-responsive-16by9">
-                            <iframe class="embed-responsive-item" src="http://www.youtube.com/embed/aaZXDm3RXuo"></iframe>
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="embed-responsive embed-responsive-16by9">
-                            <iframe class="embed-responsive-item" src="http://www.youtube.com/embed/aaZXDm3RXuo"></iframe>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
-
-
-        <button class="btn btn-info">Salvar</button>
-        <button class="btn btn-link">cancelar</button>
     </div>
-</div>
 </div>

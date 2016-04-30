@@ -4,5 +4,7 @@ require('./message-service');
 require('./table-service');
 require('./scroll-service');
 require('./user-service');
+require('./event-service');
+require('./utils-service');
 
 module.exports = 'services';
