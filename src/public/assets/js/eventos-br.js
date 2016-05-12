@@ -485,14 +485,15 @@ ____________________________________________________
 
 },{}],2:[function(require,module,exports){
 /**
- * @license AngularJS v1.4.8
- * (c) 2010-2015 Google, Inc. http://angularjs.org
+ * @license AngularJS v1.5.5
+ * (c) 2010-2016 Google, Inc. http://angularjs.org
  * License: MIT
  */
-(function(window, angular, undefined) {'use strict';
+(function(window, angular) {'use strict';
 
 /* jshint ignore:start */
 var noop        = angular.noop;
+var copy        = angular.copy;
 var extend      = angular.extend;
 var jqLite      = angular.element;
 var forEach     = angular.forEach;
@@ -511,6 +512,7 @@ var ADD_CLASS_SUFFIX = '-add';
 var REMOVE_CLASS_SUFFIX = '-remove';
 var EVENT_CLASS_PREFIX = 'ng-';
 var ACTIVE_CLASS_SUFFIX = '-active';
+var PREPARE_CLASS_SUFFIX = '-prepare';
 
 var NG_ANIMATE_CLASSNAME = 'ng-animate';
 var NG_ANIMATE_CHILDREN_DATA = '$$ngAnimateChildren';
@@ -562,6 +564,7 @@ var isPromiseLike = function(p) {
   return p && p.then ? true : false;
 };
 
+var ngMinErr = angular.$$minErr('ng');
 function assertArg(arg, name, reason) {
   if (!arg) {
     throw ngMinErr('areq', "Argument '{0}' is {1}", (name || '?'), (reason || "required"));
@@ -706,7 +709,10 @@ function applyAnimationToStyles(element, options) {
   }
 }
 
-function mergeAnimationOptions(element, target, newOptions) {
+function mergeAnimationDetails(element, oldAnimation, newAnimation) {
+  var target = oldAnimation.options || {};
+  var newOptions = newAnimation.options || {};
+
   var toAdd = (target.addClass || '') + ' ' + (newOptions.addClass || '');
   var toRemove = (target.removeClass || '') + ' ' + (newOptions.removeClass || '');
   var classes = resolveElementClasses(element.attr('class'), toAdd, toRemove);
@@ -737,6 +743,9 @@ function mergeAnimationOptions(element, target, newOptions) {
   } else {
     target.removeClass = null;
   }
+
+  oldAnimation.addClass = target.addClass;
+  oldAnimation.removeClass = target.removeClass;
 
   return target;
 }
@@ -873,7 +882,7 @@ var $$rAFSchedulerFactory = ['$$rAF', function($$rAF) {
   queue = scheduler.queue = [];
 
   /* waitUntilQuiet does two things:
-   * 1. It will run the FINAL `fn` value only when an uncancelled RAF has passed through
+   * 1. It will run the FINAL `fn` value only when an uncanceled RAF has passed through
    * 2. It will delay the next wave of tasks from running until the quiet `fn` has run.
    *
    * The motivation here is that animation code can request more time from the scheduler
@@ -908,16 +917,101 @@ var $$rAFSchedulerFactory = ['$$rAF', function($$rAF) {
   }
 }];
 
-var $$AnimateChildrenDirective = [function() {
-  return function(scope, element, attrs) {
-    var val = attrs.ngAnimateChildren;
-    if (angular.isString(val) && val.length === 0) { //empty attribute
-      element.data(NG_ANIMATE_CHILDREN_DATA, true);
-    } else {
-      attrs.$observe('ngAnimateChildren', function(value) {
+/**
+ * @ngdoc directive
+ * @name ngAnimateChildren
+ * @restrict AE
+ * @element ANY
+ *
+ * @description
+ *
+ * ngAnimateChildren allows you to specify that children of this element should animate even if any
+ * of the children's parents are currently animating. By default, when an element has an active `enter`, `leave`, or `move`
+ * (structural) animation, child elements that also have an active structural animation are not animated.
+ *
+ * Note that even if `ngAnimteChildren` is set, no child animations will run when the parent element is removed from the DOM (`leave` animation).
+ *
+ *
+ * @param {string} ngAnimateChildren If the value is empty, `true` or `on`,
+ *     then child animations are allowed. If the value is `false`, child animations are not allowed.
+ *
+ * @example
+ * <example module="ngAnimateChildren" name="ngAnimateChildren" deps="angular-animate.js" animations="true">
+     <file name="index.html">
+       <div ng-controller="mainController as main">
+         <label>Show container? <input type="checkbox" ng-model="main.enterElement" /></label>
+         <label>Animate children? <input type="checkbox" ng-model="main.animateChildren" /></label>
+         <hr>
+         <div ng-animate-children="{{main.animateChildren}}">
+           <div ng-if="main.enterElement" class="container">
+             List of items:
+             <div ng-repeat="item in [0, 1, 2, 3]" class="item">Item {{item}}</div>
+           </div>
+         </div>
+       </div>
+     </file>
+     <file name="animations.css">
+
+      .container.ng-enter,
+      .container.ng-leave {
+        transition: all ease 1.5s;
+      }
+
+      .container.ng-enter,
+      .container.ng-leave-active {
+        opacity: 0;
+      }
+
+      .container.ng-leave,
+      .container.ng-enter-active {
+        opacity: 1;
+      }
+
+      .item {
+        background: firebrick;
+        color: #FFF;
+        margin-bottom: 10px;
+      }
+
+      .item.ng-enter,
+      .item.ng-leave {
+        transition: transform 1.5s ease;
+      }
+
+      .item.ng-enter {
+        transform: translateX(50px);
+      }
+
+      .item.ng-enter-active {
+        transform: translateX(0);
+      }
+    </file>
+    <file name="script.js">
+      angular.module('ngAnimateChildren', ['ngAnimate'])
+        .controller('mainController', function() {
+          this.animateChildren = false;
+          this.enterElement = false;
+        });
+    </file>
+  </example>
+ */
+var $$AnimateChildrenDirective = ['$interpolate', function($interpolate) {
+  return {
+    link: function(scope, element, attrs) {
+      var val = attrs.ngAnimateChildren;
+      if (angular.isString(val) && val.length === 0) { //empty attribute
+        element.data(NG_ANIMATE_CHILDREN_DATA, true);
+      } else {
+        // Interpolate and set the value, so that it is available to
+        // animations that run right after compilation
+        setData($interpolate(val)(scope));
+        attrs.$observe('ngAnimateChildren', setData);
+      }
+
+      function setData(value) {
         value = value === 'on' || value === 'true';
         element.data(NG_ANIMATE_CHILDREN_DATA, value);
-      });
+      }
     }
   };
 }];
@@ -1089,7 +1183,7 @@ var ANIMATE_TIMER_KEY = '$$animateCss';
  * ```
  *
  * To actually start the animation we need to run `animation.start()` which will then return a promise that we can hook into to detect when the animation ends.
- * If we choose not to run the animation then we MUST run `animation.end()` to perform a cleanup on the element (since some CSS classes and stlyes may have been
+ * If we choose not to run the animation then we MUST run `animation.end()` to perform a cleanup on the element (since some CSS classes and styles may have been
  * applied to the element during the preparation phase). Note that all other properties such as duration, delay, transitions and keyframes are just properties
  * and that changing them will not reconfigure the parameters of the animation.
  *
@@ -1126,11 +1220,11 @@ var ANIMATE_TIMER_KEY = '$$animateCss';
  * * `stagger` - A numeric time value representing the delay between successively animated elements
  * ({@link ngAnimate#css-staggering-animations Click here to learn how CSS-based staggering works in ngAnimate.})
  * * `staggerIndex` - The numeric index representing the stagger item (e.g. a value of 5 is equal to the sixth item in the stagger; therefore when a
- * * `stagger` option value of `0.1` is used then there will be a stagger delay of `600ms`)
- * * `applyClassesEarly` - Whether or not the classes being added or removed will be used when detecting the animation. This is set by `$animate` when enter/leave/move animations are fired to ensure that the CSS classes are resolved in time. (Note that this will prevent any transitions from occuring on the classes being added and removed.)
+ *   `stagger` option value of `0.1` is used then there will be a stagger delay of `600ms`)
+ * * `applyClassesEarly` - Whether or not the classes being added or removed will be used when detecting the animation. This is set by `$animate` when enter/leave/move animations are fired to ensure that the CSS classes are resolved in time. (Note that this will prevent any transitions from occurring on the classes being added and removed.)
  * * `cleanupStyles` - Whether or not the provided `from` and `to` styles will be removed once
  *    the animation is closed. This is useful for when the styles are used purely for the sake of
- *    the animation and do not have a lasting visual effect on the element (e.g. a colapse and open animation).
+ *    the animation and do not have a lasting visual effect on the element (e.g. a collapse and open animation).
  *    By default this value is set to `false`.
  *
  * @return {object} an object with start and end methods and details about the animation.
@@ -1183,7 +1277,7 @@ function computeCssStyles($window, element, properties) {
       }
 
       // by setting this to null in the event that the delay is not set or is set directly as 0
-      // then we can still allow for zegative values to be used later on and not mistake this
+      // then we can still allow for negative values to be used later on and not mistake this
       // value for being greater than any other negative value.
       if (val === 0) {
         val = null;
@@ -1274,9 +1368,9 @@ var $AnimateCssProvider = ['$animateProvider', function($animateProvider) {
   var gcsStaggerLookup = createLocalCacheLookup();
 
   this.$get = ['$window', '$$jqLite', '$$AnimateRunner', '$timeout',
-               '$$forceReflow', '$sniffer', '$$rAFScheduler', '$animate',
+               '$$forceReflow', '$sniffer', '$$rAFScheduler', '$$animateQueue',
        function($window,   $$jqLite,   $$AnimateRunner,   $timeout,
-                $$forceReflow,   $sniffer,   $$rAFScheduler, $animate) {
+                $$forceReflow,   $sniffer,   $$rAFScheduler, $$animateQueue) {
 
     var applyAnimationClasses = applyAnimationClassesFactory($$jqLite);
 
@@ -1299,7 +1393,7 @@ var $AnimateCssProvider = ['$animateProvider', function($animateProvider) {
       }
 
       // we keep putting this in multiple times even though the value and the cacheKey are the same
-      // because we're keeping an interal tally of how many duplicate animations are detected.
+      // because we're keeping an internal tally of how many duplicate animations are detected.
       gcsLookup.put(cacheKey, timings);
       return timings;
     }
@@ -1368,16 +1462,23 @@ var $AnimateCssProvider = ['$animateProvider', function($animateProvider) {
       return timings;
     }
 
-    return function init(element, options) {
+    return function init(element, initialOptions) {
+      // all of the animation functions should create
+      // a copy of the options data, however, if a
+      // parent service has already created a copy then
+      // we should stick to using that
+      var options = initialOptions || {};
+      if (!options.$$prepared) {
+        options = prepareAnimationOptions(copy(options));
+      }
+
       var restoreStyles = {};
       var node = getDomNode(element);
       if (!node
           || !node.parentNode
-          || !$animate.enabled()) {
+          || !$$animateQueue.enabled()) {
         return closeAndReturnNoopAnimator();
       }
-
-      options = prepareAnimationOptions(options);
 
       var temporaryStyles = [];
       var classes = element.attr('class');
@@ -1391,6 +1492,8 @@ var $AnimateCssProvider = ['$animateProvider', function($animateProvider) {
       var maxDelayTime;
       var maxDuration;
       var maxDurationTime;
+      var startTime;
+      var events = [];
 
       if (options.duration === 0 || (!$sniffer.animations && !$sniffer.transitions)) {
         return closeAndReturnNoopAnimator();
@@ -1544,7 +1647,12 @@ var $AnimateCssProvider = ['$animateProvider', function($animateProvider) {
       }
 
       if (options.delay != null) {
-        var delayStyle = parseFloat(options.delay);
+        var delayStyle;
+        if (typeof options.delay !== "boolean") {
+          delayStyle = parseFloat(options.delay);
+          // number in options.delay means we have to recalculate the delay for the closing timeout
+          maxDelay = Math.max(delayStyle, 0);
+        }
 
         if (flags.applyTransitionDelay) {
           temporaryStyles.push(getCssDelayStyle(delayStyle));
@@ -1659,6 +1767,18 @@ var $AnimateCssProvider = ['$animateProvider', function($animateProvider) {
           options.onDone();
         }
 
+        if (events && events.length) {
+          // Remove the transitionend / animationend listener(s)
+          element.off(events.join(' '), onAnimationProgress);
+        }
+
+        //Cancel the fallback closing timeout and remove the timer data
+        var animationTimerData = element.data(ANIMATE_TIMER_KEY);
+        if (animationTimerData) {
+          $timeout.cancel(animationTimerData[0].timer);
+          element.removeData(ANIMATE_TIMER_KEY);
+        }
+
         // if the preparation function fails then the promise is not setup
         if (runner) {
           runner.complete(!rejected);
@@ -1694,14 +1814,39 @@ var $AnimateCssProvider = ['$animateProvider', function($animateProvider) {
         };
       }
 
+      function onAnimationProgress(event) {
+        event.stopPropagation();
+        var ev = event.originalEvent || event;
+
+        // we now always use `Date.now()` due to the recent changes with
+        // event.timeStamp in Firefox, Webkit and Chrome (see #13494 for more info)
+        var timeStamp = ev.$manualTimeStamp || Date.now();
+
+        /* Firefox (or possibly just Gecko) likes to not round values up
+         * when a ms measurement is used for the animation */
+        var elapsedTime = parseFloat(ev.elapsedTime.toFixed(ELAPSED_TIME_MAX_DECIMAL_PLACES));
+
+        /* $manualTimeStamp is a mocked timeStamp value which is set
+         * within browserTrigger(). This is only here so that tests can
+         * mock animations properly. Real events fallback to event.timeStamp,
+         * or, if they don't, then a timeStamp is automatically created for them.
+         * We're checking to see if the timeStamp surpasses the expected delay,
+         * but we're using elapsedTime instead of the timeStamp on the 2nd
+         * pre-condition since animationPauseds sometimes close off early */
+        if (Math.max(timeStamp - startTime, 0) >= maxDelayTime && elapsedTime >= maxDuration) {
+          // we set this flag to ensure that if the transition is paused then, when resumed,
+          // the animation will automatically close itself since transitions cannot be paused.
+          animationCompleted = true;
+          close();
+        }
+      }
+
       function start() {
         if (animationClosed) return;
         if (!node.parentNode) {
           close();
           return;
         }
-
-        var startTime, events = [];
 
         // even though we only pause keyframe animations here the pause flag
         // will still happen when transitions are used. Only the transition will
@@ -1722,9 +1867,9 @@ var $AnimateCssProvider = ['$animateProvider', function($animateProvider) {
           }
         };
 
-        // checking the stagger duration prevents an accidently cascade of the CSS delay style
+        // checking the stagger duration prevents an accidentally cascade of the CSS delay style
         // being inherited from the parent. If the transition duration is zero then we can safely
-        // rely that the delay value is an intential stagger delay style.
+        // rely that the delay value is an intentional stagger delay style.
         var maxStagger = itemIndex > 0
                          && ((timings.transitionDuration && stagger.transitionDuration === 0) ||
                             (timings.animationDuration && stagger.animationDuration === 0))
@@ -1843,7 +1988,10 @@ var $AnimateCssProvider = ['$animateProvider', function($animateProvider) {
             element.data(ANIMATE_TIMER_KEY, animationsData);
           }
 
-          element.on(events.join(' '), onAnimationProgress);
+          if (events.length) {
+            element.on(events.join(' '), onAnimationProgress);
+          }
+
           if (options.to) {
             if (options.cleanupStyles) {
               registerRestorableStyles(restoreStyles, node, Object.keys(options.to));
@@ -1863,30 +2011,6 @@ var $AnimateCssProvider = ['$animateProvider', function($animateProvider) {
               animationsData[i]();
             }
             element.removeData(ANIMATE_TIMER_KEY);
-          }
-        }
-
-        function onAnimationProgress(event) {
-          event.stopPropagation();
-          var ev = event.originalEvent || event;
-          var timeStamp = ev.$manualTimeStamp || ev.timeStamp || Date.now();
-
-          /* Firefox (or possibly just Gecko) likes to not round values up
-           * when a ms measurement is used for the animation */
-          var elapsedTime = parseFloat(ev.elapsedTime.toFixed(ELAPSED_TIME_MAX_DECIMAL_PLACES));
-
-          /* $manualTimeStamp is a mocked timeStamp value which is set
-           * within browserTrigger(). This is only here so that tests can
-           * mock animations properly. Real events fallback to event.timeStamp,
-           * or, if they don't, then a timeStamp is automatically created for them.
-           * We're checking to see if the timeStamp surpasses the expected delay,
-           * but we're using elapsedTime instead of the timeStamp on the 2nd
-           * pre-condition since animations sometimes close off early */
-          if (Math.max(timeStamp - startTime, 0) >= maxDelayTime && elapsedTime >= maxDuration) {
-            // we set this flag to ensure that if the transition is paused then, when resumed,
-            // the animation will automatically close itself since transitions cannot be paused.
-            animationCompleted = true;
-            close();
           }
         }
       }
@@ -1918,7 +2042,7 @@ var $$AnimateCssDriverProvider = ['$$animationProvider', function($$animationPro
 
     var rootBodyElement = jqLite(
       // this is to avoid using something that exists outside of the body
-      // we also special case the doc fragement case because our unit test code
+      // we also special case the doc fragment case because our unit test code
       // appends the $rootElement to the body after the app has been bootstrapped
       isDocumentFragment(rootNode) || bodyNode.contains(rootNode) ? rootNode : bodyNode
     );
@@ -2018,7 +2142,7 @@ var $$AnimateCssDriverProvider = ['$$animationProvider', function($$animationPro
         var coords = getDomNode(anchor).getBoundingClientRect();
 
         // we iterate directly since safari messes up and doesn't return
-        // all the keys for the coods object when iterated
+        // all the keys for the coords object when iterated
         forEach(['width','height','top','left'], function(key) {
           var value = coords[key];
           switch (key) {
@@ -2173,6 +2297,8 @@ var $$AnimateJsProvider = ['$animateProvider', function($animateProvider) {
     var applyAnimationClasses = applyAnimationClassesFactory($$jqLite);
          // $animateJs(element, 'enter');
     return function(element, event, classes, options) {
+      var animationClosed = false;
+
       // the `classes` argument is optional and if it is not used
       // then the classes will be resolved from the element's className
       // property as well as options.addClass/options.removeClass.
@@ -2225,8 +2351,32 @@ var $$AnimateJsProvider = ['$animateProvider', function($animateProvider) {
         applyAnimationClasses(element, options);
       }
 
+      function close() {
+        animationClosed = true;
+        applyOptions();
+        applyAnimationStyles(element, options);
+      }
+
+      var runner;
+
       return {
+        $$willAnimate: true,
+        end: function() {
+          if (runner) {
+            runner.end();
+          } else {
+            close();
+            runner = new $$AnimateRunner();
+            runner.complete(true);
+          }
+          return runner;
+        },
         start: function() {
+          if (runner) {
+            return runner;
+          }
+
+          runner = new $$AnimateRunner();
           var closeActiveAnimations;
           var chain = [];
 
@@ -2251,8 +2401,7 @@ var $$AnimateJsProvider = ['$animateProvider', function($animateProvider) {
             });
           }
 
-          var animationClosed = false;
-          var runner = new $$AnimateRunner({
+          runner.setHost({
             end: function() {
               endAnimations();
             },
@@ -2265,9 +2414,7 @@ var $$AnimateJsProvider = ['$animateProvider', function($animateProvider) {
           return runner;
 
           function onComplete(success) {
-            animationClosed = true;
-            applyOptions();
-            applyAnimationStyles(element, options);
+            close(success);
             runner.complete(success);
           }
 
@@ -2487,6 +2634,7 @@ var NG_ANIMATE_PIN_DATA = '$ngAnimatePin';
 var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
   var PRE_DIGEST_STATE = 1;
   var RUNNING_STATE = 2;
+  var ONE_SPACE = ' ';
 
   var rules = this.rules = {
     skip: [],
@@ -2494,28 +2642,50 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
     join: []
   };
 
+  function makeTruthyCssClassMap(classString) {
+    if (!classString) {
+      return null;
+    }
+
+    var keys = classString.split(ONE_SPACE);
+    var map = Object.create(null);
+
+    forEach(keys, function(key) {
+      map[key] = true;
+    });
+    return map;
+  }
+
+  function hasMatchingClasses(newClassString, currentClassString) {
+    if (newClassString && currentClassString) {
+      var currentClassMap = makeTruthyCssClassMap(currentClassString);
+      return newClassString.split(ONE_SPACE).some(function(className) {
+        return currentClassMap[className];
+      });
+    }
+  }
+
   function isAllowed(ruleType, element, currentAnimation, previousAnimation) {
     return rules[ruleType].some(function(fn) {
       return fn(element, currentAnimation, previousAnimation);
     });
   }
 
-  function hasAnimationClasses(options, and) {
-    options = options || {};
-    var a = (options.addClass || '').length > 0;
-    var b = (options.removeClass || '').length > 0;
+  function hasAnimationClasses(animation, and) {
+    var a = (animation.addClass || '').length > 0;
+    var b = (animation.removeClass || '').length > 0;
     return and ? a && b : a || b;
   }
 
   rules.join.push(function(element, newAnimation, currentAnimation) {
     // if the new animation is class-based then we can just tack that on
-    return !newAnimation.structural && hasAnimationClasses(newAnimation.options);
+    return !newAnimation.structural && hasAnimationClasses(newAnimation);
   });
 
   rules.skip.push(function(element, newAnimation, currentAnimation) {
     // there is no need to animate anything if no classes are being added and
     // there is no structural animation that will be triggered
-    return !newAnimation.structural && !hasAnimationClasses(newAnimation.options);
+    return !newAnimation.structural && !hasAnimationClasses(newAnimation);
   });
 
   rules.skip.push(function(element, newAnimation, currentAnimation) {
@@ -2541,11 +2711,22 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
   });
 
   rules.cancel.push(function(element, newAnimation, currentAnimation) {
-    var nO = newAnimation.options;
-    var cO = currentAnimation.options;
+    // cancel the animation if classes added / removed in both animation cancel each other out,
+    // but only if the current animation isn't structural
 
-    // if the exact same CSS class is added/removed then it's safe to cancel it
-    return (nO.addClass && nO.addClass === cO.removeClass) || (nO.removeClass && nO.removeClass === cO.addClass);
+    if (currentAnimation.structural) return false;
+
+    var nA = newAnimation.addClass;
+    var nR = newAnimation.removeClass;
+    var cA = currentAnimation.addClass;
+    var cR = currentAnimation.removeClass;
+
+    // early detection to save the global CPU shortage :)
+    if ((isUndefined(nA) && isUndefined(nR)) || (isUndefined(cA) && isUndefined(cR))) {
+      return false;
+    }
+
+    return hasMatchingClasses(nA, cR) || hasMatchingClasses(nR, cA);
   });
 
   this.$get = ['$$rAF', '$rootScope', '$rootElement', '$document', '$$HashMap',
@@ -2617,9 +2798,16 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
 
     var applyAnimationClasses = applyAnimationClassesFactory($$jqLite);
 
-    function normalizeAnimationOptions(element, options) {
-      return mergeAnimationOptions(element, options, {});
+    function normalizeAnimationDetails(element, animation) {
+      return mergeAnimationDetails(element, animation, {});
     }
+
+    // IE9-11 has no method "contains" in SVG element and in Node.prototype. Bug #10259.
+    var contains = window.Node.prototype.contains || function(arg) {
+      // jshint bitwise: false
+      return this === arg || !!(this.compareDocumentPosition(arg) & 16);
+      // jshint bitwise: true
+    };
 
     function findCallbacks(parent, element, event) {
       var targetNode = getDomNode(element);
@@ -2629,9 +2817,9 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
       var entries = callbackRegistry[event];
       if (entries) {
         forEach(entries, function(entry) {
-          if (entry.node.contains(targetNode)) {
+          if (contains.call(entry.node, targetNode)) {
             matches.push(entry.callback);
-          } else if (event === 'leave' && entry.node.contains(targetParentNode)) {
+          } else if (event === 'leave' && contains.call(entry.node, targetParentNode)) {
             matches.push(entry.callback);
           }
         });
@@ -2640,7 +2828,24 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
       return matches;
     }
 
-    return {
+    function filterFromRegistry(list, matchContainer, matchCallback) {
+      var containerNode = extractElementNode(matchContainer);
+      return list.filter(function(entry) {
+        var isMatch = entry.node === containerNode &&
+                        (!matchCallback || entry.callback === matchCallback);
+        return !isMatch;
+      });
+    }
+
+    function cleanupEventListeners(phase, element) {
+      if (phase === 'close' && !element[0].parentNode) {
+        // If the element is not attached to a parentNode, it has been removed by
+        // the domOperation, and we can safely remove the event callbacks
+        $animate.off(element);
+      }
+    }
+
+    var $animate = {
       on: function(event, container, callback) {
         var node = extractElementNode(container);
         callbackRegistry[event] = callbackRegistry[event] || [];
@@ -2648,24 +2853,36 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
           node: node,
           callback: callback
         });
+
+        // Remove the callback when the element is removed from the DOM
+        jqLite(container).on('$destroy', function() {
+          var animationDetails = activeAnimationsLookup.get(node);
+
+          if (!animationDetails) {
+            // If there's an animation ongoing, the callback calling code will remove
+            // the event listeners. If we'd remove here, the callbacks would be removed
+            // before the animation ends
+            $animate.off(event, container, callback);
+          }
+        });
       },
 
       off: function(event, container, callback) {
+        if (arguments.length === 1 && !angular.isString(arguments[0])) {
+          container = arguments[0];
+          for (var eventType in callbackRegistry) {
+            callbackRegistry[eventType] = filterFromRegistry(callbackRegistry[eventType], container);
+          }
+
+          return;
+        }
+
         var entries = callbackRegistry[event];
         if (!entries) return;
 
         callbackRegistry[event] = arguments.length === 1
             ? null
             : filterFromRegistry(entries, container, callback);
-
-        function filterFromRegistry(list, matchContainer, matchCallback) {
-          var containerNode = extractElementNode(matchContainer);
-          return list.filter(function(entry) {
-            var isMatch = entry.node === containerNode &&
-                            (!matchCallback || entry.callback === matchCallback);
-            return !isMatch;
-          });
-        }
       },
 
       pin: function(element, parentElement) {
@@ -2706,12 +2923,7 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
               bool = !recordExists;
             } else {
               // (element, bool) - Element setter
-              bool = !!bool;
-              if (!bool) {
-                disabledElementsLookup.put(node, true);
-              } else if (recordExists) {
-                disabledElementsLookup.remove(node);
-              }
+              disabledElementsLookup.put(node, !bool);
             }
           }
         }
@@ -2720,7 +2932,14 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
       }
     };
 
-    function queueAnimation(element, event, options) {
+    return $animate;
+
+    function queueAnimation(element, event, initialOptions) {
+      // we always make a copy of the options since
+      // there should never be any side effects on
+      // the input data when running `$animateCss`.
+      var options = copy(initialOptions);
+
       var node, parent;
       element = stripCommentsFromElement(element);
       if (element) {
@@ -2777,10 +2996,14 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
 
       var isStructural = ['enter', 'move', 'leave'].indexOf(event) >= 0;
 
+      var documentHidden = $document[0].hidden;
+
       // this is a hard disable of all animations for the application or on
       // the element itself, therefore  there is no need to continue further
       // past this point if not enabled
-      var skipAnimations = !animationsEnabled || disabledElementsLookup.get(node);
+      // Animations are also disabled if the document is currently hidden (page is not visible
+      // to the user), because browsers slow down or do not flush calls to requestAnimationFrame
+      var skipAnimations = !animationsEnabled || documentHidden || disabledElementsLookup.get(node);
       var existingAnimation = (!skipAnimations && activeAnimationsLookup.get(node)) || {};
       var hasExistingAnimation = !!existingAnimation.state;
 
@@ -2791,7 +3014,10 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
       }
 
       if (skipAnimations) {
+        // Callbacks should fire even if the document is hidden (regression fix for issue #14120)
+        if (documentHidden) notifyProgress(runner, event, 'start');
         close();
+        if (documentHidden) notifyProgress(runner, event, 'close');
         return runner;
       }
 
@@ -2803,6 +3029,8 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
         structural: isStructural,
         element: element,
         event: event,
+        addClass: options.addClass,
+        removeClass: options.removeClass,
         close: close,
         options: options,
         runner: runner
@@ -2815,11 +3043,10 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
             close();
             return runner;
           } else {
-            mergeAnimationOptions(element, existingAnimation.options, options);
+            mergeAnimationDetails(element, existingAnimation, newAnimation);
             return existingAnimation.runner;
           }
         }
-
         var cancelAnimationFlag = isAllowed('cancel', element, newAnimation, existingAnimation);
         if (cancelAnimationFlag) {
           if (existingAnimation.state === RUNNING_STATE) {
@@ -2834,7 +3061,8 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
             existingAnimation.close();
           } else {
             // this will merge the new animation options into existing animation options
-            mergeAnimationOptions(element, existingAnimation.options, newAnimation.options);
+            mergeAnimationDetails(element, existingAnimation, newAnimation);
+
             return existingAnimation.runner;
           }
         } else {
@@ -2844,12 +3072,12 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
           var joinAnimationFlag = isAllowed('join', element, newAnimation, existingAnimation);
           if (joinAnimationFlag) {
             if (existingAnimation.state === RUNNING_STATE) {
-              normalizeAnimationOptions(element, options);
+              normalizeAnimationDetails(element, newAnimation);
             } else {
               applyGeneratedPreparationClasses(element, isStructural ? event : null, options);
 
               event = newAnimation.event = existingAnimation.event;
-              options = mergeAnimationOptions(element, existingAnimation.options, newAnimation.options);
+              options = mergeAnimationDetails(element, existingAnimation, newAnimation);
 
               //we return the same runner since only the option values of this animation will
               //be fed into the `existingAnimation`.
@@ -2860,7 +3088,7 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
       } else {
         // normalization in this case means that it removes redundant CSS classes that
         // already exist (addClass) or do not exist (removeClass) on the element
-        normalizeAnimationOptions(element, options);
+        normalizeAnimationDetails(element, newAnimation);
       }
 
       // when the options are merged and cleaned up we may end up not having to do
@@ -2870,7 +3098,7 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
       if (!isValidAnimation) {
         // animate (from/to) can be quickly checked first, otherwise we check if any classes are present
         isValidAnimation = (newAnimation.event === 'animate' && Object.keys(newAnimation.options.to || {}).length > 0)
-                            || hasAnimationClasses(newAnimation.options);
+                            || hasAnimationClasses(newAnimation);
       }
 
       if (!isValidAnimation) {
@@ -2900,7 +3128,7 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
         var isValidAnimation = parentElement.length > 0
                                 && (animationDetails.event === 'animate'
                                     || animationDetails.structural
-                                    || hasAnimationClasses(animationDetails.options));
+                                    || hasAnimationClasses(animationDetails));
 
         // this means that the previous animation was cancelled
         // even if the follow-up animation is the same event
@@ -2932,12 +3160,17 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
 
         // this combined multiple class to addClass / removeClass into a setClass event
         // so long as a structural event did not take over the animation
-        event = !animationDetails.structural && hasAnimationClasses(animationDetails.options, true)
+        event = !animationDetails.structural && hasAnimationClasses(animationDetails, true)
             ? 'setClass'
             : animationDetails.event;
 
         markElementAnimationState(element, RUNNING_STATE);
         var realRunner = $$animation(element, event, animationDetails.options);
+
+        // this will update the runner's flow-control events based on
+        // the `realRunner` object.
+        runner.setHost(realRunner);
+        notifyProgress(runner, event, 'start', {});
 
         realRunner.done(function(status) {
           close(!status);
@@ -2947,11 +3180,6 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
           }
           notifyProgress(runner, event, 'close', {});
         });
-
-        // this will update the runner's flow-control events based on
-        // the `realRunner` object.
-        runner.setHost(realRunner);
-        notifyProgress(runner, event, 'start', {});
       });
 
       return runner;
@@ -2968,7 +3196,10 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
               forEach(callbacks, function(callback) {
                 callback(element, phase, data);
               });
+              cleanupEventListeners(phase, element);
             });
+          } else {
+            cleanupEventListeners(phase, element);
           }
         });
         runner.progress(event, phase, data);
@@ -2989,15 +3220,15 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
       forEach(children, function(child) {
         var state = parseInt(child.getAttribute(NG_ANIMATE_ATTR_NAME));
         var animationDetails = activeAnimationsLookup.get(child);
-        switch (state) {
-          case RUNNING_STATE:
-            animationDetails.runner.end();
-            /* falls through */
-          case PRE_DIGEST_STATE:
-            if (animationDetails) {
+        if (animationDetails) {
+          switch (state) {
+            case RUNNING_STATE:
+              animationDetails.runner.end();
+              /* falls through */
+            case PRE_DIGEST_STATE:
               activeAnimationsLookup.remove(child);
-            }
-            break;
+              break;
+          }
         }
       });
     }
@@ -3012,41 +3243,61 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
       return getDomNode(nodeOrElmA) === getDomNode(nodeOrElmB);
     }
 
+    /**
+     * This fn returns false if any of the following is true:
+     * a) animations on any parent element are disabled, and animations on the element aren't explicitly allowed
+     * b) a parent element has an ongoing structural animation, and animateChildren is false
+     * c) the element is not a child of the body
+     * d) the element is not a child of the $rootElement
+     */
     function areAnimationsAllowed(element, parentElement, event) {
       var bodyElement = jqLite($document[0].body);
       var bodyElementDetected = isMatchingElement(element, bodyElement) || element[0].nodeName === 'HTML';
       var rootElementDetected = isMatchingElement(element, $rootElement);
       var parentAnimationDetected = false;
       var animateChildren;
+      var elementDisabled = disabledElementsLookup.get(getDomNode(element));
 
-      var parentHost = element.data(NG_ANIMATE_PIN_DATA);
+      var parentHost = jqLite.data(element[0], NG_ANIMATE_PIN_DATA);
       if (parentHost) {
         parentElement = parentHost;
       }
 
-      while (parentElement && parentElement.length) {
+      parentElement = getDomNode(parentElement);
+
+      while (parentElement) {
         if (!rootElementDetected) {
           // angular doesn't want to attempt to animate elements outside of the application
           // therefore we need to ensure that the rootElement is an ancestor of the current element
           rootElementDetected = isMatchingElement(parentElement, $rootElement);
         }
 
-        var parentNode = parentElement[0];
-        if (parentNode.nodeType !== ELEMENT_NODE) {
+        if (parentElement.nodeType !== ELEMENT_NODE) {
           // no point in inspecting the #document element
           break;
         }
 
-        var details = activeAnimationsLookup.get(parentNode) || {};
+        var details = activeAnimationsLookup.get(parentElement) || {};
         // either an enter, leave or move animation will commence
         // therefore we can't allow any animations to take place
         // but if a parent animation is class-based then that's ok
         if (!parentAnimationDetected) {
-          parentAnimationDetected = details.structural || disabledElementsLookup.get(parentNode);
+          var parentElementDisabled = disabledElementsLookup.get(parentElement);
+
+          if (parentElementDisabled === true && elementDisabled !== false) {
+            // disable animations if the user hasn't explicitly enabled animations on the
+            // current element
+            elementDisabled = true;
+            // element is disabled via parent element, no need to check anything else
+            break;
+          } else if (parentElementDisabled === false) {
+            elementDisabled = false;
+          }
+          parentAnimationDetected = details.structural;
         }
 
         if (isUndefined(animateChildren) || animateChildren === true) {
-          var value = parentElement.data(NG_ANIMATE_CHILDREN_DATA);
+          var value = jqLite.data(parentElement, NG_ANIMATE_CHILDREN_DATA);
           if (isDefined(value)) {
             animateChildren = value;
           }
@@ -3055,28 +3306,32 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
         // there is no need to continue traversing at this point
         if (parentAnimationDetected && animateChildren === false) break;
 
-        if (!rootElementDetected) {
-          // angular doesn't want to attempt to animate elements outside of the application
-          // therefore we need to ensure that the rootElement is an ancestor of the current element
-          rootElementDetected = isMatchingElement(parentElement, $rootElement);
-          if (!rootElementDetected) {
-            parentHost = parentElement.data(NG_ANIMATE_PIN_DATA);
-            if (parentHost) {
-              parentElement = parentHost;
-            }
-          }
-        }
-
         if (!bodyElementDetected) {
-          // we also need to ensure that the element is or will be apart of the body element
+          // we also need to ensure that the element is or will be a part of the body element
           // otherwise it is pointless to even issue an animation to be rendered
           bodyElementDetected = isMatchingElement(parentElement, bodyElement);
         }
 
-        parentElement = parentElement.parent();
+        if (bodyElementDetected && rootElementDetected) {
+          // If both body and root have been found, any other checks are pointless,
+          // as no animation data should live outside the application
+          break;
+        }
+
+        if (!rootElementDetected) {
+          // If no rootElement is detected, check if the parentElement is pinned to another element
+          parentHost = jqLite.data(parentElement, NG_ANIMATE_PIN_DATA);
+          if (parentHost) {
+            // The pin target element becomes the next parent element
+            parentElement = getDomNode(parentHost);
+            continue;
+          }
+        }
+
+        parentElement = parentElement.parentNode;
       }
 
-      var allowAnimation = !parentAnimationDetected || animateChildren;
+      var allowAnimation = (!parentAnimationDetected || animateChildren) && elementDisabled !== true;
       return allowAnimation && rootElementDetected && bodyElementDetected;
     }
 
@@ -3094,171 +3349,6 @@ var $$AnimateQueueProvider = ['$animateProvider', function($animateProvider) {
       activeAnimationsLookup.put(node, newValue);
     }
   }];
-}];
-
-var $$AnimateAsyncRunFactory = ['$$rAF', function($$rAF) {
-  var waitQueue = [];
-
-  function waitForTick(fn) {
-    waitQueue.push(fn);
-    if (waitQueue.length > 1) return;
-    $$rAF(function() {
-      for (var i = 0; i < waitQueue.length; i++) {
-        waitQueue[i]();
-      }
-      waitQueue = [];
-    });
-  }
-
-  return function() {
-    var passed = false;
-    waitForTick(function() {
-      passed = true;
-    });
-    return function(callback) {
-      passed ? callback() : waitForTick(callback);
-    };
-  };
-}];
-
-var $$AnimateRunnerFactory = ['$q', '$sniffer', '$$animateAsyncRun',
-                      function($q,   $sniffer,   $$animateAsyncRun) {
-
-  var INITIAL_STATE = 0;
-  var DONE_PENDING_STATE = 1;
-  var DONE_COMPLETE_STATE = 2;
-
-  AnimateRunner.chain = function(chain, callback) {
-    var index = 0;
-
-    next();
-    function next() {
-      if (index === chain.length) {
-        callback(true);
-        return;
-      }
-
-      chain[index](function(response) {
-        if (response === false) {
-          callback(false);
-          return;
-        }
-        index++;
-        next();
-      });
-    }
-  };
-
-  AnimateRunner.all = function(runners, callback) {
-    var count = 0;
-    var status = true;
-    forEach(runners, function(runner) {
-      runner.done(onProgress);
-    });
-
-    function onProgress(response) {
-      status = status && response;
-      if (++count === runners.length) {
-        callback(status);
-      }
-    }
-  };
-
-  function AnimateRunner(host) {
-    this.setHost(host);
-
-    this._doneCallbacks = [];
-    this._runInAnimationFrame = $$animateAsyncRun();
-    this._state = 0;
-  }
-
-  AnimateRunner.prototype = {
-    setHost: function(host) {
-      this.host = host || {};
-    },
-
-    done: function(fn) {
-      if (this._state === DONE_COMPLETE_STATE) {
-        fn();
-      } else {
-        this._doneCallbacks.push(fn);
-      }
-    },
-
-    progress: noop,
-
-    getPromise: function() {
-      if (!this.promise) {
-        var self = this;
-        this.promise = $q(function(resolve, reject) {
-          self.done(function(status) {
-            status === false ? reject() : resolve();
-          });
-        });
-      }
-      return this.promise;
-    },
-
-    then: function(resolveHandler, rejectHandler) {
-      return this.getPromise().then(resolveHandler, rejectHandler);
-    },
-
-    'catch': function(handler) {
-      return this.getPromise()['catch'](handler);
-    },
-
-    'finally': function(handler) {
-      return this.getPromise()['finally'](handler);
-    },
-
-    pause: function() {
-      if (this.host.pause) {
-        this.host.pause();
-      }
-    },
-
-    resume: function() {
-      if (this.host.resume) {
-        this.host.resume();
-      }
-    },
-
-    end: function() {
-      if (this.host.end) {
-        this.host.end();
-      }
-      this._resolve(true);
-    },
-
-    cancel: function() {
-      if (this.host.cancel) {
-        this.host.cancel();
-      }
-      this._resolve(false);
-    },
-
-    complete: function(response) {
-      var self = this;
-      if (self._state === INITIAL_STATE) {
-        self._state = DONE_PENDING_STATE;
-        self._runInAnimationFrame(function() {
-          self._resolve(response);
-        });
-      }
-    },
-
-    _resolve: function(response) {
-      if (this._state !== DONE_COMPLETE_STATE) {
-        forEach(this._doneCallbacks, function(fn) {
-          fn(response);
-        });
-        this._doneCallbacks.length = 0;
-        this._state = DONE_COMPLETE_STATE;
-      }
-    }
-  };
-
-  return AnimateRunner;
 }];
 
 var $$AnimationProvider = ['$animateProvider', function($animateProvider) {
@@ -3394,6 +3484,12 @@ var $$AnimationProvider = ['$animateProvider', function($animateProvider) {
       if (tempClasses) {
         classes += ' ' + tempClasses;
         options.tempClasses = null;
+      }
+
+      var prepareClassName;
+      if (isStructural) {
+        prepareClassName = 'ng-' + event + PREPARE_CLASS_SUFFIX;
+        $$jqLite.addClass(element, prepareClassName);
       }
 
       animationQueue.push({
@@ -3560,7 +3656,7 @@ var $$AnimationProvider = ['$animateProvider', function($animateProvider) {
             };
 
             // the anchor animations require that the from and to elements both have at least
-            // one shared CSS class which effictively marries the two elements together to use
+            // one shared CSS class which effectively marries the two elements together to use
             // the same animation driver and to properly sequence the anchor animation.
             if (group.classes.length) {
               preparedAnimations.push(group);
@@ -3618,6 +3714,10 @@ var $$AnimationProvider = ['$animateProvider', function($animateProvider) {
         if (tempClasses) {
           $$jqLite.addClass(element, tempClasses);
         }
+        if (prepareClassName) {
+          $$jqLite.removeClass(element, prepareClassName);
+          prepareClassName = null;
+        }
       }
 
       function updateAnimationRunners(animation, newRunner) {
@@ -3659,12 +3759,127 @@ var $$AnimationProvider = ['$animateProvider', function($animateProvider) {
   }];
 }];
 
+/**
+ * @ngdoc directive
+ * @name ngAnimateSwap
+ * @restrict A
+ * @scope
+ *
+ * @description
+ *
+ * ngAnimateSwap is a animation-oriented directive that allows for the container to
+ * be removed and entered in whenever the associated expression changes. A
+ * common usecase for this directive is a rotating banner or slider component which
+ * contains one image being present at a time. When the active image changes
+ * then the old image will perform a `leave` animation and the new element
+ * will be inserted via an `enter` animation.
+ *
+ * @animations
+ * | Animation                        | Occurs                               |
+ * |----------------------------------|--------------------------------------|
+ * | {@link ng.$animate#enter enter}  | when the new element is inserted to the DOM  |
+ * | {@link ng.$animate#leave leave}  | when the old element is removed from the DOM |
+ *
+ * @example
+ * <example name="ngAnimateSwap-directive" module="ngAnimateSwapExample"
+ *          deps="angular-animate.js"
+ *          animations="true" fixBase="true">
+ *   <file name="index.html">
+ *     <div class="container" ng-controller="AppCtrl">
+ *       <div ng-animate-swap="number" class="cell swap-animation" ng-class="colorClass(number)">
+ *         {{ number }}
+ *       </div>
+ *     </div>
+ *   </file>
+ *   <file name="script.js">
+ *     angular.module('ngAnimateSwapExample', ['ngAnimate'])
+ *       .controller('AppCtrl', ['$scope', '$interval', function($scope, $interval) {
+ *         $scope.number = 0;
+ *         $interval(function() {
+ *           $scope.number++;
+ *         }, 1000);
+ *
+ *         var colors = ['red','blue','green','yellow','orange'];
+ *         $scope.colorClass = function(number) {
+ *           return colors[number % colors.length];
+ *         };
+ *       }]);
+ *   </file>
+ *  <file name="animations.css">
+ *  .container {
+ *    height:250px;
+ *    width:250px;
+ *    position:relative;
+ *    overflow:hidden;
+ *    border:2px solid black;
+ *  }
+ *  .container .cell {
+ *    font-size:150px;
+ *    text-align:center;
+ *    line-height:250px;
+ *    position:absolute;
+ *    top:0;
+ *    left:0;
+ *    right:0;
+ *    border-bottom:2px solid black;
+ *  }
+ *  .swap-animation.ng-enter, .swap-animation.ng-leave {
+ *    transition:0.5s linear all;
+ *  }
+ *  .swap-animation.ng-enter {
+ *    top:-250px;
+ *  }
+ *  .swap-animation.ng-enter-active {
+ *    top:0px;
+ *  }
+ *  .swap-animation.ng-leave {
+ *    top:0px;
+ *  }
+ *  .swap-animation.ng-leave-active {
+ *    top:250px;
+ *  }
+ *  .red { background:red; }
+ *  .green { background:green; }
+ *  .blue { background:blue; }
+ *  .yellow { background:yellow; }
+ *  .orange { background:orange; }
+ *  </file>
+ * </example>
+ */
+var ngAnimateSwapDirective = ['$animate', '$rootScope', function($animate, $rootScope) {
+  return {
+    restrict: 'A',
+    transclude: 'element',
+    terminal: true,
+    priority: 600, // we use 600 here to ensure that the directive is caught before others
+    link: function(scope, $element, attrs, ctrl, $transclude) {
+      var previousElement, previousScope;
+      scope.$watchCollection(attrs.ngAnimateSwap || attrs['for'], function(value) {
+        if (previousElement) {
+          $animate.leave(previousElement);
+        }
+        if (previousScope) {
+          previousScope.$destroy();
+          previousScope = null;
+        }
+        if (value || value === 0) {
+          previousScope = scope.$new();
+          $transclude(previousScope, function(element) {
+            previousElement = element;
+            $animate.enter(element, null, $element);
+          });
+        }
+      });
+    }
+  };
+}];
+
 /* global angularAnimateModule: true,
 
+   ngAnimateSwapDirective,
    $$AnimateAsyncRunFactory,
    $$rAFSchedulerFactory,
    $$AnimateChildrenDirective,
-   $$AnimateRunnerFactory,
    $$AnimateQueueProvider,
    $$AnimationProvider,
    $AnimateCssProvider,
@@ -3789,7 +4004,7 @@ var $$AnimationProvider = ['$animateProvider', function($animateProvider) {
  * <div ng-show="bool" class="fade">
  *   Show and hide me
  * </div>
- * <button ng-click="bool=true">Toggle</button>
+ * <button ng-click="bool=!bool">Toggle</button>
  *
  * <style>
  * .fade.ng-hide {
@@ -3913,11 +4128,39 @@ var $$AnimationProvider = ['$animateProvider', function($animateProvider) {
  * the CSS class once an animation has completed.)
  *
  *
+ * ### The `ng-[event]-prepare` class
+ *
+ * This is a special class that can be used to prevent unwanted flickering / flash of content before
+ * the actual animation starts. The class is added as soon as an animation is initialized, but removed
+ * before the actual animation starts (after waiting for a $digest).
+ * It is also only added for *structural* animations (`enter`, `move`, and `leave`).
+ *
+ * In practice, flickering can appear when nesting elements with structural animations such as `ngIf`
+ * into elements that have class-based animations such as `ngClass`.
+ *
+ * ```html
+ * <div ng-class="{red: myProp}">
+ *   <div ng-class="{blue: myProp}">
+ *     <div class="message" ng-if="myProp"></div>
+ *   </div>
+ * </div>
+ * ```
+ *
+ * It is possible that during the `enter` animation, the `.message` div will be briefly visible before it starts animating.
+ * In that case, you can add styles to the CSS that make sure the element stays hidden before the animation starts:
+ *
+ * ```css
+ * .message.ng-enter-prepare {
+ *   opacity: 0;
+ * }
+ *
+ * ```
+ *
  * ## JavaScript-based Animations
  *
  * ngAnimate also allows for animations to be consumed by JavaScript code. The approach is similar to CSS-based animations (where there is a shared
  * CSS class that is referenced in our HTML code) but in addition we need to register the JavaScript animation on the module. By making use of the
- * `module.animation()` module function we can register the ainmation.
+ * `module.animation()` module function we can register the animation.
  *
  * Let's see an example of a enter/leave animation using `ngRepeat`:
  *
@@ -4330,31 +4573,6 @@ var $$AnimationProvider = ['$animateProvider', function($animateProvider) {
  * possible be sure to visit the {@link ng.$animate $animate service API page}.
  *
  *
- * ### Preventing Collisions With Third Party Libraries
- *
- * Some third-party frameworks place animation duration defaults across many element or className
- * selectors in order to make their code small and reuseable. This can lead to issues with ngAnimate, which
- * is expecting actual animations on these elements and has to wait for their completion.
- *
- * You can prevent this unwanted behavior by using a prefix on all your animation classes:
- *
- * ```css
- * /&#42; prefixed with animate- &#42;/
- * .animate-fade-add.animate-fade-add-active {
- *   transition:1s linear all;
- *   opacity:0;
- * }
- * ```
- *
- * You then configure `$animate` to enforce this prefix:
- *
- * ```js
- * $animateProvider.classNameFilter(/animate-/);
- * ```
- *
- * This also may provide your application with a speed boost since only specific elements containing CSS class prefix
- * will be evaluated for animation when any DOM changes occur in the application.
- *
  * ## Callbacks and Promises
  *
  * When `$animate` is called it returns a promise that can be used to capture when the animation has ended. Therefore if we were to trigger
@@ -4397,11 +4615,10 @@ var $$AnimationProvider = ['$animateProvider', function($animateProvider) {
  * Click here {@link ng.$animate to learn more about animations with `$animate`}.
  */
 angular.module('ngAnimate', [])
+  .directive('ngAnimateSwap', ngAnimateSwapDirective)
+
   .directive('ngAnimateChildren', $$AnimateChildrenDirective)
   .factory('$$rAFScheduler', $$rAFSchedulerFactory)
-
-  .factory('$$AnimateRunner', $$AnimateRunnerFactory)
-  .factory('$$animateAsyncRun', $$AnimateAsyncRunFactory)
 
   .provider('$$animateQueue', $$AnimateQueueProvider)
   .provider('$$animation', $$AnimationProvider)
@@ -4982,6 +5199,8 @@ module.exports = 'ngAnimate';
 })(window, angular);
 
 },{}],5:[function(require,module,exports){
+'use strict';
+
 var moduleName = require('./src/angular-input-masks.js');
 
 module.exports = moduleName;
@@ -5825,13 +6044,18 @@ IErules.AP = [{
 }));
 
 },{}],8:[function(require,module,exports){
+'use strict';
+
 module.exports = angular.module('ui.utils.masks', [
 	require('./global/global-masks'),
 	require('./br/br-masks'),
-	require('./us/us-masks')
+	require('./us/us-masks'),
+	require('./ch/ch-masks')
 ]).name;
 
-},{"./br/br-masks":10,"./global/global-masks":19,"./us/us-masks":29}],9:[function(require,module,exports){
+},{"./br/br-masks":10,"./ch/ch-masks":19,"./global/global-masks":22,"./us/us-masks":32}],9:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var maskFactory = require('mask-factory');
 
@@ -5855,7 +6079,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"mask-factory":26,"string-mask":7}],10:[function(require,module,exports){
+},{"mask-factory":29,"string-mask":7}],10:[function(require,module,exports){
+'use strict';
+
 var m = angular.module('ui.utils.masks.br', [
 	require('../helpers'),
 ])
@@ -5866,11 +6092,36 @@ var m = angular.module('ui.utils.masks.br', [
 .directive('uiBrCpfcnpjMask', require('./cpf-cnpj/cpf-cnpj'))
 .directive('uiBrIeMask', require('./inscricao-estadual/ie'))
 .directive('uiNfeAccessKeyMask', require('./nfe/nfe'))
+.directive('uiBrCarPlateMask', require('./car-plate/car-plate'))
 .directive('uiBrPhoneNumber', require('./phone/br-phone'));
 
 module.exports = m.name;
 
-},{"../helpers":25,"./boleto-bancario/boleto-bancario":9,"./cep/cep":11,"./cnpj/cnpj":12,"./cpf-cnpj/cpf-cnpj":13,"./cpf/cpf":14,"./inscricao-estadual/ie":15,"./nfe/nfe":16,"./phone/br-phone":17}],11:[function(require,module,exports){
+},{"../helpers":28,"./boleto-bancario/boleto-bancario":9,"./car-plate/car-plate":11,"./cep/cep":12,"./cnpj/cnpj":13,"./cpf-cnpj/cpf-cnpj":14,"./cpf/cpf":15,"./inscricao-estadual/ie":16,"./nfe/nfe":17,"./phone/br-phone":18}],11:[function(require,module,exports){
+'use strict';
+
+var StringMask = require('string-mask');
+var maskFactory = require('mask-factory');
+
+var carPlateMask = new StringMask('UUU-0000');
+
+module.exports = maskFactory({
+	clearValue: function(rawValue) {
+		return rawValue.replace(/[^a-zA-Z0-9]/g, '').slice(0, 7);
+	},
+	format: function(cleanValue) {
+		return (carPlateMask.apply(cleanValue) || '').replace(/[^a-zA-Z0-9]$/, '');
+	},
+	validations: {
+		carPlate: function(value) {
+			return value.length === 7;
+		}
+	}
+});
+
+},{"mask-factory":29,"string-mask":7}],12:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var maskFactory = require('mask-factory');
 
@@ -5878,7 +6129,7 @@ var cepMask = new StringMask('00000-000');
 
 module.exports = maskFactory({
 	clearValue: function(rawValue) {
-		return rawValue.replace(/[^0-9]/g, '').slice(0, 8);
+		return rawValue.toString().replace(/[^0-9]/g, '').slice(0, 8);
 	},
 	format: function(cleanValue) {
 		return (cepMask.apply(cleanValue) || '').replace(/[^0-9]$/, '');
@@ -5890,7 +6141,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"mask-factory":26,"string-mask":7}],12:[function(require,module,exports){
+},{"mask-factory":29,"string-mask":7}],13:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var BrV = require('br-validations');
 var maskFactory = require('mask-factory');
@@ -5911,7 +6164,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"br-validations":6,"mask-factory":26,"string-mask":7}],13:[function(require,module,exports){
+},{"br-validations":6,"mask-factory":29,"string-mask":7}],14:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var BrV = require('br-validations');
 var maskFactory = require('mask-factory');
@@ -5944,7 +6199,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"br-validations":6,"mask-factory":26,"string-mask":7}],14:[function(require,module,exports){
+},{"br-validations":6,"mask-factory":29,"string-mask":7}],15:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var BrV = require('br-validations');
 var maskFactory = require('mask-factory');
@@ -5965,7 +6222,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"br-validations":6,"mask-factory":26,"string-mask":7}],15:[function(require,module,exports){
+},{"br-validations":6,"mask-factory":29,"string-mask":7}],16:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var BrV = require('br-validations');
 
@@ -5976,7 +6235,7 @@ function BrIeMaskDirective($parse) {
 		'AM': [{mask: new StringMask('00.000.000-0')}],
 		'AP': [{mask: new StringMask('000000000')}],
 		'BA': [{chars: 8, mask: new StringMask('000000-00')},
-			   {mask: new StringMask('0000000-00')}],
+			{mask: new StringMask('0000000-00')}],
 		'CE': [{mask: new StringMask('00000000-0')}],
 		'DF': [{mask: new StringMask('00000000000-00')}],
 		'ES': [{mask: new StringMask('00000000-0')}],
@@ -5988,23 +6247,23 @@ function BrIeMaskDirective($parse) {
 		'PA': [{mask: new StringMask('00-000000-0')}],
 		'PB': [{mask: new StringMask('00000000-0')}],
 		'PE': [{chars: 9, mask: new StringMask('0000000-00')},
-			   {mask: new StringMask('00.0.000.0000000-0')}],
+			{mask: new StringMask('00.0.000.0000000-0')}],
 		'PI': [{mask: new StringMask('000000000')}],
 		'PR': [{mask: new StringMask('000.00000-00')}],
 		'RJ': [{mask: new StringMask('00.000.00-0')}],
 		'RN': [{chars: 9, mask: new StringMask('00.000.000-0')},
-			   {mask: new StringMask('00.0.000.000-0')}],
+			{mask: new StringMask('00.0.000.000-0')}],
 		'RO': [{mask: new StringMask('0000000000000-0')}],
 		'RR': [{mask: new StringMask('00000000-0')}],
 		'RS': [{mask: new StringMask('000/0000000')}],
 		'SC': [{mask: new StringMask('000.000.000')}],
 		'SE': [{mask: new StringMask('00000000-0')}],
 		'SP': [{mask: new StringMask('000.000.000.000')},
-			   {mask: new StringMask('-00000000.0/000')}],
+			{mask: new StringMask('-00000000.0/000')}],
 		'TO': [{mask: new StringMask('00000000000')}]
 	};
 
-	function clearValue (value) {
+	function clearValue(value) {
 		if (!value) {
 			return value;
 		}
@@ -6014,7 +6273,7 @@ function BrIeMaskDirective($parse) {
 
 	function getMask(uf, value) {
 		if (!uf || !ieMasks[uf]) {
-			return undefined;
+			return;
 		}
 
 		if (uf === 'SP' && /^P/i.test(value)) {
@@ -6023,7 +6282,7 @@ function BrIeMaskDirective($parse) {
 
 		var masks = ieMasks[uf];
 		var i = 0;
-		while(masks[i].chars && masks[i].chars < clearValue(value).length && i < masks.length - 1) {
+		while (masks[i].chars && masks[i].chars < clearValue(value).length && i < masks.length - 1) {
 			i++;
 		}
 
@@ -6033,7 +6292,7 @@ function BrIeMaskDirective($parse) {
 	function applyIEMask(value, uf) {
 		var mask = getMask(uf, value);
 
-		if(!mask) {
+		if (!mask) {
 			return value;
 		}
 
@@ -6102,7 +6361,9 @@ BrIeMaskDirective.$inject = ['$parse'];
 
 module.exports = BrIeMaskDirective;
 
-},{"br-validations":6,"string-mask":7}],16:[function(require,module,exports){
+},{"br-validations":6,"string-mask":7}],17:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var maskFactory = require('mask-factory');
 
@@ -6123,7 +6384,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"mask-factory":26,"string-mask":7}],17:[function(require,module,exports){
+},{"mask-factory":29,"string-mask":7}],18:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var maskFactory = require('mask-factory');
 
@@ -6141,11 +6404,11 @@ module.exports = maskFactory({
 	},
 	format: function(cleanValue) {
 		var formatedValue;
-		if(cleanValue.indexOf('0800') === 0) {
+		if (cleanValue.indexOf('0800') === 0) {
 			formatedValue = phoneMask0800.apply(cleanValue);
-		}else if(cleanValue.length < 11){
+		} else if (cleanValue.length < 11) {
 			formatedValue = phoneMask8D.apply(cleanValue) || '';
-		}else{
+		} else {
 			formatedValue = phoneMask9D.apply(cleanValue);
 		}
 
@@ -6164,9 +6427,53 @@ module.exports = maskFactory({
 	}
 });
 
-},{"mask-factory":26,"string-mask":7}],18:[function(require,module,exports){
+},{"mask-factory":29,"string-mask":7}],19:[function(require,module,exports){
+'use strict';
+
+var m = angular.module('ui.utils.masks.ch', [
+	require('../helpers'),
+])
+.directive('uiChPhoneNumber', require('./phone/ch-phone'));
+
+module.exports = m.name;
+
+},{"../helpers":28,"./phone/ch-phone":20}],20:[function(require,module,exports){
+'use strict';
+
+var StringMask = require('string-mask');
+var maskFactory = require('mask-factory');
+
+var phoneMask = new StringMask('+00 00 000 00 00');
+
+module.exports = maskFactory({
+	clearValue: function(rawValue) {
+		return rawValue.toString().replace(/[^0-9]/g, '').slice(0, 11);
+	},
+	format: function(cleanValue) {
+		var formatedValue;
+
+		formatedValue = phoneMask.apply(cleanValue) || '';
+
+		return formatedValue.trim().replace(/[^0-9]$/, '');
+	},
+	validations: {
+		chPhoneNumber: function(value) {
+			var valueLength = value && value.toString().length;
+			return valueLength === 11;
+		}
+	}
+});
+
+},{"mask-factory":29,"string-mask":7}],21:[function(require,module,exports){
+'use strict';
+
 var moment = require('moment');
 var StringMask = require('string-mask');
+
+function isISODateString(date) {
+	return /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}([-+][0-9]{2}:[0-9]{2}|Z)$/
+		.test(date.toString());
+}
 
 function DateMaskDirective($locale) {
 	var dateFormatMapByLocale = {
@@ -6187,7 +6494,7 @@ function DateMaskDirective($locale) {
 				}
 
 				var cleanValue = value;
-				if (typeof value === 'object') {
+				if (typeof value === 'object' || isISODateString(value)) {
 					cleanValue = moment(value).format(dateFormat);
 				}
 
@@ -6228,7 +6535,9 @@ DateMaskDirective.$inject = ['$locale'];
 
 module.exports = DateMaskDirective;
 
-},{"moment":53,"string-mask":7}],19:[function(require,module,exports){
+},{"moment":56,"string-mask":7}],22:[function(require,module,exports){
+'use strict';
+
 var m = angular.module('ui.utils.masks.global', [
 	require('../helpers'),
 ])
@@ -6241,7 +6550,9 @@ var m = angular.module('ui.utils.masks.global', [
 
 module.exports = m.name;
 
-},{"../helpers":25,"./date/date":18,"./money/money":20,"./number/number":21,"./percentage/percentage":22,"./scientific-notation/scientific-notation":23,"./time/time":24}],20:[function(require,module,exports){
+},{"../helpers":28,"./date/date":21,"./money/money":23,"./number/number":24,"./percentage/percentage":25,"./scientific-notation/scientific-notation":26,"./time/time":27}],23:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var validators = require('validators');
 
@@ -6249,26 +6560,26 @@ function MoneyMaskDirective($locale, $parse, PreFormatters) {
 	return {
 		restrict: 'A',
 		require: 'ngModel',
-		link: function (scope, element, attrs, ctrl) {
+		link: function(scope, element, attrs, ctrl) {
 			var decimalDelimiter = $locale.NUMBER_FORMATS.DECIMAL_SEP,
 				thousandsDelimiter = $locale.NUMBER_FORMATS.GROUP_SEP,
 				currencySym = $locale.NUMBER_FORMATS.CURRENCY_SYM,
 				decimals = $parse(attrs.uiMoneyMask)(scope);
 
 			function maskFactory(decimals) {
-					var decimalsPattern = decimals > 0 ? decimalDelimiter + new Array(decimals + 1).join('0') : '';
-					var maskPattern = currencySym + ' #' + thousandsDelimiter + '##0' + decimalsPattern;
-					return new StringMask(maskPattern, {reverse: true});
+				var decimalsPattern = decimals > 0 ? decimalDelimiter + new Array(decimals + 1).join('0') : '';
+				var maskPattern = currencySym + ' #' + thousandsDelimiter + '##0' + decimalsPattern;
+				return new StringMask(maskPattern, {reverse: true});
 			}
 
-			if (angular.isDefined(attrs.uiHideGroupSep)){
+			if (angular.isDefined(attrs.uiHideGroupSep)) {
 				thousandsDelimiter = '';
 			}
 
-			if(isNaN(decimals)) {
+			if (isNaN(decimals)) {
 				decimals = 2;
 			}
-
+			decimals = parseInt(decimals);
 			var moneyMask = maskFactory(decimals);
 
 			function formatter(value) {
@@ -6290,7 +6601,7 @@ function MoneyMaskDirective($locale, $parse, PreFormatters) {
 				var formatedValue = moneyMask.apply(actualNumber);
 
 				if (angular.isDefined(attrs.uiNegativeNumber)) {
-						var isNegative = (value[0] === '-'),
+					var isNegative = (value[0] === '-'),
 						needsToInvertSign = (value.slice(-1) === '-');
 
 					//only apply the minus sign if it is negative or(exclusive)
@@ -6315,6 +6626,7 @@ function MoneyMaskDirective($locale, $parse, PreFormatters) {
 			if (attrs.uiMoneyMask) {
 				scope.$watch(attrs.uiMoneyMask, function(_decimals) {
 					decimals = isNaN(_decimals) ? 2 : _decimals;
+					decimals = parseInt(decimals);
 					moneyMask = maskFactory(decimals);
 
 					parser(ctrl.$viewValue);
@@ -6336,7 +6648,7 @@ function MoneyMaskDirective($locale, $parse, PreFormatters) {
 
 			if (attrs.max) {
 				var maxVal;
-				
+
 				ctrl.$validators.max = function(modelValue) {
 					return validators.maxNumber(ctrl, modelValue, maxVal);
 				};
@@ -6353,23 +6665,25 @@ MoneyMaskDirective.$inject = ['$locale', '$parse', 'PreFormatters'];
 
 module.exports = MoneyMaskDirective;
 
-},{"string-mask":7,"validators":27}],21:[function(require,module,exports){
+},{"string-mask":7,"validators":30}],24:[function(require,module,exports){
+'use strict';
+
 var validators = require('validators');
 
 function NumberMaskDirective($locale, $parse, PreFormatters, NumberMasks) {
 	return {
 		restrict: 'A',
 		require: 'ngModel',
-		link: function (scope, element, attrs, ctrl) {
+		link: function(scope, element, attrs, ctrl) {
 			var decimalDelimiter = $locale.NUMBER_FORMATS.DECIMAL_SEP,
 				thousandsDelimiter = $locale.NUMBER_FORMATS.GROUP_SEP,
 				decimals = $parse(attrs.uiNumberMask)(scope);
 
-			if (angular.isDefined(attrs.uiHideGroupSep)){
+			if (angular.isDefined(attrs.uiHideGroupSep)) {
 				thousandsDelimiter = '';
 			}
 
-			if(isNaN(decimals)) {
+			if (isNaN(decimals)) {
 				decimals = 2;
 			}
 
@@ -6377,7 +6691,7 @@ function NumberMaskDirective($locale, $parse, PreFormatters, NumberMasks) {
 				modelMask = NumberMasks.modelMask(decimals);
 
 			function parser(value) {
-				if(ctrl.$isEmpty(value)) {
+				if (ctrl.$isEmpty(value)) {
 					return null;
 				}
 
@@ -6460,7 +6774,9 @@ NumberMaskDirective.$inject = ['$locale', '$parse', 'PreFormatters', 'NumberMask
 
 module.exports = NumberMaskDirective;
 
-},{"validators":27}],22:[function(require,module,exports){
+},{"validators":30}],25:[function(require,module,exports){
+'use strict';
+
 var validators = require('validators');
 
 function PercentageMaskDirective($locale, $parse, PreFormatters, NumberMasks) {
@@ -6471,17 +6787,22 @@ function PercentageMaskDirective($locale, $parse, PreFormatters, NumberMasks) {
 	return {
 		restrict: 'A',
 		require: 'ngModel',
-		link: function (scope, element, attrs, ctrl) {
+		link: function(scope, element, attrs, ctrl) {
 			var decimalDelimiter = $locale.NUMBER_FORMATS.DECIMAL_SEP,
 				thousandsDelimiter = $locale.NUMBER_FORMATS.GROUP_SEP,
-				decimals = parseInt(attrs.uiPercentageMask);
+				decimals = parseInt(attrs.uiPercentageMask),
+				backspacePressed = false;
+
+			element.bind('keydown keypress', function(event) {
+				backspacePressed = event.which === 8;
+			});
 
 			var modelValue = {
 				multiplier : 100,
 				decimalMask: 2
 			};
 
-			if (angular.isDefined(attrs.uiHideGroupSep)){
+			if (angular.isDefined(attrs.uiHideGroupSep)) {
 				thousandsDelimiter = '';
 			}
 
@@ -6490,7 +6811,7 @@ function PercentageMaskDirective($locale, $parse, PreFormatters, NumberMasks) {
 				modelValue.decimalMask = 0;
 			}
 
-			if(isNaN(decimals)) {
+			if (isNaN(decimals)) {
 				decimals = 2;
 			}
 
@@ -6515,6 +6836,9 @@ function PercentageMaskDirective($locale, $parse, PreFormatters, NumberMasks) {
 				var valueToFormat = PreFormatters.clearDelimitersAndLeadingZeros(value) || '0';
 				if (value.length > 1 && value.indexOf('%') === -1) {
 					valueToFormat = valueToFormat.slice(0,valueToFormat.length-1);
+				}
+				if (backspacePressed && value.length === 1 && value !== '%') {
+					valueToFormat = '0';
 				}
 				var formatedValue = viewMask.apply(valueToFormat) + ' %';
 				var actualNumber = parseFloat(modelMask.apply(valueToFormat));
@@ -6579,7 +6903,9 @@ PercentageMaskDirective.$inject = ['$locale', '$parse', 'PreFormatters', 'Number
 
 module.exports = PercentageMaskDirective;
 
-},{"validators":27}],23:[function(require,module,exports){
+},{"validators":30}],26:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 
 function ScientificNotationMaskDirective($locale, $parse) {
@@ -6613,7 +6939,7 @@ function ScientificNotationMaskDirective($locale, $parse) {
 
 			var significandMask = significandMaskBuilder(decimals);
 
-			function splitNumber (value) {
+			function splitNumber(value) {
 				var stringValue = value.toString(),
 					splittedNumber = stringValue.match(/(-?[0-9]*)[\.]?([0-9]*)?[Ee]?([\+-]?[0-9]*)?/);
 
@@ -6624,7 +6950,7 @@ function ScientificNotationMaskDirective($locale, $parse) {
 				};
 			}
 
-			function formatter (value) {
+			function formatter(value) {
 				if (ctrl.$isEmpty(value)) {
 					return value;
 				}
@@ -6670,8 +6996,8 @@ function ScientificNotationMaskDirective($locale, $parse) {
 				return formattedValue;
 			}
 
-			function parser (value) {
-				if(ctrl.$isEmpty(value)) {
+			function parser(value) {
+				if (ctrl.$isEmpty(value)) {
 					return value;
 				}
 
@@ -6689,7 +7015,7 @@ function ScientificNotationMaskDirective($locale, $parse) {
 			ctrl.$formatters.push(formatter);
 			ctrl.$parsers.push(parser);
 
-			ctrl.$validators.max = function validator (value) {
+			ctrl.$validators.max = function validator(value) {
 				return ctrl.$isEmpty(value) || value < Number.MAX_VALUE;
 			};
 		}
@@ -6699,7 +7025,9 @@ ScientificNotationMaskDirective.$inject = ['$locale', '$parse'];
 
 module.exports = ScientificNotationMaskDirective;
 
-},{"string-mask":7}],24:[function(require,module,exports){
+},{"string-mask":7}],27:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 
 module.exports = function TimeMaskDirective() {
@@ -6744,7 +7072,7 @@ module.exports = function TimeMaskDirective() {
 				return modelValue;
 			});
 
-			ctrl.$validators.time = function (modelValue) {
+			ctrl.$validators.time = function(modelValue) {
 				if (ctrl.$isEmpty(modelValue)) {
 					return true;
 				}
@@ -6764,14 +7092,16 @@ module.exports = function TimeMaskDirective() {
 	};
 };
 
-},{"string-mask":7}],25:[function(require,module,exports){
+},{"string-mask":7}],28:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 
 var m = angular.module('ui.utils.masks.helpers', []);
 
 module.exports = m.name;
 
-m.factory('PreFormatters', [function(){
+m.factory('PreFormatters', [function() {
 	function clearDelimitersAndLeadingZeros(value) {
 		if (value === '0') {
 			return '0';
@@ -6781,7 +7111,7 @@ m.factory('PreFormatters', [function(){
 		return cleanValue.replace(/[^0-9]/g, '');
 	}
 
-	function prepareNumberToFormatter (value, decimals) {
+	function prepareNumberToFormatter(value, decimals) {
 		return clearDelimitersAndLeadingZeros((parseFloat(value)).toFixed(decimals));
 	}
 
@@ -6790,28 +7120,12 @@ m.factory('PreFormatters', [function(){
 		prepareNumberToFormatter: prepareNumberToFormatter
 	};
 }])
-.factory('NumberValidators', [function() {
+.factory('NumberMasks', [function() {
 	return {
-		maxNumber: function maxValidator(ctrl, value, limit) {
-			var max = parseFloat(limit);
-			var validity = ctrl.$isEmpty(value) || isNaN(max)|| value <= max;
-			ctrl.$setValidity('max', validity);
-			return value;
-		},
-		minNumber: function minValidator(ctrl, value, limit) {
-			var min = parseFloat(limit);
-			var validity = ctrl.$isEmpty(value) || isNaN(min) || value >= min;
-			ctrl.$setValidity('min', validity);
-			return value;
-		}
-	};
-}])
-.factory('NumberMasks', [function(){
-	return {
-		viewMask: function (decimals, decimalDelimiter, thousandsDelimiter) {
+		viewMask: function(decimals, decimalDelimiter, thousandsDelimiter) {
 			var mask = '#' + thousandsDelimiter + '##0';
 
-			if(decimals > 0) {
+			if (decimals > 0) {
 				mask += decimalDelimiter;
 				for (var i = 0; i < decimals; i++) {
 					mask += '0';
@@ -6822,10 +7136,10 @@ m.factory('PreFormatters', [function(){
 				reverse: true
 			});
 		},
-		modelMask: function (decimals) {
+		modelMask: function(decimals) {
 			var mask = '###0';
 
-			if(decimals > 0) {
+			if (decimals > 0) {
 				mask += '.';
 				for (var i = 0; i < decimals; i++) {
 					mask += '0';
@@ -6839,7 +7153,9 @@ m.factory('PreFormatters', [function(){
 	};
 }]);
 
-},{"string-mask":7}],26:[function(require,module,exports){
+},{"string-mask":7}],29:[function(require,module,exports){
+'use strict';
+
 module.exports = function maskFactory(maskDefinition) {
 	return function MaskDirective() {
 		return {
@@ -6886,11 +7202,13 @@ module.exports = function maskFactory(maskDefinition) {
 	};
 };
 
-},{}],27:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
+'use strict';
+
 module.exports = {
 	maxNumber: function(ctrl, value, limit) {
 		var max = parseFloat(limit, 10);
-		return ctrl.$isEmpty(value) || isNaN(max)|| value <= max;
+		return ctrl.$isEmpty(value) || isNaN(max) || value <= max;
 	},
 	minNumber: function(ctrl, value, limit) {
 		var min = parseFloat(limit, 10);
@@ -6898,7 +7216,9 @@ module.exports = {
 	}
 };
 
-},{}],28:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var maskFactory = require('mask-factory');
 
@@ -6912,9 +7232,9 @@ module.exports = maskFactory({
 	format: function(cleanValue) {
 		var formattedValue;
 
-		if(cleanValue.length < 11){
+		if (cleanValue.length < 11) {
 			formattedValue = phoneMaskUS.apply(cleanValue) || '';
-		}else{
+		} else {
 			formattedValue = phoneMaskINTL.apply(cleanValue);
 		}
 
@@ -6927,7 +7247,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"mask-factory":26,"string-mask":7}],29:[function(require,module,exports){
+},{"mask-factory":29,"string-mask":7}],32:[function(require,module,exports){
+'use strict';
+
 var m = angular.module('ui.utils.masks.us', [
 	require('../helpers')
 ])
@@ -6935,7 +7257,7 @@ var m = angular.module('ui.utils.masks.us', [
 
 module.exports = m.name;
 
-},{"../helpers":25,"./phone/us-phone":28}],30:[function(require,module,exports){
+},{"../helpers":28,"./phone/us-phone":31}],33:[function(require,module,exports){
 /*! 
  * angular-loading-bar v0.8.0
  * https://chieffancypants.github.io/angular-loading-bar
@@ -7266,17 +7588,17 @@ angular.module('cfp.loadingBar', [])
   });       // wtf javascript. srsly
 })();       //
 
-},{}],31:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 require('./build/loading-bar');
 module.exports = 'angular-loading-bar';
 
-},{"./build/loading-bar":30}],32:[function(require,module,exports){
+},{"./build/loading-bar":33}],35:[function(require,module,exports){
 /**
- * @license AngularJS v1.4.8
- * (c) 2010-2015 Google, Inc. http://angularjs.org
+ * @license AngularJS v1.5.5
+ * (c) 2010-2016 Google, Inc. http://angularjs.org
  * License: MIT
  */
-(function(window, angular, undefined) {'use strict';
+(function(window, angular) {'use strict';
 
 var $resourceMinErr = angular.$$minErr('$resource');
 
@@ -7341,6 +7663,9 @@ function shallowClearAndCopy(src, dst) {
  * @ngdoc service
  * @name $resource
  * @requires $http
+ * @requires ng.$log
+ * @requires $q
+ * @requires ng.$timeout
  *
  * @description
  * A factory which creates a resource object that lets you interact with
@@ -7375,7 +7700,7 @@ function shallowClearAndCopy(src, dst) {
  *   can escape it with `/\.`.
  *
  * @param {Object=} paramDefaults Default values for `url` parameters. These can be overridden in
- *   `actions` methods. If any of the parameter value is a function, it will be executed every time
+ *   `actions` methods. If a parameter value is a function, it will be executed every time
  *   when a param value needs to be obtained for a request (unless the param was overridden).
  *
  *   Each key value in the parameter object is first bound to url template if present and then any
@@ -7385,9 +7710,9 @@ function shallowClearAndCopy(src, dst) {
  *   URL `/path/greet?salutation=Hello`.
  *
  *   If the parameter value is prefixed with `@` then the value for that parameter will be extracted
- *   from the corresponding property on the `data` object (provided when calling an action method).  For
- *   example, if the `defaultParam` object is `{someParam: '@someProp'}` then the value of `someParam`
- *   will be `data.someProp`.
+ *   from the corresponding property on the `data` object (provided when calling an action method).
+ *   For example, if the `defaultParam` object is `{someParam: '@someProp'}` then the value of
+ *   `someParam` will be `data.someProp`.
  *
  * @param {Object.<Object>=} actions Hash with declaration of custom actions that should extend
  *   the default set of resource actions. The declaration should be created in the format of {@link
@@ -7421,15 +7746,21 @@ function shallowClearAndCopy(src, dst) {
  *     `{function(data, headersGetter)|Array.<function(data, headersGetter)>}` –
  *     transform function or an array of such functions. The transform function takes the http
  *     response body and headers and returns its transformed (typically deserialized) version.
- *     By default, transformResponse will contain one function that checks if the response looks like
- *     a JSON string and deserializes it using `angular.fromJson`. To prevent this behavior, set
- *     `transformResponse` to an empty array: `transformResponse: []`
+ *     By default, transformResponse will contain one function that checks if the response looks
+ *     like a JSON string and deserializes it using `angular.fromJson`. To prevent this behavior,
+ *     set `transformResponse` to an empty array: `transformResponse: []`
  *   - **`cache`** – `{boolean|Cache}` – If true, a default $http cache will be used to cache the
  *     GET request, otherwise if a cache instance built with
  *     {@link ng.$cacheFactory $cacheFactory}, this cache will be used for
  *     caching.
- *   - **`timeout`** – `{number|Promise}` – timeout in milliseconds, or {@link ng.$q promise} that
- *     should abort the request when resolved.
+ *   - **`timeout`** – `{number}` – timeout in milliseconds.<br />
+ *     **Note:** In contrast to {@link ng.$http#usage $http.config}, {@link ng.$q promises} are
+ *     **not** supported in $resource, because the same value would be used for multiple requests.
+ *     If you are looking for a way to cancel requests, you should use the `cancellable` option.
+ *   - **`cancellable`** – `{boolean}` – if set to true, the request made by a "non-instance" call
+ *     will be cancelled (if not already completed) by calling `$cancelRequest()` on the call's
+ *     return value. Calling `$cancelRequest()` for a non-cancellable or an already
+ *     completed/cancelled request will have no effect.<br />
  *   - **`withCredentials`** - `{boolean}` - whether to set the `withCredentials` flag on the
  *     XHR object. See
  *     [requests with credentials](https://developer.mozilla.org/en/http_access_control#section_5)
@@ -7441,12 +7772,13 @@ function shallowClearAndCopy(src, dst) {
  *     with `http response` object. See {@link ng.$http $http interceptors}.
  *
  * @param {Object} options Hash with custom settings that should extend the
- *   default `$resourceProvider` behavior.  The only supported option is
- *
- *   Where:
+ *   default `$resourceProvider` behavior.  The supported options are:
  *
  *   - **`stripTrailingSlashes`** – {boolean} – If true then the trailing
  *   slashes from any calculated URL will be stripped. (Defaults to true.)
+ *   - **`cancellable`** – {boolean} – If true, the request made by a "non-instance" call will be
+ *   cancelled (if not already completed) by calling `$cancelRequest()` on the call's return value.
+ *   This can be overwritten per action. (Defaults to false.)
  *
  * @returns {Object} A resource "class" object with methods for the default set of resource actions
  *   optionally extended with custom `actions`. The default set contains these actions:
@@ -7494,7 +7826,7 @@ function shallowClearAndCopy(src, dst) {
  *   Class actions return empty instance (with additional properties below).
  *   Instance actions return promise of the action.
  *
- *   The Resource instances and collection have these additional properties:
+ *   The Resource instances and collections have these additional properties:
  *
  *   - `$promise`: the {@link ng.$q promise} of the original server interaction that created this
  *     instance or collection.
@@ -7504,7 +7836,7 @@ function shallowClearAndCopy(src, dst) {
  *     {@link ngRoute.$routeProvider resolve section of $routeProvider.when()} to defer view
  *     rendering until the resource(s) are loaded.
  *
- *     On failure, the promise is resolved with the {@link ng.$http http response} object, without
+ *     On failure, the promise is rejected with the {@link ng.$http http response} object, without
  *     the `resource` property.
  *
  *     If an interceptor object was provided, the promise will instead be resolved with the value
@@ -7513,6 +7845,11 @@ function shallowClearAndCopy(src, dst) {
  *   - `$resolved`: `true` after first server interaction is completed (either with success or
  *      rejection), `false` before that. Knowing if the Resource has been resolved is useful in
  *      data-binding.
+ *
+ *   The Resource instances and collections have these additional methods:
+ *
+ *   - `$cancelRequest`: If there is a cancellable, pending request related to the instance or
+ *      collection, calling this method will abort the request.
  *
  * @example
  *
@@ -7558,6 +7895,11 @@ function shallowClearAndCopy(src, dst) {
  *
  * Calling these methods invoke `$http` on the `url` template with the given `method`, `params` and
  * `headers`.
+ *
+ * @example
+ *
+ * # User resource
+ *
  * When the data is returned from the server then the object is an instance of the resource type and
  * all of the non-GET methods are available with `$` prefix. This allows you to easily support CRUD
  * operations (create, read, update, delete) on server-side data.
@@ -7576,10 +7918,10 @@ function shallowClearAndCopy(src, dst) {
  *
    ```js
      var User = $resource('/user/:userId', {userId:'@id'});
-     User.get({userId:123}, function(u, getResponseHeaders){
-       u.abc = true;
-       u.$save(function(u, putResponseHeaders) {
-         //u => saved user object
+     User.get({userId:123}, function(user, getResponseHeaders){
+       user.abc = true;
+       user.$save(function(user, putResponseHeaders) {
+         //user => saved user object
          //putResponseHeaders => $http header getter
        });
      });
@@ -7594,8 +7936,11 @@ function shallowClearAndCopy(src, dst) {
            $scope.user = user;
          });
    ```
-
+ *
+ * @example
+ *
  * # Creating a custom 'PUT' request
+ *
  * In this example we create a custom method on our resource to make a PUT request
  * ```js
  *    var app = angular.module('app', ['ngResource', 'ngRoute']);
@@ -7623,6 +7968,34 @@ function shallowClearAndCopy(src, dst) {
  *    // This will PUT /notes/ID with the note object in the request payload
  *    }]);
  * ```
+ *
+ * @example
+ *
+ * # Cancelling requests
+ *
+ * If an action's configuration specifies that it is cancellable, you can cancel the request related
+ * to an instance or collection (as long as it is a result of a "non-instance" call):
+ *
+   ```js
+     // ...defining the `Hotel` resource...
+     var Hotel = $resource('/api/hotel/:id', {id: '@id'}, {
+       // Let's make the `query()` method cancellable
+       query: {method: 'get', isArray: true, cancellable: true}
+     });
+
+     // ...somewhere in the PlanVacationController...
+     ...
+     this.onDestinationChanged = function onDestinationChanged(destination) {
+       // We don't care about any pending request for hotels
+       // in a different destination any more
+       this.availableHotels.$cancelRequest();
+
+       // Let's query for hotels in '<destination>'
+       // (calls: /api/hotel?location=<destination>)
+       this.availableHotels = Hotel.query({location: destination});
+     };
+   ```
+ *
  */
 angular.module('ngResource', ['ng']).
   provider('$resource', function() {
@@ -7643,7 +8016,7 @@ angular.module('ngResource', ['ng']).
       }
     };
 
-    this.$get = ['$http', '$q', function($http, $q) {
+    this.$get = ['$http', '$log', '$q', '$timeout', function($http, $log, $q, $timeout) {
 
       var noop = angular.noop,
         forEach = angular.forEach,
@@ -7711,7 +8084,9 @@ angular.module('ngResource', ['ng']).
             }
             if (!(new RegExp("^\\d+$").test(param)) && param &&
               (new RegExp("(^|[^\\\\]):" + param + "(\\W|$)").test(url))) {
-              urlParams[param] = true;
+              urlParams[param] = {
+                isQueryParamValue: (new RegExp("\\?.*=:" + param + "(?:\\W|$)")).test(url)
+              };
             }
           });
           url = url.replace(/\\:/g, ':');
@@ -7721,10 +8096,14 @@ angular.module('ngResource', ['ng']).
           });
 
           params = params || {};
-          forEach(self.urlParams, function(_, urlParam) {
+          forEach(self.urlParams, function(paramInfo, urlParam) {
             val = params.hasOwnProperty(urlParam) ? params[urlParam] : self.defaults[urlParam];
             if (angular.isDefined(val) && val !== null) {
-              encodedVal = encodeUriSegment(val);
+              if (paramInfo.isQueryParamValue) {
+                encodedVal = encodeUriQuery(val, true);
+              } else {
+                encodedVal = encodeUriSegment(val);
+              }
               url = url.replace(new RegExp(":" + urlParam + "(\\W|$)", "g"), function(match, p1) {
                 return encodedVal + p1;
               });
@@ -7796,6 +8175,20 @@ angular.module('ngResource', ['ng']).
 
         forEach(actions, function(action, name) {
           var hasBody = /^(POST|PUT|PATCH)$/i.test(action.method);
+          var numericTimeout = action.timeout;
+          var cancellable = angular.isDefined(action.cancellable) ? action.cancellable :
+              (options && angular.isDefined(options.cancellable)) ? options.cancellable :
+              provider.defaults.cancellable;
+
+          if (numericTimeout && !angular.isNumber(numericTimeout)) {
+            $log.debug('ngResource:\n' +
+                       '  Only numeric values are allowed as `timeout`.\n' +
+                       '  Promises are not supported in $resource, because the same value would ' +
+                       'be used for multiple requests. If you are looking for a way to cancel ' +
+                       'requests, you should use the `cancellable` option.');
+            delete action.timeout;
+            numericTimeout = null;
+          }
 
           Resource[name] = function(a1, a2, a3, a4) {
             var params = {}, data, success, error;
@@ -7844,6 +8237,8 @@ angular.module('ngResource', ['ng']).
               defaultResponseInterceptor;
             var responseErrorInterceptor = action.interceptor && action.interceptor.responseError ||
               undefined;
+            var timeoutDeferred;
+            var numericTimeoutPromise;
 
             forEach(action, function(value, key) {
               switch (key) {
@@ -7853,12 +8248,19 @@ angular.module('ngResource', ['ng']).
                 case 'params':
                 case 'isArray':
                 case 'interceptor':
-                  break;
-                case 'timeout':
-                  httpConfig[key] = value;
+                case 'cancellable':
                   break;
               }
             });
+
+            if (!isInstanceCall && cancellable) {
+              timeoutDeferred = $q.defer();
+              httpConfig.timeout = timeoutDeferred.promise;
+
+              if (numericTimeout) {
+                numericTimeoutPromise = $timeout(timeoutDeferred.resolve, numericTimeout);
+              }
+            }
 
             if (hasBody) httpConfig.data = data;
             route.setUrlParams(httpConfig,
@@ -7866,8 +8268,7 @@ angular.module('ngResource', ['ng']).
               action.url);
 
             var promise = $http(httpConfig).then(function(response) {
-              var data = response.data,
-                promise = value.$promise;
+              var data = response.data;
 
               if (data) {
                 // Need to convert action.isArray to boolean in case it is undefined
@@ -7892,22 +8293,26 @@ angular.module('ngResource', ['ng']).
                     }
                   });
                 } else {
+                  var promise = value.$promise;     // Save the promise
                   shallowClearAndCopy(data, value);
-                  value.$promise = promise;
+                  value.$promise = promise;         // Restore the promise
                 }
               }
-
-              value.$resolved = true;
-
               response.resource = value;
 
               return response;
             }, function(response) {
-              value.$resolved = true;
-
               (error || noop)(response);
-
               return $q.reject(response);
+            });
+
+            promise['finally'](function() {
+              value.$resolved = true;
+              if (!isInstanceCall && cancellable) {
+                value.$cancelRequest = angular.noop;
+                $timeout.cancel(numericTimeoutPromise);
+                timeoutDeferred = numericTimeoutPromise = httpConfig.timeout = null;
+              }
             });
 
             promise = promise.then(
@@ -7924,6 +8329,7 @@ angular.module('ngResource', ['ng']).
               // - return the instance / collection
               value.$promise = promise;
               value.$resolved = false;
+              if (cancellable) value.$cancelRequest = timeoutDeferred.resolve;
 
               return value;
             }
@@ -7956,11 +8362,11 @@ angular.module('ngResource', ['ng']).
 
 })(window, window.angular);
 
-},{}],33:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 require('./angular-resource');
 module.exports = 'ngResource';
 
-},{"./angular-resource":32}],34:[function(require,module,exports){
+},{"./angular-resource":35}],37:[function(require,module,exports){
 /**
  * @license AngularJS v1.4.7
  * (c) 2010-2015 Google, Inc. http://angularjs.org
@@ -8645,11 +9051,11 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
 
 })(window, window.angular);
 
-},{}],35:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 require('./angular-sanitize');
 module.exports = 'ngSanitize';
 
-},{"./angular-sanitize":34}],36:[function(require,module,exports){
+},{"./angular-sanitize":37}],39:[function(require,module,exports){
 (function (window, angular, undefined) {
   'use strict';
 
@@ -9198,7 +9604,7 @@ module.exports = 'ngSanitize';
 
 }(window, angular));
 
-},{}],37:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /*  angular-summernote v0.8.1 | (c) 2016 JeongHoon Byun | MIT license */
 /* global angular */
 angular.module('summernote', [])
@@ -9407,11 +9813,11 @@ angular.module('summernote', [])
     };
   }]);
 
-},{}],38:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /*!
- * angular-translate - v2.8.1 - 2015-10-01
+ * angular-translate - v2.11.0 - 2016-03-20
  * 
- * Copyright (c) 2015 The angular-translate team, Pascal Precht; Licensed MIT
+ * Copyright (c) 2016 The angular-translate team, Pascal Precht; Licensed MIT
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -9436,6 +9842,13 @@ angular.module('summernote', [])
  * @description
  * The main module which holds everything together.
  */
+runTranslate.$inject = ['$translate'];
+$translate.$inject = ['$STORAGE_KEY', '$windowProvider', '$translateSanitizationProvider', 'pascalprechtTranslateOverrider'];
+$translateDefaultInterpolation.$inject = ['$interpolate', '$translateSanitization'];
+translateDirective.$inject = ['$translate', '$q', '$interpolate', '$compile', '$parse', '$rootScope'];
+translateCloakDirective.$inject = ['$translate', '$rootScope'];
+translateFilterFactory.$inject = ['$parse', '$translate'];
+$translationCache.$inject = ['$cacheFactory'];
 angular.module('pascalprecht.translate', ['ng'])
   .run(runTranslate);
 
@@ -9469,7 +9882,6 @@ function runTranslate($translate) {
     $translate.use($translate.preferredLanguage());
   }
 }
-runTranslate.$inject = ['$translate'];
 
 runTranslate.displayName = 'runTranslate';
 
@@ -9714,13 +10126,23 @@ function $translateSanitizationProvider () {
     return $sanitize(value);
   };
 
-  var mapInterpolationParameters = function (value, iteratee) {
+  var mapInterpolationParameters = function (value, iteratee, stack) {
     if (angular.isObject(value)) {
       var result = angular.isArray(value) ? [] : {};
 
+      if (!stack) {
+        stack = [];
+      } else {
+        if (stack.indexOf(value) > -1) {
+          throw new Error('pascalprecht.translate.$translateSanitization: Error cannot interpolate parameter due recursive object');
+        }
+      }
+
+      stack.push(value);
       angular.forEach(value, function (propertyValue, propertyKey) {
-        result[propertyKey] = mapInterpolationParameters(propertyValue, iteratee);
+        result[propertyKey] = mapInterpolationParameters(propertyValue, iteratee, stack);
       });
+      stack.splice(-1, 1); // remove last
 
       return result;
     } else if (angular.isNumber(value)) {
@@ -9774,6 +10196,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
       loaderCache,
       directivePriority = 0,
       statefulFilter = true,
+      postProcessFn,
       uniformLanguageTagResolver = 'default',
       languageTagResolver = {
         'default': function (tag) {
@@ -9788,10 +10211,15 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           var temp = (tag || '').split('_').join('-');
           var parts = temp.split('-');
           return parts.length > 1 ? (parts[0].toLowerCase() + '-' + parts[1].toUpperCase()) : temp;
+        },
+        'iso639-1': function (tag) {
+          var temp = (tag || '').split('_').join('-');
+          var parts = temp.split('-');
+          return parts[0].toLowerCase();
         }
       };
 
-  var version = '2.8.1';
+  var version = '2.11.0';
 
   // tries to determine the browsers language
   var getFirstBrowserLanguage = function () {
@@ -9873,6 +10301,9 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
   };
 
   var negotiateLocale = function (preferred) {
+    if(!preferred) {
+      return;
+    }
 
     var avail = [],
         locale = angular.lowercase(preferred),
@@ -9883,6 +10314,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
       avail.push(angular.lowercase($availableLanguageKeys[i]));
     }
 
+    // Check for an exact match in our list of available keys
     if (indexOf(avail, locale) > -1) {
       return preferred;
     }
@@ -9890,32 +10322,33 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
     if ($languageKeyAliases) {
       var alias;
       for (var langKeyAlias in $languageKeyAliases) {
-        var hasWildcardKey = false;
-        var hasExactKey = Object.prototype.hasOwnProperty.call($languageKeyAliases, langKeyAlias) &&
-          angular.lowercase(langKeyAlias) === angular.lowercase(preferred);
+        if ($languageKeyAliases.hasOwnProperty(langKeyAlias)) {
+          var hasWildcardKey = false;
+          var hasExactKey = Object.prototype.hasOwnProperty.call($languageKeyAliases, langKeyAlias) &&
+            angular.lowercase(langKeyAlias) === angular.lowercase(preferred);
 
-        if (langKeyAlias.slice(-1) === '*') {
-          hasWildcardKey = langKeyAlias.slice(0, -1) === preferred.slice(0, langKeyAlias.length-1);
-        }
-        if (hasExactKey || hasWildcardKey) {
-          alias = $languageKeyAliases[langKeyAlias];
-          if (indexOf(avail, angular.lowercase(alias)) > -1) {
-            return alias;
+          if (langKeyAlias.slice(-1) === '*') {
+            hasWildcardKey = langKeyAlias.slice(0, -1) === preferred.slice(0, langKeyAlias.length - 1);
+          }
+          if (hasExactKey || hasWildcardKey) {
+            alias = $languageKeyAliases[langKeyAlias];
+            if (indexOf(avail, angular.lowercase(alias)) > -1) {
+              return alias;
+            }
           }
         }
       }
     }
 
-    if (preferred) {
-      var parts = preferred.split('_');
+    // Check for a language code without region
+    var parts = preferred.split('_');
 
-      if (parts.length > 1 && indexOf(avail, angular.lowercase(parts[0])) > -1) {
-        return parts[0];
-      }
+    if (parts.length > 1 && indexOf(avail, angular.lowercase(parts[0])) > -1) {
+      return parts[0];
     }
 
-    // If everything fails, just return the preferred, unchanged.
-    return preferred;
+    // If everything fails, return undefined.
+    return;
   };
 
   /**
@@ -9950,7 +10383,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
    * registered with no language key. Invoking it with a language key returns the
    * related translation table.
    *
-   * @param {string} key A language key.
+   * @param {string} langKey A language key.
    * @param {object} translationTable A plain old JavaScript object that represents a translation table.
    *
    */
@@ -10269,6 +10702,20 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
     return $uses;
   };
 
+  /**
+   * @ngdoc function
+   * @name pascalprecht.translate.$translateProvider#resolveClientLocale
+   * @methodOf pascalprecht.translate.$translateProvider
+   *
+   * @description
+   * This returns the current browser/client's language key. The result is processed with the configured uniform tag resolver.
+   *
+   * @returns {string} the current client/browser language key
+   */
+  this.resolveClientLocale = function () {
+    return getLocale();
+  };
+
  /**
    * @ngdoc function
    * @name pascalprecht.translate.$translateProvider#storageKey
@@ -10570,7 +11017,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
     if (!$availableLanguageKeys.length) {
       $preferredLanguage = locale;
     } else {
-      $preferredLanguage = negotiateLocale(locale);
+      $preferredLanguage = negotiateLocale(locale) || locale;
     }
 
     return this;
@@ -10682,6 +11129,25 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
   };
 
   /**
+   * @ngdoc function
+   * @name pascalprecht.translate.$translateProvider#postProcess
+   * @methodOf pascalprecht.translate.$translateProvider
+   *
+   * @description
+   * The post processor will be intercept right after the translation result. It can modify the result.
+   *
+   * @param {object} fn Function or service name (string) to be called after the translation value has been set / resolved. The function itself will enrich every value being processed and then continue the normal resolver process
+   */
+  this.postProcess = function (fn) {
+    if (fn) {
+      postProcessFn = fn;
+    } else {
+      postProcessFn = undefined;
+    }
+    return this;
+  };
+
+  /**
    * @ngdoc object
    * @name pascalprecht.translate.$translate
    * @requires $interpolate
@@ -10705,6 +11171,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
    *                                     is the translation id and the value the translation.
    * @param {object=} interpolateParams An object hash for dynamic values
    * @param {string} interpolationId The id of the interpolation to use
+   * @param {string} forceLanguage A language to be used instead of the current language
    * @returns {object} promise
    */
   this.$get = [
@@ -10722,7 +11189,17 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           fallbackIndex,
           startFallbackIteration;
 
-      var $translate = function (translationId, interpolateParams, interpolationId, defaultTranslationText) {
+      var $translate = function (translationId, interpolateParams, interpolationId, defaultTranslationText, forceLanguage) {
+        if (!$uses && $preferredLanguage) {
+          $uses = $preferredLanguage;
+        }
+        var uses = (forceLanguage && forceLanguage !== $uses) ? // we don't want to re-negotiate $uses
+              (negotiateLocale(forceLanguage) || forceLanguage) : $uses;
+
+        // Check forceLanguage is present
+        if (forceLanguage) {
+          loadTranslationsIfMissing(forceLanguage);
+        }
 
         // Duck detection: If the first argument is an array, a bunch of translations was requested.
         // The result is an object.
@@ -10741,7 +11218,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
                 deferred.resolve([translationId, value]);
               };
               // we don't care whether the promise was resolved or rejected; just store the values
-              $translate(translationId, interpolateParams, interpolationId, defaultTranslationText).then(regardless, regardless);
+              $translate(translationId, interpolateParams, interpolationId, defaultTranslationText, forceLanguage).then(regardless, regardless);
               return deferred.promise;
             };
             for (var i = 0, c = translationIds.length; i < c; i++) {
@@ -10766,7 +11243,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         var promiseToWaitFor = (function () {
           var promise = $preferredLanguage ?
             langPromises[$preferredLanguage] :
-            langPromises[$uses];
+            langPromises[uses];
 
           fallbackIndex = 0;
 
@@ -10798,14 +11275,18 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           // no promise to wait for? okay. Then there's no loader registered
           // nor is a one pending for language that comes from storage.
           // We can just translate.
-          determineTranslation(translationId, interpolateParams, interpolationId, defaultTranslationText).then(deferred.resolve, deferred.reject);
+          determineTranslation(translationId, interpolateParams, interpolationId, defaultTranslationText, uses).then(deferred.resolve, deferred.reject);
         } else {
           var promiseResolved = function () {
-            determineTranslation(translationId, interpolateParams, interpolationId, defaultTranslationText).then(deferred.resolve, deferred.reject);
+            // $uses may have changed while waiting
+            if (!forceLanguage) {
+              uses = $uses;
+            }
+            determineTranslation(translationId, interpolateParams, interpolationId, defaultTranslationText, uses).then(deferred.resolve, deferred.reject);
           };
           promiseResolved.displayName = 'promiseResolved';
 
-          promiseToWaitFor['finally'](promiseResolved, deferred.reject);
+          promiseToWaitFor['finally'](promiseResolved);
         }
         return deferred.promise;
       };
@@ -11013,7 +11494,11 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
               getFallbackTranslation(langKey, translation.substr(2), interpolateParams, Interpolator)
                 .then(deferred.resolve, deferred.reject);
             } else {
-              deferred.resolve(Interpolator.interpolate(translationTable[translationId], interpolateParams));
+              var interpolatedValue = Interpolator.interpolate(translationTable[translationId], interpolateParams);
+              interpolatedValue = applyPostProcessing(translationId, translationTable[translationId], interpolatedValue, interpolateParams, langKey);
+
+              deferred.resolve(interpolatedValue);
+
             }
             Interpolator.setLocale($uses);
           } else {
@@ -11064,14 +11549,16 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
        * Translate by missing translation handler.
        *
        * @param translationId
+       * @param interpolateParams
+       * @param defaultTranslationText
        * @returns translation created by $missingTranslationHandler or translationId is $missingTranslationHandler is
        * absent
        */
-      var translateByHandler = function (translationId, interpolateParams) {
+      var translateByHandler = function (translationId, interpolateParams, defaultTranslationText) {
         // If we have a handler factory - we might also call it here to determine if it provides
         // a default text for a translationid that can't be found anywhere in our tables
         if ($missingTranslationHandlerFactory) {
-          var resultString = $injector.get($missingTranslationHandlerFactory)(translationId, $uses, interpolateParams);
+          var resultString = $injector.get($missingTranslationHandlerFactory)(translationId, $uses, interpolateParams, defaultTranslationText);
           if (resultString !== undefined) {
             return resultString;
           } else {
@@ -11101,11 +11588,13 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         if (fallbackLanguageIndex < $fallbackLanguage.length) {
           var langKey = $fallbackLanguage[fallbackLanguageIndex];
           getFallbackTranslation(langKey, translationId, interpolateParams, Interpolator).then(
-            deferred.resolve,
+            function (data) {
+                deferred.resolve(data);
+            },
             function () {
               // Look in the next fallback language for a translation.
               // It delays the resolving by passing another promise to resolve.
-              resolveForFallbackLanguage(fallbackLanguageIndex + 1, translationId, interpolateParams, Interpolator, defaultTranslationText).then(deferred.resolve);
+              return resolveForFallbackLanguage(fallbackLanguageIndex + 1, translationId, interpolateParams, Interpolator, defaultTranslationText).then(deferred.resolve, deferred.reject);
             }
           );
         } else {
@@ -11116,7 +11605,12 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           } else {
             // if no default translation is set and an error handler is defined, send it to the handler
             // and then return the result
-            deferred.resolve(translateByHandler(translationId, interpolateParams));
+            if ($missingTranslationHandlerFactory) {
+              deferred.resolve(translateByHandler(translationId, interpolateParams));
+            } else {
+              deferred.reject(translateByHandler(translationId, interpolateParams));
+            }
+
           }
         }
         return deferred.promise;
@@ -11174,11 +11668,11 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         return resolveForFallbackLanguageInstant((startFallbackIteration>0 ? startFallbackIteration : fallbackIndex), translationId, interpolateParams, Interpolator);
       };
 
-      var determineTranslation = function (translationId, interpolateParams, interpolationId, defaultTranslationText) {
+      var determineTranslation = function (translationId, interpolateParams, interpolationId, defaultTranslationText, uses) {
 
         var deferred = $q.defer();
 
-        var table = $uses ? $translationTable[$uses] : $translationTable,
+        var table = uses ? $translationTable[uses] : $translationTable,
             Interpolator = (interpolationId) ? interpolatorHashMap[interpolationId] : defaultInterpolator;
 
         // if the translation id exists, we can just interpolate it
@@ -11188,22 +11682,25 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           // If using link, rerun $translate with linked translationId and return it
           if (translation.substr(0, 2) === '@:') {
 
-            $translate(translation.substr(2), interpolateParams, interpolationId, defaultTranslationText)
+            $translate(translation.substr(2), interpolateParams, interpolationId, defaultTranslationText, uses)
               .then(deferred.resolve, deferred.reject);
           } else {
-            deferred.resolve(Interpolator.interpolate(translation, interpolateParams));
+            //
+            var resolvedTranslation = Interpolator.interpolate(translation, interpolateParams);
+            resolvedTranslation = applyPostProcessing(translationId, translation, resolvedTranslation, interpolateParams, uses);
+            deferred.resolve(resolvedTranslation);
           }
         } else {
           var missingTranslationHandlerTranslation;
           // for logging purposes only (as in $translateMissingTranslationHandlerLog), value is not returned to promise
           if ($missingTranslationHandlerFactory && !pendingLoader) {
-            missingTranslationHandlerTranslation = translateByHandler(translationId, interpolateParams);
+            missingTranslationHandlerTranslation = translateByHandler(translationId, interpolateParams, defaultTranslationText);
           }
 
           // since we couldn't translate the inital requested translation id,
           // we try it now with one or more fallback languages, if fallback language(s) is
           // configured.
-          if ($uses && $fallbackLanguage && $fallbackLanguage.length) {
+          if (uses && $fallbackLanguage && $fallbackLanguage.length) {
             fallbackTranslation(translationId, interpolateParams, Interpolator, defaultTranslationText)
                 .then(function (translation) {
                   deferred.resolve(translation);
@@ -11230,9 +11727,9 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         return deferred.promise;
       };
 
-      var determineTranslationInstant = function (translationId, interpolateParams, interpolationId) {
+      var determineTranslationInstant = function (translationId, interpolateParams, interpolationId, uses) {
 
-        var result, table = $uses ? $translationTable[$uses] : $translationTable,
+        var result, table = uses ? $translationTable[uses] : $translationTable,
             Interpolator = defaultInterpolator;
 
         // if the interpolation id exists use custom interpolator
@@ -11246,7 +11743,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
 
           // If using link, rerun $translate with linked translationId and return it
           if (translation.substr(0, 2) === '@:') {
-            result = determineTranslationInstant(translation.substr(2), interpolateParams, interpolationId);
+            result = determineTranslationInstant(translation.substr(2), interpolateParams, interpolationId, uses);
           } else {
             result = Interpolator.interpolate(translation, interpolateParams);
           }
@@ -11260,7 +11757,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           // since we couldn't translate the inital requested translation id,
           // we try it now with one or more fallback languages, if fallback language(s) is
           // configured.
-          if ($uses && $fallbackLanguage && $fallbackLanguage.length) {
+          if (uses && $fallbackLanguage && $fallbackLanguage.length) {
             fallbackIndex = 0;
             result = fallbackTranslationInstant(translationId, interpolateParams, Interpolator);
           } else if ($missingTranslationHandlerFactory && !pendingLoader && missingTranslationHandlerTranslation) {
@@ -11281,6 +11778,31 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           $nextLang = undefined;
         }
         langPromises[key] = undefined;
+      };
+
+      var applyPostProcessing = function (translationId, translation, resolvedTranslation, interpolateParams, uses) {
+        var fn = postProcessFn;
+
+        if (fn) {
+
+          if (typeof(fn) === 'string') {
+            // getting on-demand instance
+            fn = $injector.get(fn);
+          }
+          if (fn) {
+            return fn(translationId, translation, resolvedTranslation, interpolateParams, uses);
+          }
+        }
+
+        return resolvedTranslation;
+      };
+
+      var loadTranslationsIfMissing = function (key) {
+        if (!$translationTable[key] && $loaderFactory && !langPromises[key]) {
+          langPromises[key] = loadAsync(key).then(function (translation) {
+            translations(translation.key, translation.table);
+          });
+        }
       };
 
       /**
@@ -11424,6 +11946,22 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
 
       /**
        * @ngdoc function
+       * @name pascalprecht.translate.$translate#negotiateLocale
+       * @methodOf pascalprecht.translate.$translate
+       *
+       * @description
+       * Returns a language key based on available languages and language aliases. If a
+       * language key cannot be resolved, returns undefined.
+       *
+       * If no or a falsy key is given, returns undefined.
+       *
+       * @param {string} [key] Language key
+       * @return {string|undefined} Language key or undefined if no language key is found.
+       */
+      $translate.negotiateLocale = negotiateLocale;
+
+      /**
+       * @ngdoc function
        * @name pascalprecht.translate.$translate#use
        * @methodOf pascalprecht.translate.$translate
        *
@@ -11458,14 +11996,19 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
 
         // Try to get the aliased language key
         var aliasedKey = negotiateLocale(key);
+        // Ensure only registered language keys will be loaded
+        if ($availableLanguageKeys.length > 0 && !aliasedKey) {
+          return $q.reject(key);
+        }
+
         if (aliasedKey) {
           key = aliasedKey;
         }
 
         // if there isn't a translation table for the language we've requested,
         // we load it asynchronously
+        $nextLang = key;
         if (($forceAsyncReloadEnabled || !$translationTable[key]) && $loaderFactory && !langPromises[key]) {
-          $nextLang = key;
           langPromises[key] = loadAsync(key).then(function (translation) {
             translations(translation.key, translation.table);
             deferred.resolve(translation.key);
@@ -11482,15 +12025,22 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           langPromises[key]['finally'](function () {
             clearNextLangAndPromise(key);
           });
-        } else if ($nextLang === key && langPromises[key]) {
+        } else if (langPromises[key]) {
           // we are already loading this asynchronously
           // resolve our new deferred when the old langPromise is resolved
           langPromises[key].then(function (translation) {
+            if ($nextLang === translation.key) {
+              useLanguage(translation.key);
+            }
             deferred.resolve(translation.key);
             return translation;
           }, function (key) {
-            deferred.reject(key);
-            return $q.reject(key);
+            // find first available fallback language if that request has failed
+            if (!$uses && $fallbackLanguage && $fallbackLanguage.length > 0) {
+              return $translate.use($fallbackLanguage[0]).then(deferred.resolve, deferred.reject);
+            } else {
+              return deferred.reject(key);
+            }
           });
         } else {
           deferred.resolve(key);
@@ -11498,6 +12048,20 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         }
 
         return deferred.promise;
+      };
+
+      /**
+       * @ngdoc function
+       * @name pascalprecht.translate.$translate#resolveClientLocale
+       * @methodOf pascalprecht.translate.$translate
+       *
+       * @description
+       * This returns the current browser/client's language key. The result is processed with the configured uniform tag resolver.
+       *
+       * @returns {string} the current client/browser language key
+       */
+      $translate.resolveClientLocale = function () {
+        return getLocale();
       };
 
       /**
@@ -11657,14 +12221,24 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
        *                                     each key is the translation id and the value the translation.
        * @param {object} interpolateParams Params
        * @param {string} interpolationId The id of the interpolation to use
+       * @param {string} forceLanguage A language to be used instead of the current language
        *
        * @return {string|object} translation
        */
-      $translate.instant = function (translationId, interpolateParams, interpolationId) {
+      $translate.instant = function (translationId, interpolateParams, interpolationId, forceLanguage) {
+
+        // we don't want to re-negotiate $uses
+        var uses = (forceLanguage && forceLanguage !== $uses) ? // we don't want to re-negotiate $uses
+              (negotiateLocale(forceLanguage) || forceLanguage) : $uses;
 
         // Detect undefined and null values to shorten the execution and prevent exceptions
         if (translationId === null || angular.isUndefined(translationId)) {
           return translationId;
+        }
+
+        // Check forceLanguage is present
+        if (forceLanguage) {
+          loadTranslationsIfMissing(forceLanguage);
         }
 
         // Duck detection: If the first argument is an array, a bunch of translations was requested.
@@ -11672,7 +12246,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         if (angular.isArray(translationId)) {
           var results = {};
           for (var i = 0, c = translationId.length; i < c; i++) {
-            results[translationId[i]] = $translate.instant(translationId[i], interpolateParams, interpolationId);
+            results[translationId[i]] = $translate.instant(translationId[i], interpolateParams, interpolationId, forceLanguage);
           }
           return results;
         }
@@ -11691,8 +12265,8 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         if ($preferredLanguage) {
           possibleLangKeys.push($preferredLanguage);
         }
-        if ($uses) {
-          possibleLangKeys.push($uses);
+        if (uses) {
+          possibleLangKeys.push(uses);
         }
         if ($fallbackLanguage && $fallbackLanguage.length) {
           possibleLangKeys = possibleLangKeys.concat($fallbackLanguage);
@@ -11701,9 +12275,7 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
           var possibleLangKey = possibleLangKeys[j];
           if ($translationTable[possibleLangKey]) {
             if (typeof $translationTable[possibleLangKey][translationId] !== 'undefined') {
-              result = determineTranslationInstant(translationId, interpolateParams, interpolationId);
-            } else if ($notFoundIndicatorLeft || $notFoundIndicatorRight) {
-              result = applyNotFoundIndicators(translationId);
+              result = determineTranslationInstant(translationId, interpolateParams, interpolationId, uses);
             }
           }
           if (typeof result !== 'undefined') {
@@ -11712,10 +12284,14 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         }
 
         if (!result && result !== '') {
-          // Return translation of default interpolator if not found anything.
-          result = defaultInterpolator.interpolate(translationId, interpolateParams);
-          if ($missingTranslationHandlerFactory && !pendingLoader) {
-            result = translateByHandler(translationId, interpolateParams);
+          if ($notFoundIndicatorLeft || $notFoundIndicatorRight) {
+            result = applyNotFoundIndicators(translationId);
+          } else {
+            // Return translation of default interpolator if not found anything.
+            result = defaultInterpolator.interpolate(translationId, interpolateParams);
+            if ($missingTranslationHandlerFactory && !pendingLoader) {
+              result = translateByHandler(translationId, interpolateParams);
+            }
           }
         }
 
@@ -11807,6 +12383,25 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
         return deferred.promise;
       };
 
+      /**
+       * @ngdoc function
+       * @name pascalprecht.translate.$translate#getAvailableLanguageKeys
+       * @methodOf pascalprecht.translate.$translate
+       *
+       * @description
+       * This function simply returns the registered language keys being defined before in the config phase
+       * With this, an application can use the array to provide a language selection dropdown or similar
+       * without any additional effort
+       *
+       * @returns {object} returns the list of possibly registered language keys and mapping or null if not defined
+       */
+      $translate.getAvailableLanguageKeys = function () {
+        if ($availableLanguageKeys.length > 0) {
+          return $availableLanguageKeys;
+        }
+        return null;
+      };
+
       // Whenever $translateReady is being fired, this will ensure the state of $isReady
       var globalOnReadyListener = $rootScope.$on('$translateReady', function () {
         $onReadyDeferred.resolve();
@@ -11852,7 +12447,6 @@ function $translate($STORAGE_KEY, $windowProvider, $translateSanitizationProvide
     }
   ];
 }
-$translate.$inject = ['$STORAGE_KEY', '$windowProvider', '$translateSanitizationProvider', 'pascalprechtTranslateOverrider'];
 
 $translate.displayName = 'displayName';
 
@@ -11941,7 +12535,6 @@ function $translateDefaultInterpolation ($interpolate, $translateSanitization) {
 
   return $translateInterpolator;
 }
-$translateDefaultInterpolation.$inject = ['$interpolate', '$translateSanitization'];
 
 $translateDefaultInterpolation.displayName = '$translateDefaultInterpolation';
 
@@ -11954,7 +12547,7 @@ angular.module('pascalprecht.translate')
  * @requires $compile
  * @requires $filter
  * @requires $interpolate
- * @restrict A
+ * @restrict AE
  *
  * @description
  * Translates given translation id either through attribute or DOM content.
@@ -11966,6 +12559,7 @@ angular.module('pascalprecht.translate')
  * @param {string=} translate-attr-ATTR translate Translation id and put it into ATTR attribute.
  * @param {string=} translate-default will be used unless translation was successful
  * @param {boolean=} translate-compile (default true if present) defines locally activation of {@link pascalprecht.translate.$translateProvider#methods_usePostCompiling}
+ * @param {boolean=} translate-keep-content (default true if present) defines that in case a KEY could not be translated, that the existing content is left in the innerHTML}
  *
  * @example
    <example module="ngView">
@@ -12122,7 +12716,8 @@ function translateDirective($translate, $q, $interpolate, $compile, $parse, $roo
                 });
               }
             } else {
-              translationIds.translate = iElementText;
+              // do not assigne the translation id if it is empty.
+              translationIds.translate = !iElementText ? undefined : iElementText;
             }
           } else {
             translationIds.translate = translationId;
@@ -12163,6 +12758,7 @@ function translateDirective($translate, $q, $interpolate, $compile, $parse, $roo
 
         iAttr.$observe('translateDefault', function (value) {
           scope.defaultText = value;
+          updateTranslations();
         });
 
         if (translateValuesExist) {
@@ -12192,7 +12788,6 @@ function translateDirective($translate, $q, $interpolate, $compile, $parse, $roo
         // Master update function
         var updateTranslations = function () {
           for (var key in translationIds) {
-
             if (translationIds.hasOwnProperty(key) && translationIds[key] !== undefined) {
               updateTranslation(key, translationIds[key], scope, scope.interpolateParams, scope.defaultText, scope.translateNamespace);
             }
@@ -12207,7 +12802,7 @@ function translateDirective($translate, $q, $interpolate, $compile, $parse, $roo
               translationId = translateNamespace + translationId;
             }
 
-            $translate(translationId, interpolateParams, translateInterpolation, defaultTranslationText)
+            $translate(translationId, interpolateParams, translateInterpolation, defaultTranslationText, scope.translateLanguage)
               .then(function (translation) {
                 applyTranslation(translation, scope, true, translateAttr);
               }, function (translationId) {
@@ -12220,12 +12815,16 @@ function translateDirective($translate, $q, $interpolate, $compile, $parse, $roo
         };
 
         var applyTranslation = function (value, scope, successful, translateAttr) {
-          if (translateAttr === 'translate') {
-            // default translate into innerHTML
-            if (!successful && typeof scope.defaultText !== 'undefined') {
+          if (!successful) {
+            if (typeof scope.defaultText !== 'undefined') {
               value = scope.defaultText;
             }
-            iElement.empty().append(scope.preText + value + scope.postText);
+          }
+          if (translateAttr === 'translate') {
+            // default translate into innerHTML
+            if (successful || (!successful && typeof iAttr.translateKeepContent === 'undefined')) {
+              iElement.empty().append(scope.preText + value + scope.postText);
+            }
             var globallyEnabled = $translate.isPostCompilingEnabled();
             var locallyDefined = typeof tAttr.translateCompile !== 'undefined';
             var locallyEnabled = locallyDefined && tAttr.translateCompile !== 'false';
@@ -12234,9 +12833,6 @@ function translateDirective($translate, $q, $interpolate, $compile, $parse, $roo
             }
           } else {
             // translate attribute
-            if (!successful && typeof scope.defaultText !== 'undefined') {
-              value = scope.defaultText;
-            }
             var attributeName = iAttr.$attr[translateAttr];
             if (attributeName.substr(0, 5) === 'data-') {
               // ensure html5 data prefix is stripped
@@ -12250,6 +12846,9 @@ function translateDirective($translate, $q, $interpolate, $compile, $parse, $roo
         if (translateValuesExist || translateValueExist || iAttr.translateDefault) {
           scope.$watch('interpolateParams', updateTranslations, true);
         }
+
+        // Replaced watcher on translateLanguage with event listener
+        var unbindTranslateLanguage = scope.$on('translateLanguageChanged', updateTranslations);
 
         // Ensures the text will be refreshed after the current language was changed
         // w/ $translate.use(...)
@@ -12267,12 +12866,14 @@ function translateDirective($translate, $q, $interpolate, $compile, $parse, $roo
           observeElementTranslation(iAttr.translate);
         }
         updateTranslations();
-        scope.$on('$destroy', unbind);
+        scope.$on('$destroy', function(){
+          unbindTranslateLanguage();
+          unbind();
+        });
       };
     }
   };
 }
-translateDirective.$inject = ['$translate', '$q', '$interpolate', '$compile', '$parse', '$rootScope'];
 
 /**
  * Returns the scope's namespace.
@@ -12316,7 +12917,7 @@ angular.module('pascalprecht.translate')
  */
 .directive('translateCloak', translateCloakDirective);
 
-function translateCloakDirective($translate) {
+function translateCloakDirective($translate, $rootScope) {
 
   'use strict';
 
@@ -12334,17 +12935,20 @@ function translateCloakDirective($translate) {
       applyCloak();
 
       return function linkFn(scope, iElement, iAttr) {
-        // Register a watcher for the defined translation allowing a fine tuned cloak
         if (iAttr.translateCloak && iAttr.translateCloak.length) {
+          // Register a watcher for the defined translation allowing a fine tuned cloak
           iAttr.$observe('translateCloak', function (translationId) {
             $translate(translationId).then(removeCloak, applyCloak);
+          });
+          // Register for change events as this is being another indicicator revalidating the cloak)
+          $rootScope.$on('$translateChangeSuccess', function () {
+            $translate(iAttr.translateCloak).then(removeCloak, applyCloak);
           });
         }
       };
     }
   };
 }
-translateCloakDirective.$inject = ['$translate'];
 
 translateCloakDirective.displayName = 'translateCloakDirective';
 
@@ -12443,6 +13047,77 @@ translateNamespaceDirective.displayName = 'translateNamespaceDirective';
 
 angular.module('pascalprecht.translate')
 /**
+ * @ngdoc directive
+ * @name pascalprecht.translate.directive:translateLanguage
+ * @restrict A
+ *
+ * @description
+ * Forces the language to the directives in the underlying scope.
+ *
+ * @param {string=} translate language that will be negotiated.
+ *
+ * @example
+   <example module="ngView">
+    <file name="index.html">
+      <div>
+
+        <div>
+            <h1 translate>HELLO</h1>
+        </div>
+
+        <div translate-language="de">
+            <h1 translate>HELLO</h1>
+        </div>
+
+      </div>
+    </file>
+    <file name="script.js">
+      angular.module('ngView', ['pascalprecht.translate'])
+
+      .config(function ($translateProvider) {
+
+        $translateProvider
+          .translations('en',{
+            'HELLO': 'Hello world!'
+          })
+          .translations('de',{
+            'HELLO': 'Hallo Welt!'
+          })
+          .translations(.preferredLanguage('en');
+
+      });
+
+    </file>
+   </example>
+ */
+.directive('translateLanguage', translateLanguageDirective);
+
+function translateLanguageDirective() {
+
+  'use strict';
+
+  return {
+    restrict: 'A',
+    scope: true,
+    compile: function () {
+      return function linkFn(scope, iElement, iAttrs) {
+
+        iAttrs.$observe('translateLanguage', function (newTranslateLanguage) {
+          scope.translateLanguage = newTranslateLanguage;
+        });
+
+        scope.$watch('translateLanguage', function(){
+          scope.$broadcast('translateLanguageChanged');
+        });
+      };
+    }
+  };
+}
+
+translateLanguageDirective.displayName = 'translateLanguageDirective';
+
+angular.module('pascalprecht.translate')
+/**
  * @ngdoc filter
  * @name pascalprecht.translate.filter:translate
  * @requires $parse
@@ -12499,13 +13174,12 @@ function translateFilterFactory($parse, $translate) {
 
   'use strict';
 
-  var translateFilter = function (translationId, interpolateParams, interpolation) {
-
+  var translateFilter = function (translationId, interpolateParams, interpolation, forceLanguage) {
     if (!angular.isObject(interpolateParams)) {
       interpolateParams = $parse(interpolateParams)(this);
     }
 
-    return $translate.instant(translationId, interpolateParams, interpolation);
+    return $translate.instant(translationId, interpolateParams, interpolation, forceLanguage);
   };
 
   if ($translate.statefulFilter()) {
@@ -12514,7 +13188,6 @@ function translateFilterFactory($parse, $translate) {
 
   return translateFilter;
 }
-translateFilterFactory.$inject = ['$parse', '$translate'];
 
 translateFilterFactory.displayName = 'translateFilterFactory';
 
@@ -12540,18 +13213,17 @@ function $translationCache($cacheFactory) {
 
   return $cacheFactory('translations');
 }
-$translationCache.$inject = ['$cacheFactory'];
 
 $translationCache.displayName = '$translationCache';
 return 'pascalprecht.translate';
 
 }));
 
-},{}],39:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 require('./ui-bootstrap-tpls');
 module.exports = 'ui.bootstrap';
 
-},{"./ui-bootstrap-tpls":40}],40:[function(require,module,exports){
+},{"./ui-bootstrap-tpls":43}],43:[function(require,module,exports){
 /*
  * angular-ui-bootstrap
  * http://angular-ui.github.io/bootstrap/
@@ -21055,10 +21727,10 @@ angular.module("template/typeahead/typeahead-popup.html", []).run(["$templateCac
     "");
 }]);
 !angular.$$csp() && angular.element(document).find('head').prepend('<style type="text/css">.ng-animate.item:not(.left):not(.right){-webkit-transition:0s ease-in-out left;transition:0s ease-in-out left}</style>');
-},{}],41:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 /**
  * State-based routing for AngularJS
- * @version v0.2.15
+ * @version v0.2.18
  * @link http://angular-ui.github.com/
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
@@ -21080,7 +21752,8 @@ var isDefined = angular.isDefined,
     isArray = angular.isArray,
     forEach = angular.forEach,
     extend = angular.extend,
-    copy = angular.copy;
+    copy = angular.copy,
+    toJson = angular.toJson;
 
 function inherit(parent, extra) {
   return extend(new (extend(function() {}, { prototype: parent }))(), extra);
@@ -21167,7 +21840,7 @@ function inheritParams(currentParams, newParams, $current, $to) {
   var parents = ancestors($current, $to), parentParams, inherited = {}, inheritList = [];
 
   for (var i in parents) {
-    if (!parents[i].params) continue;
+    if (!parents[i] || !parents[i].params) continue;
     parentParams = objectKeys(parents[i].params);
     if (!parentParams.length) continue;
 
@@ -21580,7 +22253,7 @@ function $Resolve(  $q,    $injector) {
    * propagated immediately. Once the `$resolve` promise has been rejected, no 
    * further invocables will be called.
    * 
-   * Cyclic dependencies between invocables are not permitted and will caues `$resolve`
+   * Cyclic dependencies between invocables are not permitted and will cause `$resolve`
    * to throw an error. As a special case, an injectable can depend on a parameter 
    * with the same name as the injectable, which will be fulfilled from the `parent` 
    * injectable of the same name. This allows inherited values to be decorated. 
@@ -21804,13 +22477,13 @@ function UrlMatcher(pattern, config, parentMatcher) {
   // The regular expression is somewhat complicated due to the need to allow curly braces
   // inside the regular expression. The placeholder regexp breaks down as follows:
   //    ([:*])([\w\[\]]+)              - classic placeholder ($1 / $2) (search version has - for snake-case)
-  //    \{([\w\[\]]+)(?:\:( ... ))?\}  - curly brace placeholder ($3) with optional regexp/type ... ($4) (search version has - for snake-case
+  //    \{([\w\[\]]+)(?:\:\s*( ... ))?\}  - curly brace placeholder ($3) with optional regexp/type ... ($4) (search version has - for snake-case
   //    (?: ... | ... | ... )+         - the regexp consists of any number of atoms, an atom being either
   //    [^{}\\]+                       - anything other than curly braces or backslash
   //    \\.                            - a backslash escape
   //    \{(?:[^{}\\]+|\\.)*\}          - a matched set of curly braces containing other atoms
-  var placeholder       = /([:*])([\w\[\]]+)|\{([\w\[\]]+)(?:\:((?:[^{}\\]+|\\.|\{(?:[^{}\\]+|\\.)*\})+))?\}/g,
-      searchPlaceholder = /([:]?)([\w\[\]-]+)|\{([\w\[\]-]+)(?:\:((?:[^{}\\]+|\\.|\{(?:[^{}\\]+|\\.)*\})+))?\}/g,
+  var placeholder       = /([:*])([\w\[\]]+)|\{([\w\[\]]+)(?:\:\s*((?:[^{}\\]+|\\.|\{(?:[^{}\\]+|\\.)*\})+))?\}/g,
+      searchPlaceholder = /([:]?)([\w\[\].-]+)|\{([\w\[\].-]+)(?:\:\s*((?:[^{}\\]+|\\.|\{(?:[^{}\\]+|\\.)*\})+))?\}/g,
       compiled = '^', last = 0, m,
       segments = this.segments = [],
       parentParams = parentMatcher ? parentMatcher.params : {},
@@ -21820,7 +22493,7 @@ function UrlMatcher(pattern, config, parentMatcher) {
   function addParameter(id, type, config, location) {
     paramNames.push(id);
     if (parentParams[id]) return parentParams[id];
-    if (!/^\w+(-+\w+)*(?:\[\])?$/.test(id)) throw new Error("Invalid parameter name '" + id + "' in pattern '" + pattern + "'");
+    if (!/^\w+([-.]+\w+)*(?:\[\])?$/.test(id)) throw new Error("Invalid parameter name '" + id + "' in pattern '" + pattern + "'");
     if (params[id]) throw new Error("Duplicate parameter name '" + id + "' in pattern '" + pattern + "'");
     params[id] = new $$UMFP.Param(id, type, config, location);
     return params[id];
@@ -21831,7 +22504,10 @@ function UrlMatcher(pattern, config, parentMatcher) {
     if (!pattern) return result;
     switch(squash) {
       case false: surroundPattern = ['(', ')' + (optional ? "?" : "")]; break;
-      case true:  surroundPattern = ['?(', ')?']; break;
+      case true:
+        result = result.replace(/\/$/, '');
+        surroundPattern = ['(?:\/(', ')|\/)?'];
+      break;
       default:    surroundPattern = ['(' + squash + "|", ')?']; break;
     }
     return result + surroundPattern[0] + pattern + surroundPattern[1];
@@ -21847,7 +22523,11 @@ function UrlMatcher(pattern, config, parentMatcher) {
     cfg         = config.params[id];
     segment     = pattern.substring(last, m.index);
     regexp      = isSearch ? m[4] : m[4] || (m[1] == '*' ? '.*' : null);
-    type        = $$UMFP.type(regexp || "string") || inherit($$UMFP.type("string"), { pattern: new RegExp(regexp, config.caseInsensitive ? 'i' : undefined) });
+
+    if (regexp) {
+      type      = $$UMFP.type(regexp) || inherit($$UMFP.type("string"), { pattern: new RegExp(regexp, config.caseInsensitive ? 'i' : undefined) });
+    }
+
     return {
       id: id, regexp: regexp, segment: segment, type: type, cfg: cfg
     };
@@ -21977,20 +22657,29 @@ UrlMatcher.prototype.exec = function (path, searchParams) {
     return map(allReversed, unquoteDashes).reverse();
   }
 
+  var param, paramVal;
   for (i = 0; i < nPath; i++) {
     paramName = paramNames[i];
-    var param = this.params[paramName];
-    var paramVal = m[i+1];
+    param = this.params[paramName];
+    paramVal = m[i+1];
     // if the param value matches a pre-replace pair, replace the value before decoding.
-    for (j = 0; j < param.replace; j++) {
+    for (j = 0; j < param.replace.length; j++) {
       if (param.replace[j].from === paramVal) paramVal = param.replace[j].to;
     }
     if (paramVal && param.array === true) paramVal = decodePathArray(paramVal);
+    if (isDefined(paramVal)) paramVal = param.type.decode(paramVal);
     values[paramName] = param.value(paramVal);
   }
   for (/**/; i < nTotal; i++) {
     paramName = paramNames[i];
     values[paramName] = this.params[paramName].value(searchParams[paramName]);
+    param = this.params[paramName];
+    paramVal = searchParams[paramName];
+    for (j = 0; j < param.replace.length; j++) {
+      if (param.replace[j].from === paramVal) paramVal = param.replace[j].to;
+    }
+    if (isDefined(paramVal)) paramVal = param.type.decode(paramVal);
+    values[paramName] = param.value(paramVal);
   }
 
   return values;
@@ -22014,7 +22703,7 @@ UrlMatcher.prototype.parameters = function (param) {
 
 /**
  * @ngdoc function
- * @name ui.router.util.type:UrlMatcher#validate
+ * @name ui.router.util.type:UrlMatcher#validates
  * @methodOf ui.router.util.type:UrlMatcher
  *
  * @description
@@ -22067,6 +22756,8 @@ UrlMatcher.prototype.format = function (values) {
 
     if (isPathParam) {
       var nextSegment = segments[i + 1];
+      var isFinalPathParam = i + 1 === nPath;
+
       if (squash === false) {
         if (encoded != null) {
           if (isArray(encoded)) {
@@ -22082,9 +22773,12 @@ UrlMatcher.prototype.format = function (values) {
       } else if (isString(squash)) {
         result += squash + nextSegment;
       }
+
+      if (isFinalPathParam && param.squash === true && result.slice(-1) === '/') result = result.slice(0, -1);
     } else {
       if (encoded == null || (isDefaultValue && squash !== false)) continue;
       if (!isArray(encoded)) encoded = [ encoded ];
+      if (encoded.length === 0) continue;
       encoded = map(encoded, encodeURIComponent).join('&' + name + '=');
       result += (search ? '&' : '?') + (name + '=' + encoded);
       search = true;
@@ -22249,6 +22943,7 @@ Type.prototype.$asArray = function(mode, isSearch) {
     // Wraps type (.is/.encode/.decode) functions to operate on each value of an array
     function arrayHandler(callback, allTruthyMode) {
       return function handleArray(val) {
+        if (isArray(val) && val.length === 0) return val;
         val = arrayWrap(val);
         var result = map(val, callback);
         if (allTruthyMode === true)
@@ -22297,11 +22992,15 @@ function $UrlMatcherFactory() {
 
   var isCaseInsensitive = false, isStrictMode = true, defaultSquashPolicy = false;
 
-  function valToString(val) { return val != null ? val.toString().replace(/\//g, "%2F") : val; }
-  function valFromString(val) { return val != null ? val.toString().replace(/%2F/g, "/") : val; }
+  // Use tildes to pre-encode slashes.
+  // If the slashes are simply URLEncoded, the browser can choose to pre-decode them,
+  // and bidirectional encoding/decoding fails.
+  // Tilde was chosen because it's not a RFC 3986 section 2.2 Reserved Character
+  function valToString(val) { return val != null ? val.toString().replace(/~/g, "~~").replace(/\//g, "~2F") : val; }
+  function valFromString(val) { return val != null ? val.toString().replace(/~2F/g, "/").replace(/~~/g, "~") : val; }
 
   var $types = {}, enqueue = true, typeQueue = [], injector, defaultTypes = {
-    string: {
+    "string": {
       encode: valToString,
       decode: valFromString,
       // TODO: in 1.0, make string .is() return false if value is undefined/null by default.
@@ -22309,19 +23008,19 @@ function $UrlMatcherFactory() {
       is: function(val) { return val == null || !isDefined(val) || typeof val === "string"; },
       pattern: /[^/]*/
     },
-    int: {
+    "int": {
       encode: valToString,
       decode: function(val) { return parseInt(val, 10); },
       is: function(val) { return isDefined(val) && this.decode(val.toString()) === val; },
       pattern: /\d+/
     },
-    bool: {
+    "bool": {
       encode: function(val) { return val ? 1 : 0; },
       decode: function(val) { return parseInt(val, 10) !== 0; },
       is: function(val) { return val === true || val === false; },
       pattern: /0|1/
     },
-    date: {
+    "date": {
       encode: function (val) {
         if (!this.is(val))
           return undefined;
@@ -22340,14 +23039,14 @@ function $UrlMatcherFactory() {
       pattern: /[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1])/,
       capture: /([0-9]{4})-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])/
     },
-    json: {
+    "json": {
       encode: angular.toJson,
       decode: angular.fromJson,
       is: angular.isObject,
       equals: angular.equals,
       pattern: /[^/]*/
     },
-    any: { // does not encode/decode
+    "any": { // does not encode/decode
       encode: angular.identity,
       decode: angular.identity,
       equals: angular.equals,
@@ -22641,7 +23340,12 @@ function $UrlMatcherFactory() {
       if (config.type && urlType) throw new Error("Param '"+id+"' has two type configurations.");
       if (urlType) return urlType;
       if (!config.type) return (location === "config" ? $types.any : $types.string);
-      return config.type instanceof Type ? config.type : new Type(config.type);
+
+      if (angular.isString(config.type))
+        return $types[config.type];
+      if (config.type instanceof Type)
+        return config.type;
+      return new Type(config.type);
     }
 
     // array config: param name (param[]) overrides default settings.  explicit config overrides param name.
@@ -22836,7 +23540,7 @@ function $UrlRouterProvider(   $locationProvider,   $urlMatcherFactory) {
    * });
    * </pre>
    *
-   * @param {object} rule Handler function that takes `$injector` and `$location`
+   * @param {function} rule Handler function that takes `$injector` and `$location`
    * services as arguments. You can use them to return a valid path as a string.
    *
    * @return {object} `$urlRouterProvider` - `$urlRouterProvider` instance
@@ -22872,7 +23576,7 @@ function $UrlRouterProvider(   $locationProvider,   $urlMatcherFactory) {
    * });
    * </pre>
    *
-   * @param {string|object} rule The url path you want to redirect to or a function 
+   * @param {string|function} rule The url path you want to redirect to or a function 
    * rule that returns the url path. The function version is passed two params: 
    * `$injector` and `$location` services, and must return a url string.
    *
@@ -22901,7 +23605,9 @@ function $UrlRouterProvider(   $locationProvider,   $urlMatcherFactory) {
    * @methodOf ui.router.router.$urlRouterProvider
    *
    * @description
-   * Registers a handler for a given url matching. if handle is a string, it is
+   * Registers a handler for a given url matching. 
+   * 
+   * If the handler is a string, it is
    * treated as a redirect, and is interpolated according to the syntax of match
    * (i.e. like `String.replace()` for `RegExp`, or like a `UrlMatcher` pattern otherwise).
    *
@@ -22930,7 +23636,7 @@ function $UrlRouterProvider(   $locationProvider,   $urlMatcherFactory) {
    * </pre>
    *
    * @param {string|object} what The incoming path that you want to redirect.
-   * @param {string|object} handler The path you want to redirect your user to.
+   * @param {string|function} handler The path you want to redirect your user to.
    */
   this.when = function (what, handler) {
     var redirect, handlerIsString = isString(handler);
@@ -23041,8 +23747,8 @@ function $UrlRouterProvider(   $locationProvider,   $urlMatcherFactory) {
    *
    */
   this.$get = $get;
-  $get.$inject = ['$location', '$rootScope', '$injector', '$browser'];
-  function $get(   $location,   $rootScope,   $injector,   $browser) {
+  $get.$inject = ['$location', '$rootScope', '$injector', '$browser', '$sniffer'];
+  function $get(   $location,   $rootScope,   $injector,   $browser,   $sniffer) {
 
     var baseHref = $browser.baseHref(), location = $location.url(), lastPushedUrl;
 
@@ -23175,6 +23881,8 @@ function $UrlRouterProvider(   $locationProvider,   $urlMatcherFactory) {
         if (angular.isObject(isHtml5)) {
           isHtml5 = isHtml5.enabled;
         }
+
+        isHtml5 = isHtml5 && $sniffer.history;
         
         var url = urlMatcher.format(params);
         options = options || {};
@@ -23248,7 +23956,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
     // inherit 'data' from parent and override by own values (if any)
     data: function(state) {
       if (state.parent && state.parent.data) {
-        state.data = state.self.data = extend({}, state.parent.data, state.data);
+        state.data = state.self.data = inherit(state.parent.data, state.data);
       }
       return state.data;
     },
@@ -23282,7 +23990,8 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
 
     // Derive parameters for this state and ensure they're a super-set of parent's parameters
     params: function(state) {
-      return state.parent && state.parent.params ? extend(state.parent.params.$$new(), state.ownParams) : new $$UMFP.ParamSet();
+      var ownParams = pick(state.ownParams, state.ownParams.$$keys());
+      return state.parent && state.parent.params ? extend(state.parent.params.$$new(), ownParams) : new $$UMFP.ParamSet();
     },
 
     // If there is no explicit multi-view configuration, make one up so we don't have
@@ -23379,7 +24088,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
 
     var name = state.name;
     if (!isString(name) || name.indexOf('@') >= 0) throw new Error("State must have a valid name");
-    if (states.hasOwnProperty(name)) throw new Error("State '" + name + "'' is already defined");
+    if (states.hasOwnProperty(name)) throw new Error("State '" + name + "' is already defined");
 
     // Get parent name
     var parentName = (name.indexOf('.') !== -1) ? name.substring(0, name.lastIndexOf('.'))
@@ -23747,7 +24456,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
    *
    * Callback function for when a state is entered. Good way
    *   to trigger an action or dispatch an event, such as opening a dialog.
-   * If minifying your scripts, make sure to explictly annotate this function,
+   * If minifying your scripts, make sure to explicitly annotate this function,
    * because it won't be automatically annotated by your build tools.
    *
    * <pre>onEnter: function(MyService, $stateParams) {
@@ -23759,7 +24468,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
    *
    * Callback function for when a state is exited. Good way to
    *   trigger an action or dispatch an event, such as opening a dialog.
-   * If minifying your scripts, make sure to explictly annotate this function,
+   * If minifying your scripts, make sure to explicitly annotate this function,
    * because it won't be automatically annotated by your build tools.
    *
    * <pre>onExit: function(MyService, $stateParams) {
@@ -24090,7 +24799,8 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
      *
      * @param {object=} params A map of the parameters that will be sent to the state, 
      * will populate $stateParams. Any parameters that are not specified will be inherited from currently 
-     * defined parameters. This allows, for example, going to a sibling state that shares parameters
+     * defined parameters. Only parameters specified in the state definition can be overridden, new 
+     * parameters will be ignored. This allows, for example, going to a sibling state that shares parameters
      * specified in a parent state. Parameter inheritance only works between common ancestor states, I.e.
      * transitioning to a sibling will get you the parameters for all parents, transitioning to a child
      * will get you all current parameters, etc.
@@ -24102,9 +24812,10 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
      * - **`relative`** - {object=$state.$current}, When transitioning with relative path (e.g '^'), 
      *    defines which state to be relative from.
      * - **`notify`** - {boolean=true}, If `true` will broadcast $stateChangeStart and $stateChangeSuccess events.
-     * - **`reload`** (v0.2.5) - {boolean=false}, If `true` will force transition even if the state or params 
-     *    have not changed, aka a reload of the same state. It differs from reloadOnSearch because you'd
-     *    use this when you want to force a reload when *everything* is the same, including search params.
+     * - **`reload`** (v0.2.5) - {boolean=false|string|object}, If `true` will force transition even if no state or params
+     *    have changed.  It will reload the resolves and views of the current state and parent states.
+     *    If `reload` is a string (or state object), the state object is fetched (by name, or object reference); and \
+     *    the transition reloads the resolves and views for that matched state, and all its children states.
      *
      * @returns {promise} A promise representing the state of the new transition.
      *
@@ -24242,6 +24953,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
         if (hash) toParams['#'] = hash;
         $state.params = toParams;
         copy($state.params, $stateParams);
+        copy(filterByKeys(to.params.$$keys(), $stateParams), to.locals.globals.$stateParams);
         if (options.location && to.navigable && to.navigable.url) {
           $urlRouter.push(to.navigable.url, toParams, {
             $$avoidResync: true, replace: options.location === 'replace'
@@ -24254,7 +24966,10 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
 
       // Filter parameters before we pass them to event handlers etc.
       toParams = filterByKeys(to.params.$$keys(), toParams || {});
-
+      
+      // Re-add the saved hash before we start returning things or broadcasting $stateChangeStart
+      if (hash) toParams['#'] = hash;
+      
       // Broadcast start event and cancel the transition if requested
       if (options.notify) {
         /**
@@ -24284,9 +24999,10 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
          * })
          * </pre>
          */
-        if ($rootScope.$broadcast('$stateChangeStart', to.self, toParams, from.self, fromParams).defaultPrevented) {
+        if ($rootScope.$broadcast('$stateChangeStart', to.self, toParams, from.self, fromParams, options).defaultPrevented) {
           $rootScope.$broadcast('$stateChangeCancel', to.self, toParams, from.self, fromParams);
-          $urlRouter.update();
+          //Don't update and resync url if there's been a new transition started. see issue #2238, #600
+          if ($state.transition == null) $urlRouter.update();
           return TransitionPrevented;
         }
       }
@@ -24331,9 +25047,6 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
             $injector.invoke(entering.self.onEnter, entering.self, entering.locals.globals);
           }
         }
-
-        // Re-add the saved hash before we start returning things
-        if (hash) toParams['#'] = hash;
 
         // Run it again, to catch any transitions in callbacks
         if ($state.transition !== transition) return TransitionSuperseded;
@@ -24668,7 +25381,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory) {
 }
 
 angular.module('ui.router.state')
-  .value('$stateParams', {})
+  .factory('$stateParams', function () { return {}; })
   .provider('$state', $StateProvider);
 
 
@@ -24708,32 +25421,6 @@ function $ViewProvider() {
 
         if (options.view) {
           result = $templateFactory.fromConfig(options.view, options.params, options.locals);
-        }
-        if (result && options.notify) {
-        /**
-         * @ngdoc event
-         * @name ui.router.state.$state#$viewContentLoading
-         * @eventOf ui.router.state.$view
-         * @eventType broadcast on root scope
-         * @description
-         *
-         * Fired once the view **begins loading**, *before* the DOM is rendered.
-         *
-         * @param {Object} event Event object.
-         * @param {Object} viewConfig The view config properties (template, controller, etc).
-         *
-         * @example
-         *
-         * <pre>
-         * $scope.$on('$viewContentLoading',
-         * function(event, viewConfig){
-         *     // Access to all the view config properties.
-         *     // and one special property 'targetView'
-         *     // viewConfig.targetView
-         * });
-         * </pre>
-         */
-          $rootScope.$broadcast('$viewContentLoading', options);
         }
         return result;
       }
@@ -24796,6 +25483,8 @@ function $ViewScrollProvider() {
 
 angular.module('ui.router.state').provider('$uiViewScroll', $ViewScrollProvider);
 
+var ngMajorVer = angular.version.major;
+var ngMinorVer = angular.version.minor;
 /**
  * @ngdoc directive
  * @name ui.router.state.directive:ui-view
@@ -24819,6 +25508,9 @@ angular.module('ui.router.state').provider('$uiViewScroll', $ViewScrollProvider)
  * when a view is populated. By default, $anchorScroll is overridden by ui-router's custom scroll
  * service, {@link ui.router.state.$uiViewScroll}. This custom service let's you
  * scroll ui-view elements into view when they are populated during a state activation.
+ *
+ * @param {string=} noanimation If truthy, the non-animated renderer will be selected (no animations
+ * will be applied to the ui-view)
  *
  * *Note: To revert back to old [`$anchorScroll`](http://docs.angularjs.org/api/ng.$anchorScroll)
  * functionality, call `$uiViewScrollProvider.useAnchorScroll()`.*
@@ -24931,26 +25623,44 @@ function $ViewDirective(   $state,   $injector,   $uiViewScroll,   $interpolate)
   // Returns a set of DOM manipulation functions based on which Angular version
   // it should use
   function getRenderer(attrs, scope) {
-    var statics = function() {
-      return {
-        enter: function (element, target, cb) { target.after(element); cb(); },
-        leave: function (element, cb) { element.remove(); cb(); }
-      };
+    var statics = {
+      enter: function (element, target, cb) { target.after(element); cb(); },
+      leave: function (element, cb) { element.remove(); cb(); }
     };
 
+    if (!!attrs.noanimation) return statics;
+
+    function animEnabled(element) {
+      if (ngMajorVer === 1 && ngMinorVer >= 4) return !!$animate.enabled(element);
+      if (ngMajorVer === 1 && ngMinorVer >= 2) return !!$animate.enabled();
+      return (!!$animator);
+    }
+
+    // ng 1.2+
     if ($animate) {
       return {
         enter: function(element, target, cb) {
-          var promise = $animate.enter(element, null, target, cb);
-          if (promise && promise.then) promise.then(cb);
+          if (!animEnabled(element)) {
+            statics.enter(element, target, cb);
+          } else if (angular.version.minor > 2) {
+            $animate.enter(element, null, target).then(cb);
+          } else {
+            $animate.enter(element, null, target, cb);
+          }
         },
         leave: function(element, cb) {
-          var promise = $animate.leave(element, cb);
-          if (promise && promise.then) promise.then(cb);
+          if (!animEnabled(element)) {
+            statics.leave(element, cb);
+          } else if (angular.version.minor > 2) {
+            $animate.leave(element).then(cb);
+          } else {
+            $animate.leave(element, cb);
+          }
         }
       };
     }
 
+    // ng 1.1.5
     if ($animator) {
       var animate = $animator && $animator(scope, attrs);
 
@@ -24960,7 +25670,7 @@ function $ViewDirective(   $state,   $injector,   $uiViewScroll,   $interpolate)
       };
     }
 
-    return statics();
+    return statics;
   }
 
   var directive = {
@@ -24978,31 +25688,41 @@ function $ViewDirective(   $state,   $injector,   $uiViewScroll,   $interpolate)
         scope.$on('$stateChangeSuccess', function() {
           updateView(false);
         });
-        scope.$on('$viewContentLoading', function() {
-          updateView(false);
-        });
 
         updateView(true);
 
         function cleanupLastView() {
-          if (previousEl) {
-            previousEl.remove();
-            previousEl = null;
+          var _previousEl = previousEl;
+          var _currentScope = currentScope;
+
+          if (_currentScope) {
+            _currentScope._willBeDestroyed = true;
           }
 
-          if (currentScope) {
-            currentScope.$destroy();
-            currentScope = null;
+          function cleanOld() {
+            if (_previousEl) {
+              _previousEl.remove();
+            }
+
+            if (_currentScope) {
+              _currentScope.$destroy();
+            }
           }
 
           if (currentEl) {
             renderer.leave(currentEl, function() {
+              cleanOld();
               previousEl = null;
             });
 
             previousEl = currentEl;
-            currentEl = null;
+          } else {
+            cleanOld();
+            previousEl = null;
           }
+
+          currentEl = null;
+          currentScope = null;
         }
 
         function updateView(firstTime) {
@@ -25010,9 +25730,23 @@ function $ViewDirective(   $state,   $injector,   $uiViewScroll,   $interpolate)
               name            = getUiViewName(scope, attrs, $element, $interpolate),
               previousLocals  = name && $state.$current && $state.$current.locals[name];
 
-          if (!firstTime && previousLocals === latestLocals) return; // nothing to do
+          if (!firstTime && previousLocals === latestLocals || scope._willBeDestroyed) return; // nothing to do
           newScope = scope.$new();
           latestLocals = $state.$current.locals[name];
+
+          /**
+           * @ngdoc event
+           * @name ui.router.state.directive:ui-view#$viewContentLoading
+           * @eventOf ui.router.state.directive:ui-view
+           * @eventType emits on ui-view directive scope
+           * @description
+           *
+           * Fired once the view **begins loading**, *before* the DOM is rendered.
+           *
+           * @param {Object} event Event object.
+           * @param {string} viewName Name of the view.
+           */
+          newScope.$emit('$viewContentLoading', name);
 
           var clone = $transclude(newScope, function(clone) {
             renderer.enter(clone, $element, function onUiViewEnter() {
@@ -25034,12 +25768,13 @@ function $ViewDirective(   $state,   $injector,   $uiViewScroll,   $interpolate)
            * @name ui.router.state.directive:ui-view#$viewContentLoaded
            * @eventOf ui.router.state.directive:ui-view
            * @eventType emits on ui-view directive scope
-           * @description           *
+           * @description
            * Fired once the view is **loaded**, *after* the DOM is rendered.
            *
            * @param {Object} event Event object.
+           * @param {string} viewName Name of the view.
            */
-          currentScope.$emit('$viewContentLoaded');
+          currentScope.$emit('$viewContentLoaded', name);
           currentScope.$eval(onloadExp);
         }
       };
@@ -25116,6 +25851,43 @@ function stateContext(el) {
   }
 }
 
+function getTypeInfo(el) {
+  // SVGAElement does not use the href attribute, but rather the 'xlinkHref' attribute.
+  var isSvg = Object.prototype.toString.call(el.prop('href')) === '[object SVGAnimatedString]';
+  var isForm = el[0].nodeName === "FORM";
+
+  return {
+    attr: isForm ? "action" : (isSvg ? 'xlink:href' : 'href'),
+    isAnchor: el.prop("tagName").toUpperCase() === "A",
+    clickable: !isForm
+  };
+}
+
+function clickHook(el, $state, $timeout, type, current) {
+  return function(e) {
+    var button = e.which || e.button, target = current();
+
+    if (!(button > 1 || e.ctrlKey || e.metaKey || e.shiftKey || el.attr('target'))) {
+      // HACK: This is to allow ng-clicks to be processed before the transition is initiated:
+      var transition = $timeout(function() {
+        $state.go(target.state, target.params, target.options);
+      });
+      e.preventDefault();
+
+      // if the state has no URL, ignore one preventDefault from the <a> directive.
+      var ignorePreventDefaultCount = type.isAnchor && !target.href ? 1: 0;
+
+      e.preventDefault = function() {
+        if (ignorePreventDefaultCount-- <= 0) $timeout.cancel(transition);
+      };
+    }
+  };
+}
+
+function defaultOpts(el, $state) {
+  return { relative: stateContext(el) || $state.$current, inherit: true };
+}
+
 /**
  * @ngdoc directive
  * @name ui.router.state.directive:ui-sref
@@ -25126,17 +25898,17 @@ function stateContext(el) {
  * @restrict A
  *
  * @description
- * A directive that binds a link (`<a>` tag) to a state. If the state has an associated 
- * URL, the directive will automatically generate & update the `href` attribute via 
- * the {@link ui.router.state.$state#methods_href $state.href()} method. Clicking 
- * the link will trigger a state transition with optional parameters. 
+ * A directive that binds a link (`<a>` tag) to a state. If the state has an associated
+ * URL, the directive will automatically generate & update the `href` attribute via
+ * the {@link ui.router.state.$state#methods_href $state.href()} method. Clicking
+ * the link will trigger a state transition with optional parameters.
  *
- * Also middle-clicking, right-clicking, and ctrl-clicking on the link will be 
+ * Also middle-clicking, right-clicking, and ctrl-clicking on the link will be
  * handled natively by the browser.
  *
- * You can also use relative state paths within ui-sref, just like the relative 
+ * You can also use relative state paths within ui-sref, just like the relative
  * paths passed to `$state.go()`. You just need to be aware that the path is relative
- * to the state that the link lives in, in other words the state that loaded the 
+ * to the state that the link lives in, in other words the state that loaded the
  * template containing the link.
  *
  * You can specify options to pass to {@link ui.router.state.$state#go $state.go()}
@@ -25144,22 +25916,22 @@ function stateContext(el) {
  * and `reload`.
  *
  * @example
- * Here's an example of how you'd use ui-sref and how it would compile. If you have the 
+ * Here's an example of how you'd use ui-sref and how it would compile. If you have the
  * following template:
  * <pre>
  * <a ui-sref="home">Home</a> | <a ui-sref="about">About</a> | <a ui-sref="{page: 2}">Next page</a>
- * 
+ *
  * <ul>
  *     <li ng-repeat="contact in contacts">
  *         <a ui-sref="contacts.detail({ id: contact.id })">{{ contact.name }}</a>
  *     </li>
  * </ul>
  * </pre>
- * 
+ *
  * Then the compiled html would be (assuming Html5Mode is off and current state is contacts):
  * <pre>
  * <a href="#/home" ui-sref="home">Home</a> | <a href="#/about" ui-sref="about">About</a> | <a href="#/contacts?page=2" ui-sref="{page: 2}">Next page</a>
- * 
+ *
  * <ul>
  *     <li ng-repeat="contact in contacts">
  *         <a href="#/contacts/1" ui-sref="contacts.detail({ id: contact.id })">Joe</a>
@@ -25180,77 +25952,82 @@ function stateContext(el) {
  */
 $StateRefDirective.$inject = ['$state', '$timeout'];
 function $StateRefDirective($state, $timeout) {
-  var allowedOptions = ['location', 'inherit', 'reload', 'absolute'];
-
   return {
     restrict: 'A',
     require: ['?^uiSrefActive', '?^uiSrefActiveEq'],
     link: function(scope, element, attrs, uiSrefActive) {
-      var ref = parseStateRef(attrs.uiSref, $state.current.name);
-      var params = null, url = null, base = stateContext(element) || $state.$current;
-      // SVGAElement does not use the href attribute, but rather the 'xlinkHref' attribute.
-      var hrefKind = Object.prototype.toString.call(element.prop('href')) === '[object SVGAnimatedString]' ?
-                 'xlink:href' : 'href';
-      var newHref = null, isAnchor = element.prop("tagName").toUpperCase() === "A";
-      var isForm = element[0].nodeName === "FORM";
-      var attr = isForm ? "action" : hrefKind, nav = true;
+      var ref    = parseStateRef(attrs.uiSref, $state.current.name);
+      var def    = { state: ref.state, href: null, params: null };
+      var type   = getTypeInfo(element);
+      var active = uiSrefActive[1] || uiSrefActive[0];
 
-      var options = { relative: base, inherit: true };
-      var optionsOverride = scope.$eval(attrs.uiSrefOpts) || {};
+      def.options = extend(defaultOpts(element, $state), attrs.uiSrefOpts ? scope.$eval(attrs.uiSrefOpts) : {});
 
-      angular.forEach(allowedOptions, function(option) {
-        if (option in optionsOverride) {
-          options[option] = optionsOverride[option];
-        }
-      });
+      var update = function(val) {
+        if (val) def.params = angular.copy(val);
+        def.href = $state.href(ref.state, def.params, def.options);
 
-      var update = function(newVal) {
-        if (newVal) params = angular.copy(newVal);
-        if (!nav) return;
-
-        newHref = $state.href(ref.state, params, options);
-
-        var activeDirective = uiSrefActive[1] || uiSrefActive[0];
-        if (activeDirective) {
-          activeDirective.$$addStateInfo(ref.state, params);
-        }
-        if (newHref === null) {
-          nav = false;
-          return false;
-        }
-        attrs.$set(attr, newHref);
+        if (active) active.$$addStateInfo(ref.state, def.params);
+        if (def.href !== null) attrs.$set(type.attr, def.href);
       };
 
       if (ref.paramExpr) {
-        scope.$watch(ref.paramExpr, function(newVal, oldVal) {
-          if (newVal !== params) update(newVal);
-        }, true);
-        params = angular.copy(scope.$eval(ref.paramExpr));
+        scope.$watch(ref.paramExpr, function(val) { if (val !== def.params) update(val); }, true);
+        def.params = angular.copy(scope.$eval(ref.paramExpr));
       }
       update();
 
-      if (isForm) return;
-
-      element.bind("click", function(e) {
-        var button = e.which || e.button;
-        if ( !(button > 1 || e.ctrlKey || e.metaKey || e.shiftKey || element.attr('target')) ) {
-          // HACK: This is to allow ng-clicks to be processed before the transition is initiated:
-          var transition = $timeout(function() {
-            $state.go(ref.state, params, options);
-          });
-          e.preventDefault();
-
-          // if the state has no URL, ignore one preventDefault from the <a> directive.
-          var ignorePreventDefaultCount = isAnchor && !newHref ? 1: 0;
-          e.preventDefault = function() {
-            if (ignorePreventDefaultCount-- <= 0)
-              $timeout.cancel(transition);
-          };
-        }
-      });
+      if (!type.clickable) return;
+      element.bind("click", clickHook(element, $state, $timeout, type, function() { return def; }));
     }
   };
 }
+
+/**
+ * @ngdoc directive
+ * @name ui.router.state.directive:ui-state
+ *
+ * @requires ui.router.state.uiSref
+ *
+ * @restrict A
+ *
+ * @description
+ * Much like ui-sref, but will accept named $scope properties to evaluate for a state definition,
+ * params and override options.
+ *
+ * @param {string} ui-state 'stateName' can be any valid absolute or relative state
+ * @param {Object} ui-state-params params to pass to {@link ui.router.state.$state#href $state.href()}
+ * @param {Object} ui-state-opts options to pass to {@link ui.router.state.$state#go $state.go()}
+ */
+$StateRefDynamicDirective.$inject = ['$state', '$timeout'];
+function $StateRefDynamicDirective($state, $timeout) {
+  return {
+    restrict: 'A',
+    require: ['?^uiSrefActive', '?^uiSrefActiveEq'],
+    link: function(scope, element, attrs, uiSrefActive) {
+      var type   = getTypeInfo(element);
+      var active = uiSrefActive[1] || uiSrefActive[0];
+      var group  = [attrs.uiState, attrs.uiStateParams || null, attrs.uiStateOpts || null];
+      var watch  = '[' + group.map(function(val) { return val || 'null'; }).join(', ') + ']';
+      var def    = { state: null, params: null, options: null, href: null };
+
+      function runStateRefLink (group) {
+        def.state = group[0]; def.params = group[1]; def.options = group[2];
+        def.href = $state.href(def.state, def.params, def.options);
+
+        if (active) active.$$addStateInfo(def.state, def.params);
+        if (def.href) attrs.$set(type.attr, def.href);
+      }
+
+      scope.$watch(watch, runStateRefLink, true);
+      runStateRefLink(scope.$eval(watch));
+
+      if (!type.clickable) return;
+      element.bind("click", clickHook(element, $state, $timeout, type, function() { return def; }));
+    }
+  };
+}
+
 
 /**
  * @ngdoc directive
@@ -25309,6 +26086,24 @@ function $StateRefDirective($state, $timeout) {
  *   </li>
  * </ul>
  * </pre>
+ *
+ * It is also possible to pass ui-sref-active an expression that evaluates
+ * to an object hash, whose keys represent active class names and whose
+ * values represent the respective state names/globs.
+ * ui-sref-active will match if the current active state **includes** any of
+ * the specified state names/globs, even the abstract ones.
+ *
+ * @Example
+ * Given the following template, with "admin" being an abstract state:
+ * <pre>
+ * <div ui-sref-active="{'active': 'admin.*'}">
+ *   <a ui-sref-active="active" ui-sref="admin.roles">Roles</a>
+ * </div>
+ * </pre>
+ *
+ * When the current state is "admin.roles" the "active" class will be applied
+ * to both the <div> and <a> elements. It is important to note that the state
+ * names/globs passed to ui-sref-active shadow the state provided by ui-sref.
  */
 
 /**
@@ -25330,53 +26125,98 @@ $StateRefActiveDirective.$inject = ['$state', '$stateParams', '$interpolate'];
 function $StateRefActiveDirective($state, $stateParams, $interpolate) {
   return  {
     restrict: "A",
-    controller: ['$scope', '$element', '$attrs', function ($scope, $element, $attrs) {
-      var states = [], activeClass;
+    controller: ['$scope', '$element', '$attrs', '$timeout', function ($scope, $element, $attrs, $timeout) {
+      var states = [], activeClasses = {}, activeEqClass, uiSrefActive;
 
       // There probably isn't much point in $observing this
       // uiSrefActive and uiSrefActiveEq share the same directive object with some
       // slight difference in logic routing
-      activeClass = $interpolate($attrs.uiSrefActiveEq || $attrs.uiSrefActive || '', false)($scope);
+      activeEqClass = $interpolate($attrs.uiSrefActiveEq || '', false)($scope);
+
+      try {
+        uiSrefActive = $scope.$eval($attrs.uiSrefActive);
+      } catch (e) {
+        // Do nothing. uiSrefActive is not a valid expression.
+        // Fall back to using $interpolate below
+      }
+      uiSrefActive = uiSrefActive || $interpolate($attrs.uiSrefActive || '', false)($scope);
+      if (isObject(uiSrefActive)) {
+        forEach(uiSrefActive, function(stateOrName, activeClass) {
+          if (isString(stateOrName)) {
+            var ref = parseStateRef(stateOrName, $state.current.name);
+            addState(ref.state, $scope.$eval(ref.paramExpr), activeClass);
+          }
+        });
+      }
 
       // Allow uiSref to communicate with uiSrefActive[Equals]
       this.$$addStateInfo = function (newState, newParams) {
-        var state = $state.get(newState, stateContext($element));
-
-        states.push({
-          state: state || { name: newState },
-          params: newParams
-        });
-
+        // we already got an explicit state provided by ui-sref-active, so we
+        // shadow the one that comes from ui-sref
+        if (isObject(uiSrefActive) && states.length > 0) {
+          return;
+        }
+        addState(newState, newParams, uiSrefActive);
         update();
       };
 
       $scope.$on('$stateChangeSuccess', update);
 
+      function addState(stateName, stateParams, activeClass) {
+        var state = $state.get(stateName, stateContext($element));
+        var stateHash = createStateHash(stateName, stateParams);
+
+        states.push({
+          state: state || { name: stateName },
+          params: stateParams,
+          hash: stateHash
+        });
+
+        activeClasses[stateHash] = activeClass;
+      }
+
+      /**
+       * @param {string} state
+       * @param {Object|string} [params]
+       * @return {string}
+       */
+      function createStateHash(state, params) {
+        if (!isString(state)) {
+          throw new Error('state should be a string');
+        }
+        if (isObject(params)) {
+          return state + toJson(params);
+        }
+        params = $scope.$eval(params);
+        if (isObject(params)) {
+          return state + toJson(params);
+        }
+        return state;
+      }
+
       // Update route state
       function update() {
-        if (anyMatch()) {
-          $element.addClass(activeClass);
-        } else {
-          $element.removeClass(activeClass);
-        }
-      }
-
-      function anyMatch() {
         for (var i = 0; i < states.length; i++) {
-          if (isMatch(states[i].state, states[i].params)) {
-            return true;
+          if (anyMatch(states[i].state, states[i].params)) {
+            addClass($element, activeClasses[states[i].hash]);
+          } else {
+            removeClass($element, activeClasses[states[i].hash]);
+          }
+
+          if (exactMatch(states[i].state, states[i].params)) {
+            addClass($element, activeEqClass);
+          } else {
+            removeClass($element, activeEqClass);
           }
         }
-        return false;
       }
 
-      function isMatch(state, params) {
-        if (typeof $attrs.uiSrefActiveEq !== 'undefined') {
-          return $state.is(state.name, params);
-        } else {
-          return $state.includes(state.name, params);
-        }
-      }
+      function addClass(el, className) { $timeout(function () { el.addClass(className); }); }
+      function removeClass(el, className) { el.removeClass(className); }
+      function anyMatch(state, params) { return $state.includes(state.name, params); }
+      function exactMatch(state, params) { return $state.is(state.name, params); }
+
+      update();
     }]
   };
 }
@@ -25384,7 +26224,8 @@ function $StateRefActiveDirective($state, $stateParams, $interpolate) {
 angular.module('ui.router.state')
   .directive('uiSref', $StateRefDirective)
   .directive('uiSrefActive', $StateRefActiveDirective)
-  .directive('uiSrefActiveEq', $StateRefActiveDirective);
+  .directive('uiSrefActiveEq', $StateRefActiveDirective)
+  .directive('uiState', $StateRefDynamicDirective);
 
 /**
  * @ngdoc filter
@@ -25397,8 +26238,8 @@ angular.module('ui.router.state')
  */
 $IsStateFilter.$inject = ['$state'];
 function $IsStateFilter($state) {
-  var isFilter = function (state) {
-    return $state.is(state);
+  var isFilter = function (state, params) {
+    return $state.is(state, params);
   };
   isFilter.$stateful = true;
   return isFilter;
@@ -25415,8 +26256,8 @@ function $IsStateFilter($state) {
  */
 $IncludedByStateFilter.$inject = ['$state'];
 function $IncludedByStateFilter($state) {
-  var includesFilter = function (state) {
-    return $state.includes(state);
+  var includesFilter = function (state, params, options) {
+    return $state.includes(state, params, options);
   };
   includesFilter.$stateful = true;
   return  includesFilter;
@@ -25426,7 +26267,7 @@ angular.module('ui.router.state')
   .filter('isState', $IsStateFilter)
   .filter('includedByState', $IncludedByStateFilter);
 })(window, window.angular);
-},{}],42:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /**
  * @license AngularJS v1.4.7
  * (c) 2010-2015 Google, Inc. http://angularjs.org
@@ -54331,13 +55172,13 @@ $provide.value("$locale", {
 })(window, document);
 
 !window.angular.$$csp().noInlineStyle && window.angular.element(document.head).prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>');
-},{}],43:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 require('./angular');
 module.exports = angular;
 
-},{"./angular":42}],44:[function(require,module,exports){
+},{"./angular":45}],47:[function(require,module,exports){
 /*!
-	Autosize 3.0.14
+	Autosize 3.0.15
 	license: MIT
 	http://www.jacklmoore.com/autosize
 */
@@ -54370,6 +55211,20 @@ module.exports = angular;
 				list.splice(list.indexOf(key), 1);
 			} };
 	})();
+
+	var createEvent = function createEvent(name) {
+		return new Event(name);
+	};
+	try {
+		new Event('test');
+	} catch (e) {
+		// IE does not support `new Event()`
+		createEvent = function (name) {
+			var evt = document.createEvent('Event');
+			evt.initEvent(name, true, false);
+			return evt;
+		};
+	}
 
 	function assign(ta) {
 		var _ref = arguments[1] === undefined ? {} : arguments[1];
@@ -54475,8 +55330,7 @@ module.exports = angular;
 			}
 
 			if (startHeight !== ta.style.height) {
-				var evt = document.createEvent('Event');
-				evt.initEvent('autosize:resized', true, false);
+				var evt = createEvent('autosize:resized');
 				ta.dispatchEvent(evt);
 			}
 		}
@@ -54529,15 +55383,13 @@ module.exports = angular;
 
 	function destroy(ta) {
 		if (!(ta && ta.nodeName && ta.nodeName === 'TEXTAREA')) return;
-		var evt = document.createEvent('Event');
-		evt.initEvent('autosize:destroy', true, false);
+		var evt = createEvent('autosize:destroy');
 		ta.dispatchEvent(evt);
 	}
 
 	function update(ta) {
 		if (!(ta && ta.nodeName && ta.nodeName === 'TEXTAREA')) return;
-		var evt = document.createEvent('Event');
-		evt.initEvent('autosize:update', true, false);
+		var evt = createEvent('autosize:update');
 		ta.dispatchEvent(evt);
 	}
 
@@ -54579,7 +55431,7 @@ module.exports = angular;
 
 	module.exports = autosize;
 });
-},{}],45:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 /*! version : 4.17.37
  =========================================================
  bootstrap-datetimejs
@@ -57133,7 +57985,7 @@ module.exports = angular;
     };
 }));
 
-},{"jquery":49,"moment":53}],46:[function(require,module,exports){
+},{"jquery":52,"moment":56}],49:[function(require,module,exports){
 /*
 * Project: Bootstrap Notify = v3.1.3
 * Description: Turns standard Bootstrap alerts into "Growl-like" notifications.
@@ -57488,16 +58340,16 @@ module.exports = angular;
 
 }));
 
-},{"jquery":49}],47:[function(require,module,exports){
+},{"jquery":52}],50:[function(require,module,exports){
 /*
  * jquery.flot.tooltip
  * 
  * description: easy-to-use tooltips for Flot charts
- * version: 0.8.5
+ * version: 0.8.7
  * authors: Krzysztof Urbas @krzysu [myviews.pl],Evan Steinkerchner @Roundaround
  * website: https://github.com/krzysu/flot.tooltip
  * 
- * build on 2015-06-12
+ * build on 2016-03-15
  * released under MIT License, 2012
 */ 
 (function ($) {
@@ -57528,6 +58380,7 @@ module.exports = angular;
             defaultTheme: true,
             snap: true,
             lines: false,
+            clickTips: false,
 
             // callbacks
             onHover: function (flotItem, $tooltipEl) {},
@@ -57592,12 +58445,18 @@ module.exports = angular;
 
             // bind event
             $( plot.getPlaceholder() ).bind("plothover", plothover);
+            if (that.tooltipOptions.clickTips) {
+                $( plot.getPlaceholder() ).bind("plotclick", plotclick);
+            }
+            that.clickmode = false;
 
             $(eventHolder).bind('mousemove', mouseMove);
         });
 
         plot.hooks.shutdown.push(function (plot, eventHolder){
             $(plot.getPlaceholder()).unbind("plothover", plothover);
+            $(plot.getPlaceholder()).unbind("plotclick", plotclick);
+            plot.removeTooltip();
             $(eventHolder).unbind("mousemove", mouseMove);
         });
 
@@ -57606,6 +58465,25 @@ module.exports = angular;
             pos.x = e.pageX;
             pos.y = e.pageY;
             plot.setTooltipPosition(pos);
+        }
+
+        /**
+         *  open the tooltip (if not already open) and freeze it on the current position till the next click
+         */
+        function plotclick(event, pos, item) {
+            if (! that.clickmode) {
+                // it is the click activating the clicktip
+                plothover(event, pos, item);
+                if (that.getDomElement().is(":visible")) {
+                    $(plot.getPlaceholder()).unbind("plothover", plothover);
+                    that.clickmode = true;
+                }
+            } else {
+                // it is the click deactivating the clicktip
+                $( plot.getPlaceholder() ).bind("plothover", plothover);
+                plot.hideTooltip();
+                that.clickmode = false;
+            }
         }
 
         function plothover(event, pos, item) {
@@ -57780,6 +58658,10 @@ module.exports = angular;
         plot.hideTooltip = function () {
             that.getDomElement().hide().html('');
         };
+
+        plot.removeTooltip = function() {
+            that.getDomElement().remove();
+        };
     };
 
     /**
@@ -57787,23 +58669,26 @@ module.exports = angular;
      * @return jQuery object
      */
     FlotTooltip.prototype.getDomElement = function () {
-        var $tip = $('.' + this.tooltipOptions.cssClass);
+        var $tip = $('<div>');
+        if (this.tooltipOptions && this.tooltipOptions.cssClass) {
+            $tip = $('.' + this.tooltipOptions.cssClass);
 
-        if( $tip.length === 0 ){
-            $tip = $('<div />').addClass(this.tooltipOptions.cssClass);
-            $tip.appendTo('body').hide().css({position: 'absolute'});
-
-            if(this.tooltipOptions.defaultTheme) {
-                $tip.css({
-                    'background': '#fff',
-                    'z-index': '1040',
-                    'padding': '0.4em 0.6em',
-                    'border-radius': '0.5em',
-                    'font-size': '0.8em',
-                    'border': '1px solid #111',
-                    'display': 'none',
-                    'white-space': 'nowrap'
-                });
+            if( $tip.length === 0 ){
+                $tip = $('<div />').addClass(this.tooltipOptions.cssClass);
+                $tip.appendTo('body').hide().css({position: 'absolute'});
+    
+                if(this.tooltipOptions.defaultTheme) {
+                    $tip.css({
+                        'background': '#fff',
+                        'z-index': '1040',
+                        'padding': '0.4em 0.6em',
+                        'border-radius': '0.5em',
+                        'font-size': '0.8em',
+                        'border': '1px solid #111',
+                        'display': 'none',
+                        'white-space': 'nowrap'
+                    });
+                }
             }
         }
 
@@ -57963,7 +58848,7 @@ module.exports = angular;
                 if (item.series.xaxis[ticks].hasOwnProperty(tickIndex) && !this.isTimeMode('xaxis', item)) {
                     var valueX = (this.isCategoriesMode('xaxis', item)) ? item.series.xaxis[ticks][tickIndex].label : item.series.xaxis[ticks][tickIndex].v;
                     if (valueX === x) {
-                        content = content.replace(xPattern, item.series.xaxis[ticks][tickIndex].label);
+                        content = content.replace(xPattern, item.series.xaxis[ticks][tickIndex].label.replace(/\$/g, '$$$$'));
                     }
                 }
             }
@@ -57975,7 +58860,7 @@ module.exports = angular;
                 if (item.series.yaxis.ticks.hasOwnProperty(yIndex)) {
                     var valueY = (this.isCategoriesMode('yaxis', item)) ? item.series.yaxis.ticks[yIndex].label : item.series.yaxis.ticks[yIndex].v;
                     if (valueY === y) {
-                        content = content.replace(yPattern, item.series.yaxis.ticks[yIndex].label);
+                        content = content.replace(yPattern, item.series.yaxis.ticks[yIndex].label.replace(/\$/g, '$$$$'));
                     }
                 }
             }
@@ -58061,7 +58946,7 @@ module.exports = angular;
 
 })(jQuery);
 
-},{}],48:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 /* Javascript plotting library for jQuery, version 0.8 alpha.
 
 Copyright (c) 2007-2012 IOLA and Ole Laursen.
@@ -60775,9 +61660,9 @@ Licensed under the MIT license.
 
 })(jQuery);
 
-},{}],49:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 /*!
- * jQuery JavaScript Library v2.2.0
+ * jQuery JavaScript Library v2.2.3
  * http://jquery.com/
  *
  * Includes Sizzle.js
@@ -60787,7 +61672,7 @@ Licensed under the MIT license.
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2016-01-08T20:02Z
+ * Date: 2016-04-05T19:26Z
  */
 
 (function( global, factory ) {
@@ -60843,7 +61728,7 @@ var support = {};
 
 
 var
-	version = "2.2.0",
+	version = "2.2.3",
 
 	// Define a local copy of jQuery
 	jQuery = function( selector, context ) {
@@ -61054,6 +61939,7 @@ jQuery.extend( {
 	},
 
 	isPlainObject: function( obj ) {
+		var key;
 
 		// Not plain objects:
 		// - Any object or value whose internal [[Class]] property is not "[object Object]"
@@ -61063,14 +61949,18 @@ jQuery.extend( {
 			return false;
 		}
 
+		// Not own constructor property must be Object
 		if ( obj.constructor &&
-				!hasOwn.call( obj.constructor.prototype, "isPrototypeOf" ) ) {
+				!hasOwn.call( obj, "constructor" ) &&
+				!hasOwn.call( obj.constructor.prototype || {}, "isPrototypeOf" ) ) {
 			return false;
 		}
 
-		// If the function hasn't returned already, we're confident that
-		// |obj| is a plain object, created by {} or constructed with new Object
-		return true;
+		// Own properties are enumerated firstly, so to speed up,
+		// if last one is own, then all properties are own
+		for ( key in obj ) {}
+
+		return key === undefined || hasOwn.call( obj, key );
 	},
 
 	isEmptyObject: function( obj ) {
@@ -65257,7 +66147,7 @@ function on( elem, types, selector, data, fn, one ) {
 	if ( fn === false ) {
 		fn = returnFalse;
 	} else if ( !fn ) {
-		return this;
+		return elem;
 	}
 
 	if ( one === 1 ) {
@@ -65906,14 +66796,14 @@ var
 	rscriptTypeMasked = /^true\/(.*)/,
 	rcleanScript = /^\s*<!(?:\[CDATA\[|--)|(?:\]\]|--)>\s*$/g;
 
+// Manipulating tables requires a tbody
 function manipulationTarget( elem, content ) {
-	if ( jQuery.nodeName( elem, "table" ) &&
-		jQuery.nodeName( content.nodeType !== 11 ? content : content.firstChild, "tr" ) ) {
+	return jQuery.nodeName( elem, "table" ) &&
+		jQuery.nodeName( content.nodeType !== 11 ? content : content.firstChild, "tr" ) ?
 
-		return elem.getElementsByTagName( "tbody" )[ 0 ] || elem;
-	}
-
-	return elem;
+		elem.getElementsByTagName( "tbody" )[ 0 ] ||
+			elem.appendChild( elem.ownerDocument.createElement( "tbody" ) ) :
+		elem;
 }
 
 // Replace/restore the type attribute of script elements for safe DOM manipulation
@@ -66420,7 +67310,7 @@ var getStyles = function( elem ) {
 		// FF meanwhile throws on frame elements through "defaultView.getComputedStyle"
 		var view = elem.ownerDocument.defaultView;
 
-		if ( !view.opener ) {
+		if ( !view || !view.opener ) {
 			view = window;
 		}
 
@@ -66569,15 +67459,18 @@ function curCSS( elem, name, computed ) {
 		style = elem.style;
 
 	computed = computed || getStyles( elem );
+	ret = computed ? computed.getPropertyValue( name ) || computed[ name ] : undefined;
+
+	// Support: Opera 12.1x only
+	// Fall back to style even without computed
+	// computed is undefined for elems on document fragments
+	if ( ( ret === "" || ret === undefined ) && !jQuery.contains( elem.ownerDocument, elem ) ) {
+		ret = jQuery.style( elem, name );
+	}
 
 	// Support: IE9
 	// getPropertyValue is only needed for .css('filter') (#12537)
 	if ( computed ) {
-		ret = computed.getPropertyValue( name ) || computed[ name ];
-
-		if ( ret === "" && !jQuery.contains( elem.ownerDocument, elem ) ) {
-			ret = jQuery.style( elem, name );
-		}
 
 		// A tribute to the "awesome hack by Dean Edwards"
 		// Android Browser returns percentage for some values,
@@ -68100,6 +68993,12 @@ jQuery.extend( {
 	}
 } );
 
+// Support: IE <=11 only
+// Accessing the selectedIndex property
+// forces the browser to respect setting selected
+// on the option
+// The getter ensures a default option is selected
+// when in an optgroup
 if ( !support.optSelected ) {
 	jQuery.propHooks.selected = {
 		get: function( elem ) {
@@ -68108,6 +69007,16 @@ if ( !support.optSelected ) {
 				parent.parentNode.selectedIndex;
 			}
 			return null;
+		},
+		set: function( elem ) {
+			var parent = elem.parentNode;
+			if ( parent ) {
+				parent.selectedIndex;
+
+				if ( parent.parentNode ) {
+					parent.parentNode.selectedIndex;
+				}
+			}
 		}
 	};
 }
@@ -68302,7 +69211,8 @@ jQuery.fn.extend( {
 
 
 
-var rreturn = /\r/g;
+var rreturn = /\r/g,
+	rspaces = /[\x20\t\r\n\f]+/g;
 
 jQuery.fn.extend( {
 	val: function( value ) {
@@ -68378,9 +69288,15 @@ jQuery.extend( {
 		option: {
 			get: function( elem ) {
 
-				// Support: IE<11
-				// option.value not trimmed (#14858)
-				return jQuery.trim( elem.value );
+				var val = jQuery.find.attr( elem, "value" );
+				return val != null ?
+					val :
+
+					// Support: IE10-11+
+					// option.text throws exceptions (#14686, #14858)
+					// Strip and collapse whitespace
+					// https://html.spec.whatwg.org/#strip-and-collapse-whitespace
+					jQuery.trim( jQuery.text( elem ) ).replace( rspaces, " " );
 			}
 		},
 		select: {
@@ -68433,7 +69349,7 @@ jQuery.extend( {
 				while ( i-- ) {
 					option = options[ i ];
 					if ( option.selected =
-							jQuery.inArray( jQuery.valHooks.option.get( option ), values ) > -1
+						jQuery.inArray( jQuery.valHooks.option.get( option ), values ) > -1
 					) {
 						optionSet = true;
 					}
@@ -68627,7 +69543,7 @@ jQuery.extend( jQuery.event, {
 				// But now, this "simulate" function is used only for events
 				// for which stopPropagation() is noop, so there is no need for that anymore.
 				//
-				// For the compat branch though, guard for "click" and "submit"
+				// For the 1.x branch though, guard for "click" and "submit"
 				// events is still used, but was moved to jQuery.event.stopPropagation function
 				// because `originalEvent` should point to the original event for the constancy
 				// with other events and for more focused logic
@@ -70128,18 +71044,6 @@ jQuery.ajaxPrefilter( "json jsonp", function( s, originalSettings, jqXHR ) {
 
 
 
-// Support: Safari 8+
-// In Safari 8 documents created via document.implementation.createHTMLDocument
-// collapse sibling forms: the second one becomes a child of the first one.
-// Because of that, this security measure has to be disabled in Safari 8.
-// https://bugs.webkit.org/show_bug.cgi?id=137337
-support.createHTMLDocument = ( function() {
-	var body = document.implementation.createHTMLDocument( "" ).body;
-	body.innerHTML = "<form></form><form></form>";
-	return body.childNodes.length === 2;
-} )();
-
-
 // Argument "data" should be string of html
 // context (optional): If specified, the fragment will be created in this context,
 // defaults to document
@@ -70152,12 +71056,7 @@ jQuery.parseHTML = function( data, context, keepScripts ) {
 		keepScripts = context;
 		context = false;
 	}
-
-	// Stop scripts or inline event handlers from being executed immediately
-	// by using document.implementation
-	context = context || ( support.createHTMLDocument ?
-		document.implementation.createHTMLDocument( "" ) :
-		document );
+	context = context || document;
 
 	var parsed = rsingleTag.exec( data ),
 		scripts = !keepScripts && [];
@@ -70239,7 +71138,7 @@ jQuery.fn.load = function( url, params, callback ) {
 		// If it fails, this function gets "jqXHR", "status", "error"
 		} ).always( callback && function( jqXHR, status ) {
 			self.each( function() {
-				callback.apply( self, response || [ jqXHR.responseText, status, jqXHR ] );
+				callback.apply( this, response || [ jqXHR.responseText, status, jqXHR ] );
 			} );
 		} );
 	}
@@ -70397,11 +71296,8 @@ jQuery.fn.extend( {
 			}
 
 			// Add offsetParent borders
-			// Subtract offsetParent scroll positions
-			parentOffset.top += jQuery.css( offsetParent[ 0 ], "borderTopWidth", true ) -
-				offsetParent.scrollTop();
-			parentOffset.left += jQuery.css( offsetParent[ 0 ], "borderLeftWidth", true ) -
-				offsetParent.scrollLeft();
+			parentOffset.top += jQuery.css( offsetParent[ 0 ], "borderTopWidth", true );
+			parentOffset.left += jQuery.css( offsetParent[ 0 ], "borderLeftWidth", true );
 		}
 
 		// Subtract parent offsets and element margins
@@ -70608,8 +71504,8 @@ if ( !noGlobal ) {
 return jQuery;
 }));
 
-},{}],50:[function(require,module,exports){
-/*! lightgallery - v1.2.14 - 2016-01-18
+},{}],53:[function(require,module,exports){
+/*! lightgallery - v1.2.18 - 2016-04-13
 * http://sachinchoolur.github.io/lightGallery/
 * Copyright (c) 2016 Sachin N; Licensed Apache 2.0 */
 (function($, window, document, undefined) {
@@ -70643,6 +71539,8 @@ return jQuery;
         slideEndAnimatoin: true,
         hideControlOnEnd: false,
         mousewheel: true,
+
+        getCaptionFromTitleOrAlt: true,
 
         // .lg-item || '.lg-sub-html'
         appendSubHtmlTo: '.lg-sub-html',
@@ -71025,6 +71923,7 @@ return jQuery;
         var youtube = src.match(/\/\/(?:www\.)?youtu(?:\.be|be\.com)\/(?:watch\?v=|embed\/)?([a-z0-9\-\_\%]+)/i);
         var vimeo = src.match(/\/\/(?:www\.)?vimeo.com\/([0-9a-z\-_]+)/i);
         var dailymotion = src.match(/\/\/(?:www\.)?dai.ly\/([0-9a-z\-_]+)/i);
+        var vk = src.match(/\/\/(?:www\.)?(?:vk\.com|vkontakte\.ru)\/(?:video_ext\.php\?)(.*)/i);
 
         if (youtube) {
             return {
@@ -71037,6 +71936,10 @@ return jQuery;
         } else if (dailymotion) {
             return {
                 dailymotion: dailymotion
+            };
+        } else if (vk) {
+            return {
+                vk: vk
             };
         }
     };
@@ -71068,7 +71971,11 @@ return jQuery;
             if (this.$items.eq(index).attr('data-sub-html-url')) {
                 subHtmlUrl = this.$items.eq(index).attr('data-sub-html-url');
             } else {
+
                 subHtml = this.$items.eq(index).attr('data-sub-html');
+                if (this.s.getCaptionFromTitleOrAlt && !subHtml) {
+                    subHtml = this.$items.eq(index).attr('title') || this.$items.eq(index).find('img').first().attr('alt');
+                }
             }
         }
 
@@ -71080,8 +71987,6 @@ return jQuery;
                 var fL = subHtml.substring(0, 1);
                 if (fL === '.' || fL === '#') {
                     subHtml = $(subHtml).html();
-                } else {
-                    subHtml = subHtml;
                 }
             } else {
                 subHtml = '';
@@ -71911,7 +72816,7 @@ return jQuery;
 
 })(jQuery, window, document);
 
-},{}],51:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 /*
 == malihu jquery custom scrollbar plugin == 
 Version: 3.1.3 
@@ -74337,7 +75242,7 @@ and dependencies (minified).
 	});
 
 }))}));
-},{"jquery-mousewheel":52}],52:[function(require,module,exports){
+},{"jquery-mousewheel":55}],55:[function(require,module,exports){
 /*!
  * jQuery Mousewheel 3.1.13
  *
@@ -74560,9 +75465,9 @@ and dependencies (minified).
 
 }));
 
-},{}],53:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 //! moment.js
-//! version : 2.11.1
+//! version : 2.13.0
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
 //! license : MIT
 //! momentjs.com
@@ -74586,7 +75491,7 @@ and dependencies (minified).
     }
 
     function isArray(input) {
-        return Object.prototype.toString.call(input) === '[object Array]';
+        return input instanceof Array || Object.prototype.toString.call(input) === '[object Array]';
     }
 
     function isDate(input) {
@@ -74639,7 +75544,9 @@ and dependencies (minified).
             invalidMonth    : null,
             invalidFormat   : false,
             userInvalidated : false,
-            iso             : false
+            iso             : false,
+            parsedDateParts : [],
+            meridiem        : null
         };
     }
 
@@ -74650,9 +75557,30 @@ and dependencies (minified).
         return m._pf;
     }
 
+    var some;
+    if (Array.prototype.some) {
+        some = Array.prototype.some;
+    } else {
+        some = function (fun) {
+            var t = Object(this);
+            var len = t.length >>> 0;
+
+            for (var i = 0; i < len; i++) {
+                if (i in t && fun.call(this, t[i], i, t)) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+    }
+
     function valid__isValid(m) {
         if (m._isValid == null) {
             var flags = getParsingFlags(m);
+            var parsedParts = some.call(flags.parsedDateParts, function (i) {
+                return i != null;
+            });
             m._isValid = !isNaN(m._d.getTime()) &&
                 flags.overflow < 0 &&
                 !flags.empty &&
@@ -74660,7 +75588,8 @@ and dependencies (minified).
                 !flags.invalidWeekday &&
                 !flags.nullInput &&
                 !flags.invalidFormat &&
-                !flags.userInvalidated;
+                !flags.userInvalidated &&
+                (!flags.meridiem || (flags.meridiem && parsedParts));
 
             if (m._strict) {
                 m._isValid = m._isValid &&
@@ -74792,7 +75721,105 @@ and dependencies (minified).
         return diffs + lengthDiff;
     }
 
-    function Locale() {
+    function warn(msg) {
+        if (utils_hooks__hooks.suppressDeprecationWarnings === false &&
+                (typeof console !==  'undefined') && console.warn) {
+            console.warn('Deprecation warning: ' + msg);
+        }
+    }
+
+    function deprecate(msg, fn) {
+        var firstTime = true;
+
+        return extend(function () {
+            if (utils_hooks__hooks.deprecationHandler != null) {
+                utils_hooks__hooks.deprecationHandler(null, msg);
+            }
+            if (firstTime) {
+                warn(msg + '\nArguments: ' + Array.prototype.slice.call(arguments).join(', ') + '\n' + (new Error()).stack);
+                firstTime = false;
+            }
+            return fn.apply(this, arguments);
+        }, fn);
+    }
+
+    var deprecations = {};
+
+    function deprecateSimple(name, msg) {
+        if (utils_hooks__hooks.deprecationHandler != null) {
+            utils_hooks__hooks.deprecationHandler(name, msg);
+        }
+        if (!deprecations[name]) {
+            warn(msg);
+            deprecations[name] = true;
+        }
+    }
+
+    utils_hooks__hooks.suppressDeprecationWarnings = false;
+    utils_hooks__hooks.deprecationHandler = null;
+
+    function isFunction(input) {
+        return input instanceof Function || Object.prototype.toString.call(input) === '[object Function]';
+    }
+
+    function isObject(input) {
+        return Object.prototype.toString.call(input) === '[object Object]';
+    }
+
+    function locale_set__set (config) {
+        var prop, i;
+        for (i in config) {
+            prop = config[i];
+            if (isFunction(prop)) {
+                this[i] = prop;
+            } else {
+                this['_' + i] = prop;
+            }
+        }
+        this._config = config;
+        // Lenient ordinal parsing accepts just a number in addition to
+        // number + (possibly) stuff coming from _ordinalParseLenient.
+        this._ordinalParseLenient = new RegExp(this._ordinalParse.source + '|' + (/\d{1,2}/).source);
+    }
+
+    function mergeConfigs(parentConfig, childConfig) {
+        var res = extend({}, parentConfig), prop;
+        for (prop in childConfig) {
+            if (hasOwnProp(childConfig, prop)) {
+                if (isObject(parentConfig[prop]) && isObject(childConfig[prop])) {
+                    res[prop] = {};
+                    extend(res[prop], parentConfig[prop]);
+                    extend(res[prop], childConfig[prop]);
+                } else if (childConfig[prop] != null) {
+                    res[prop] = childConfig[prop];
+                } else {
+                    delete res[prop];
+                }
+            }
+        }
+        return res;
+    }
+
+    function Locale(config) {
+        if (config != null) {
+            this.set(config);
+        }
+    }
+
+    var keys;
+
+    if (Object.keys) {
+        keys = Object.keys;
+    } else {
+        keys = function (obj) {
+            var i, res = [];
+            for (i in obj) {
+                if (hasOwnProp(obj, i)) {
+                    res.push(i);
+                }
+            }
+            return res;
+        };
     }
 
     // internal storage for locale config files
@@ -74868,11 +75895,25 @@ and dependencies (minified).
         return globalLocale._abbr;
     }
 
-    function defineLocale (name, values) {
-        if (values !== null) {
-            values.abbr = name;
-            locales[name] = locales[name] || new Locale();
-            locales[name].set(values);
+    function defineLocale (name, config) {
+        if (config !== null) {
+            config.abbr = name;
+            if (locales[name] != null) {
+                deprecateSimple('defineLocaleOverride',
+                        'use moment.updateLocale(localeName, config) to change ' +
+                        'an existing locale. moment.defineLocale(localeName, ' +
+                        'config) should only be used for creating a new locale');
+                config = mergeConfigs(locales[name]._config, config);
+            } else if (config.parentLocale != null) {
+                if (locales[config.parentLocale] != null) {
+                    config = mergeConfigs(locales[config.parentLocale]._config, config);
+                } else {
+                    // treat as if there is no base config
+                    deprecateSimple('parentLocaleUndefined',
+                            'specified parentLocale is not defined yet');
+                }
+            }
+            locales[name] = new Locale(config);
 
             // backwards compat for now: also set the locale
             locale_locales__getSetGlobalLocale(name);
@@ -74883,6 +75924,31 @@ and dependencies (minified).
             delete locales[name];
             return null;
         }
+    }
+
+    function updateLocale(name, config) {
+        if (config != null) {
+            var locale;
+            if (locales[name] != null) {
+                config = mergeConfigs(locales[name]._config, config);
+            }
+            locale = new Locale(config);
+            locale.parentLocale = locales[name];
+            locales[name] = locale;
+
+            // backwards compat for now: also set the locale
+            locale_locales__getSetGlobalLocale(name);
+        } else {
+            // pass null for config to unupdate, useful for tests
+            if (locales[name] != null) {
+                if (locales[name].parentLocale != null) {
+                    locales[name] = locales[name].parentLocale;
+                } else if (locales[name] != null) {
+                    delete locales[name];
+                }
+            }
+        }
+        return locales[name];
     }
 
     // returns locale data
@@ -74907,6 +75973,10 @@ and dependencies (minified).
         }
 
         return chooseLocale(key);
+    }
+
+    function locale_locales__listLocales() {
+        return keys(locales);
     }
 
     var aliases = {};
@@ -74935,10 +76005,6 @@ and dependencies (minified).
         }
 
         return normalizedInput;
-    }
-
-    function isFunction(input) {
-        return input instanceof Function || Object.prototype.toString.call(input) === '[object Function]';
     }
 
     function makeGetSet (unit, keepTime) {
@@ -74989,7 +76055,7 @@ and dependencies (minified).
             Math.pow(10, Math.max(0, zerosToFill)).toString().substr(1) + absNumber;
     }
 
-    var formattingTokens = /(\[[^\[]*\])|(\\)?([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|.)/g;
+    var formattingTokens = /(\[[^\[]*\])|(\\)?([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|.)/g;
 
     var localFormattingTokens = /(\[[^\[]*\])|(\\)?(LTS|LT|LL?L?L?|l{1,4})/g;
 
@@ -75042,7 +76108,7 @@ and dependencies (minified).
         }
 
         return function (mom) {
-            var output = '';
+            var output = '', i;
             for (i = 0; i < length; i++) {
                 output += array[i] instanceof Function ? array[i].call(mom, format) : array[i];
             }
@@ -75171,6 +76237,23 @@ and dependencies (minified).
     var WEEK = 7;
     var WEEKDAY = 8;
 
+    var indexOf;
+
+    if (Array.prototype.indexOf) {
+        indexOf = Array.prototype.indexOf;
+    } else {
+        indexOf = function (o) {
+            // I know
+            var i;
+            for (i = 0; i < this.length; ++i) {
+                if (this[i] === o) {
+                    return i;
+                }
+            }
+            return -1;
+        };
+    }
+
     function daysInMonth(year, month) {
         return new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
     }
@@ -75233,8 +76316,53 @@ and dependencies (minified).
             this._monthsShort[MONTHS_IN_FORMAT.test(format) ? 'format' : 'standalone'][m.month()];
     }
 
+    function units_month__handleStrictParse(monthName, format, strict) {
+        var i, ii, mom, llc = monthName.toLocaleLowerCase();
+        if (!this._monthsParse) {
+            // this is not used
+            this._monthsParse = [];
+            this._longMonthsParse = [];
+            this._shortMonthsParse = [];
+            for (i = 0; i < 12; ++i) {
+                mom = create_utc__createUTC([2000, i]);
+                this._shortMonthsParse[i] = this.monthsShort(mom, '').toLocaleLowerCase();
+                this._longMonthsParse[i] = this.months(mom, '').toLocaleLowerCase();
+            }
+        }
+
+        if (strict) {
+            if (format === 'MMM') {
+                ii = indexOf.call(this._shortMonthsParse, llc);
+                return ii !== -1 ? ii : null;
+            } else {
+                ii = indexOf.call(this._longMonthsParse, llc);
+                return ii !== -1 ? ii : null;
+            }
+        } else {
+            if (format === 'MMM') {
+                ii = indexOf.call(this._shortMonthsParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._longMonthsParse, llc);
+                return ii !== -1 ? ii : null;
+            } else {
+                ii = indexOf.call(this._longMonthsParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._shortMonthsParse, llc);
+                return ii !== -1 ? ii : null;
+            }
+        }
+    }
+
     function localeMonthsParse (monthName, format, strict) {
         var i, mom, regex;
+
+        if (this._monthsParseExact) {
+            return units_month__handleStrictParse.call(this, monthName, format, strict);
+        }
 
         if (!this._monthsParse) {
             this._monthsParse = [];
@@ -75242,6 +76370,9 @@ and dependencies (minified).
             this._shortMonthsParse = [];
         }
 
+        // TODO: add sorting
+        // Sorting makes sure if one month (or abbr) is a prefix of another
+        // see sorting in computeMonthsParse
         for (i = 0; i < 12; i++) {
             // make the regex if we don't have it already
             mom = create_utc__createUTC([2000, i]);
@@ -75274,12 +76405,15 @@ and dependencies (minified).
             return mom;
         }
 
-        // TODO: Move this out of here!
         if (typeof value === 'string') {
-            value = mom.localeData().monthsParse(value);
-            // TODO: Another silent failure?
-            if (typeof value !== 'number') {
-                return mom;
+            if (/^\d+$/.test(value)) {
+                value = toInt(value);
+            } else {
+                value = mom.localeData().monthsParse(value);
+                // TODO: Another silent failure?
+                if (typeof value !== 'number') {
+                    return mom;
+                }
             }
         }
 
@@ -75364,8 +76498,8 @@ and dependencies (minified).
 
         this._monthsRegex = new RegExp('^(' + mixedPieces.join('|') + ')', 'i');
         this._monthsShortRegex = this._monthsRegex;
-        this._monthsStrictRegex = new RegExp('^(' + longPieces.join('|') + ')$', 'i');
-        this._monthsShortStrictRegex = new RegExp('^(' + shortPieces.join('|') + ')$', 'i');
+        this._monthsStrictRegex = new RegExp('^(' + longPieces.join('|') + ')', 'i');
+        this._monthsShortStrictRegex = new RegExp('^(' + shortPieces.join('|') + ')', 'i');
     }
 
     function checkOverflow (m) {
@@ -75397,36 +76531,6 @@ and dependencies (minified).
 
         return m;
     }
-
-    function warn(msg) {
-        if (utils_hooks__hooks.suppressDeprecationWarnings === false &&
-                (typeof console !==  'undefined') && console.warn) {
-            console.warn('Deprecation warning: ' + msg);
-        }
-    }
-
-    function deprecate(msg, fn) {
-        var firstTime = true;
-
-        return extend(function () {
-            if (firstTime) {
-                warn(msg + '\nArguments: ' + Array.prototype.slice.call(arguments).join(', ') + '\n' + (new Error()).stack);
-                firstTime = false;
-            }
-            return fn.apply(this, arguments);
-        }, fn);
-    }
-
-    var deprecations = {};
-
-    function deprecateSimple(name, msg) {
-        if (!deprecations[name]) {
-            warn(msg);
-            deprecations[name] = true;
-        }
-    }
-
-    utils_hooks__hooks.suppressDeprecationWarnings = false;
 
     // iso 8601 regex
     // 0000-00-00 0000-W00 or 0000-W00-0 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000 or +00)
@@ -75622,7 +76726,7 @@ and dependencies (minified).
 
     // MOMENTS
 
-    var getSetYear = makeGetSet('FullYear', false);
+    var getSetYear = makeGetSet('FullYear', true);
 
     function getIsLeapYear () {
         return isLeapYear(this.year());
@@ -75891,6 +76995,9 @@ and dependencies (minified).
                 config._a[HOUR] > 0) {
             getParsingFlags(config).bigHour = undefined;
         }
+
+        getParsingFlags(config).parsedDateParts = config._a.slice(0);
+        getParsingFlags(config).meridiem = config._meridiem;
         // handle meridiem
         config._a[HOUR] = meridiemFixWrap(config._locale, config._a[HOUR], config._meridiem);
 
@@ -76031,7 +77138,7 @@ and dependencies (minified).
         if (input === undefined) {
             config._d = new Date(utils_hooks__hooks.now());
         } else if (isDate(input)) {
-            config._d = new Date(+input);
+            config._d = new Date(input.valueOf());
         } else if (typeof input === 'string') {
             configFromString(config);
         } else if (isArray(input)) {
@@ -76073,7 +77180,7 @@ and dependencies (minified).
     }
 
     var prototypeMin = deprecate(
-         'moment().min is deprecated, use moment.min instead. https://github.com/moment/moment/issues/1548',
+         'moment().min is deprecated, use moment.max instead. https://github.com/moment/moment/issues/1548',
          function () {
              var other = local__createLocal.apply(null, arguments);
              if (this.isValid() && other.isValid()) {
@@ -76085,7 +77192,7 @@ and dependencies (minified).
      );
 
     var prototypeMax = deprecate(
-        'moment().max is deprecated, use moment.max instead. https://github.com/moment/moment/issues/1548',
+        'moment().max is deprecated, use moment.min instead. https://github.com/moment/moment/issues/1548',
         function () {
             var other = local__createLocal.apply(null, arguments);
             if (this.isValid() && other.isValid()) {
@@ -76151,7 +77258,7 @@ and dependencies (minified).
         this._milliseconds = +milliseconds +
             seconds * 1e3 + // 1000
             minutes * 6e4 + // 1000 * 60
-            hours * 36e5; // 1000 * 60 * 60
+            hours * 1000 * 60 * 60; //using 1000 * 60 * 60 instead of 36e5 to avoid floating point rounding errors https://github.com/moment/moment/issues/2978
         // Because of dateAddRemove treats 24 hours as different from a
         // day when working around DST, we need to store them separately
         this._days = +days +
@@ -76221,9 +77328,9 @@ and dependencies (minified).
         var res, diff;
         if (model._isUTC) {
             res = model.clone();
-            diff = (isMoment(input) || isDate(input) ? +input : +local__createLocal(input)) - (+res);
+            diff = (isMoment(input) || isDate(input) ? input.valueOf() : local__createLocal(input).valueOf()) - res.valueOf();
             // Use low-level api, because this fn is low-level api.
-            res._d.setTime(+res._d + diff);
+            res._d.setTime(res._d.valueOf() + diff);
             utils_hooks__hooks.updateOffset(res, false);
             return res;
         } else {
@@ -76379,11 +77486,12 @@ and dependencies (minified).
     }
 
     // ASP.NET json date format regex
-    var aspNetRegex = /(\-)?(?:(\d*)[. ])?(\d+)\:(\d+)(?:\:(\d+)\.?(\d{3})?)?/;
+    var aspNetRegex = /^(\-)?(?:(\d*)[. ])?(\d+)\:(\d+)(?:\:(\d+)\.?(\d{3})?\d*)?$/;
 
     // from http://docs.closure-library.googlecode.com/git/closure_goog_date_date.js.source.html
     // somewhat more in line with 4.4.3.2 2004 spec, but allows decimal anywhere
-    var isoRegex = /^(-)?P(?:(?:([0-9,.]*)Y)?(?:([0-9,.]*)M)?(?:([0-9,.]*)D)?(?:T(?:([0-9,.]*)H)?(?:([0-9,.]*)M)?(?:([0-9,.]*)S)?)?|([0-9,.]*)W)$/;
+    // and further modified to allow for strings containing both week and day
+    var isoRegex = /^(-)?P(?:(-?[0-9,.]*)Y)?(?:(-?[0-9,.]*)M)?(?:(-?[0-9,.]*)W)?(?:(-?[0-9,.]*)D)?(?:T(?:(-?[0-9,.]*)H)?(?:(-?[0-9,.]*)M)?(?:(-?[0-9,.]*)S)?)?$/;
 
     function create__createDuration (input, key) {
         var duration = input,
@@ -76421,11 +77529,11 @@ and dependencies (minified).
             duration = {
                 y : parseIso(match[2], sign),
                 M : parseIso(match[3], sign),
-                d : parseIso(match[4], sign),
-                h : parseIso(match[5], sign),
-                m : parseIso(match[6], sign),
-                s : parseIso(match[7], sign),
-                w : parseIso(match[8], sign)
+                w : parseIso(match[4], sign),
+                d : parseIso(match[5], sign),
+                h : parseIso(match[6], sign),
+                m : parseIso(match[7], sign),
+                s : parseIso(match[8], sign)
             };
         } else if (duration == null) {// checks for null or undefined
             duration = {};
@@ -76489,6 +77597,14 @@ and dependencies (minified).
         return res;
     }
 
+    function absRound (number) {
+        if (number < 0) {
+            return Math.round(-1 * number) * -1;
+        } else {
+            return Math.round(number);
+        }
+    }
+
     // TODO: remove 'name' arg after deprecation is removed
     function createAdder(direction, name) {
         return function (val, period) {
@@ -76508,8 +77624,8 @@ and dependencies (minified).
 
     function add_subtract__addSubtract (mom, duration, isAdding, updateOffset) {
         var milliseconds = duration._milliseconds,
-            days = duration._days,
-            months = duration._months;
+            days = absRound(duration._days),
+            months = absRound(duration._months);
 
         if (!mom.isValid()) {
             // No op
@@ -76519,7 +77635,7 @@ and dependencies (minified).
         updateOffset = updateOffset == null ? true : updateOffset;
 
         if (milliseconds) {
-            mom._d.setTime(+mom._d + milliseconds * isAdding);
+            mom._d.setTime(mom._d.valueOf() + milliseconds * isAdding);
         }
         if (days) {
             get_set__set(mom, 'Date', get_set__get(mom, 'Date') + days * isAdding);
@@ -76564,9 +77680,9 @@ and dependencies (minified).
         }
         units = normalizeUnits(!isUndefined(units) ? units : 'millisecond');
         if (units === 'millisecond') {
-            return +this > +localInput;
+            return this.valueOf() > localInput.valueOf();
         } else {
-            return +localInput < +this.clone().startOf(units);
+            return localInput.valueOf() < this.clone().startOf(units).valueOf();
         }
     }
 
@@ -76577,14 +77693,16 @@ and dependencies (minified).
         }
         units = normalizeUnits(!isUndefined(units) ? units : 'millisecond');
         if (units === 'millisecond') {
-            return +this < +localInput;
+            return this.valueOf() < localInput.valueOf();
         } else {
-            return +this.clone().endOf(units) < +localInput;
+            return this.clone().endOf(units).valueOf() < localInput.valueOf();
         }
     }
 
-    function isBetween (from, to, units) {
-        return this.isAfter(from, units) && this.isBefore(to, units);
+    function isBetween (from, to, units, inclusivity) {
+        inclusivity = inclusivity || '()';
+        return (inclusivity[0] === '(' ? this.isAfter(from, units) : !this.isBefore(from, units)) &&
+            (inclusivity[1] === ')' ? this.isBefore(to, units) : !this.isAfter(to, units));
     }
 
     function isSame (input, units) {
@@ -76595,10 +77713,10 @@ and dependencies (minified).
         }
         units = normalizeUnits(units || 'millisecond');
         if (units === 'millisecond') {
-            return +this === +localInput;
+            return this.valueOf() === localInput.valueOf();
         } else {
-            inputMs = +localInput;
-            return +(this.clone().startOf(units)) <= inputMs && inputMs <= +(this.clone().endOf(units));
+            inputMs = localInput.valueOf();
+            return this.clone().startOf(units).valueOf() <= inputMs && inputMs <= this.clone().endOf(units).valueOf();
         }
     }
 
@@ -76665,10 +77783,12 @@ and dependencies (minified).
             adjust = (b - anchor) / (anchor2 - anchor);
         }
 
-        return -(wholeMonthDiff + adjust);
+        //check for negative zero, return zero if negative zero
+        return -(wholeMonthDiff + adjust) || 0;
     }
 
     utils_hooks__hooks.defaultFormat = 'YYYY-MM-DDTHH:mm:ssZ';
+    utils_hooks__hooks.defaultFormatUtc = 'YYYY-MM-DDTHH:mm:ss[Z]';
 
     function toString () {
         return this.clone().locale('en').format('ddd MMM DD YYYY HH:mm:ss [GMT]ZZ');
@@ -76689,7 +77809,10 @@ and dependencies (minified).
     }
 
     function format (inputString) {
-        var output = formatMoment(this, inputString || utils_hooks__hooks.defaultFormat);
+        if (!inputString) {
+            inputString = this.isUtc() ? utils_hooks__hooks.defaultFormatUtc : utils_hooks__hooks.defaultFormat;
+        }
+        var output = formatMoment(this, inputString);
         return this.localeData().postformat(output);
     }
 
@@ -76768,6 +77891,7 @@ and dependencies (minified).
         case 'week':
         case 'isoWeek':
         case 'day':
+        case 'date':
             this.hours(0);
             /* falls through */
         case 'hour':
@@ -76801,19 +77925,25 @@ and dependencies (minified).
         if (units === undefined || units === 'millisecond') {
             return this;
         }
+
+        // 'date' is an alias for 'day', so it should be considered as such.
+        if (units === 'date') {
+            units = 'day';
+        }
+
         return this.startOf(units).add(1, (units === 'isoWeek' ? 'week' : units)).subtract(1, 'ms');
     }
 
     function to_type__valueOf () {
-        return +this._d - ((this._offset || 0) * 60000);
+        return this._d.valueOf() - ((this._offset || 0) * 60000);
     }
 
     function unix () {
-        return Math.floor(+this / 1000);
+        return Math.floor(this.valueOf() / 1000);
     }
 
     function toDate () {
-        return this._offset ? new Date(+this) : this._d;
+        return this._offset ? new Date(this.valueOf()) : this._d;
     }
 
     function toArray () {
@@ -76835,8 +77965,8 @@ and dependencies (minified).
     }
 
     function toJSON () {
-        // JSON.stringify(new Date(NaN)) === 'null'
-        return this.isValid() ? this.toISOString() : 'null';
+        // new Date(NaN).toJSON() === null
+        return this.isValid() ? this.toISOString() : null;
     }
 
     function moment_valid__isValid () {
@@ -76946,7 +78076,6 @@ and dependencies (minified).
         var dayOfYearData = dayOfYearFromWeeks(weekYear, week, weekday, dow, doy),
             date = createUTCDate(dayOfYearData.year, 0, dayOfYearData.dayOfYear);
 
-        // console.log("got", weekYear, week, weekday, "set", date.toISOString());
         this.year(date.getUTCFullYear());
         this.month(date.getUTCMonth());
         this.date(date.getUTCDate());
@@ -77083,9 +78212,15 @@ and dependencies (minified).
     addRegexToken('d',    match1to2);
     addRegexToken('e',    match1to2);
     addRegexToken('E',    match1to2);
-    addRegexToken('dd',   matchWord);
-    addRegexToken('ddd',  matchWord);
-    addRegexToken('dddd', matchWord);
+    addRegexToken('dd',   function (isStrict, locale) {
+        return locale.weekdaysMinRegex(isStrict);
+    });
+    addRegexToken('ddd',   function (isStrict, locale) {
+        return locale.weekdaysShortRegex(isStrict);
+    });
+    addRegexToken('dddd',   function (isStrict, locale) {
+        return locale.weekdaysRegex(isStrict);
+    });
 
     addWeekParseToken(['dd', 'ddd', 'dddd'], function (input, week, config, token) {
         var weekday = config._locale.weekdaysParse(input, token, config._strict);
@@ -77138,8 +78273,76 @@ and dependencies (minified).
         return this._weekdaysMin[m.day()];
     }
 
+    function day_of_week__handleStrictParse(weekdayName, format, strict) {
+        var i, ii, mom, llc = weekdayName.toLocaleLowerCase();
+        if (!this._weekdaysParse) {
+            this._weekdaysParse = [];
+            this._shortWeekdaysParse = [];
+            this._minWeekdaysParse = [];
+
+            for (i = 0; i < 7; ++i) {
+                mom = create_utc__createUTC([2000, 1]).day(i);
+                this._minWeekdaysParse[i] = this.weekdaysMin(mom, '').toLocaleLowerCase();
+                this._shortWeekdaysParse[i] = this.weekdaysShort(mom, '').toLocaleLowerCase();
+                this._weekdaysParse[i] = this.weekdays(mom, '').toLocaleLowerCase();
+            }
+        }
+
+        if (strict) {
+            if (format === 'dddd') {
+                ii = indexOf.call(this._weekdaysParse, llc);
+                return ii !== -1 ? ii : null;
+            } else if (format === 'ddd') {
+                ii = indexOf.call(this._shortWeekdaysParse, llc);
+                return ii !== -1 ? ii : null;
+            } else {
+                ii = indexOf.call(this._minWeekdaysParse, llc);
+                return ii !== -1 ? ii : null;
+            }
+        } else {
+            if (format === 'dddd') {
+                ii = indexOf.call(this._weekdaysParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._shortWeekdaysParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._minWeekdaysParse, llc);
+                return ii !== -1 ? ii : null;
+            } else if (format === 'ddd') {
+                ii = indexOf.call(this._shortWeekdaysParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._weekdaysParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._minWeekdaysParse, llc);
+                return ii !== -1 ? ii : null;
+            } else {
+                ii = indexOf.call(this._minWeekdaysParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._weekdaysParse, llc);
+                if (ii !== -1) {
+                    return ii;
+                }
+                ii = indexOf.call(this._shortWeekdaysParse, llc);
+                return ii !== -1 ? ii : null;
+            }
+        }
+    }
+
     function localeWeekdaysParse (weekdayName, format, strict) {
         var i, mom, regex;
+
+        if (this._weekdaysParseExact) {
+            return day_of_week__handleStrictParse.call(this, weekdayName, format, strict);
+        }
 
         if (!this._weekdaysParse) {
             this._weekdaysParse = [];
@@ -77151,7 +78354,7 @@ and dependencies (minified).
         for (i = 0; i < 7; i++) {
             // make the regex if we don't have it already
 
-            mom = local__createLocal([2000, 1]).day(i);
+            mom = create_utc__createUTC([2000, 1]).day(i);
             if (strict && !this._fullWeekdaysParse[i]) {
                 this._fullWeekdaysParse[i] = new RegExp('^' + this.weekdays(mom, '').replace('.', '\.?') + '$', 'i');
                 this._shortWeekdaysParse[i] = new RegExp('^' + this.weekdaysShort(mom, '').replace('.', '\.?') + '$', 'i');
@@ -77207,6 +78410,99 @@ and dependencies (minified).
         return input == null ? this.day() || 7 : this.day(this.day() % 7 ? input : input - 7);
     }
 
+    var defaultWeekdaysRegex = matchWord;
+    function weekdaysRegex (isStrict) {
+        if (this._weekdaysParseExact) {
+            if (!hasOwnProp(this, '_weekdaysRegex')) {
+                computeWeekdaysParse.call(this);
+            }
+            if (isStrict) {
+                return this._weekdaysStrictRegex;
+            } else {
+                return this._weekdaysRegex;
+            }
+        } else {
+            return this._weekdaysStrictRegex && isStrict ?
+                this._weekdaysStrictRegex : this._weekdaysRegex;
+        }
+    }
+
+    var defaultWeekdaysShortRegex = matchWord;
+    function weekdaysShortRegex (isStrict) {
+        if (this._weekdaysParseExact) {
+            if (!hasOwnProp(this, '_weekdaysRegex')) {
+                computeWeekdaysParse.call(this);
+            }
+            if (isStrict) {
+                return this._weekdaysShortStrictRegex;
+            } else {
+                return this._weekdaysShortRegex;
+            }
+        } else {
+            return this._weekdaysShortStrictRegex && isStrict ?
+                this._weekdaysShortStrictRegex : this._weekdaysShortRegex;
+        }
+    }
+
+    var defaultWeekdaysMinRegex = matchWord;
+    function weekdaysMinRegex (isStrict) {
+        if (this._weekdaysParseExact) {
+            if (!hasOwnProp(this, '_weekdaysRegex')) {
+                computeWeekdaysParse.call(this);
+            }
+            if (isStrict) {
+                return this._weekdaysMinStrictRegex;
+            } else {
+                return this._weekdaysMinRegex;
+            }
+        } else {
+            return this._weekdaysMinStrictRegex && isStrict ?
+                this._weekdaysMinStrictRegex : this._weekdaysMinRegex;
+        }
+    }
+
+
+    function computeWeekdaysParse () {
+        function cmpLenRev(a, b) {
+            return b.length - a.length;
+        }
+
+        var minPieces = [], shortPieces = [], longPieces = [], mixedPieces = [],
+            i, mom, minp, shortp, longp;
+        for (i = 0; i < 7; i++) {
+            // make the regex if we don't have it already
+            mom = create_utc__createUTC([2000, 1]).day(i);
+            minp = this.weekdaysMin(mom, '');
+            shortp = this.weekdaysShort(mom, '');
+            longp = this.weekdays(mom, '');
+            minPieces.push(minp);
+            shortPieces.push(shortp);
+            longPieces.push(longp);
+            mixedPieces.push(minp);
+            mixedPieces.push(shortp);
+            mixedPieces.push(longp);
+        }
+        // Sorting makes sure if one weekday (or abbr) is a prefix of another it
+        // will match the longer piece.
+        minPieces.sort(cmpLenRev);
+        shortPieces.sort(cmpLenRev);
+        longPieces.sort(cmpLenRev);
+        mixedPieces.sort(cmpLenRev);
+        for (i = 0; i < 7; i++) {
+            shortPieces[i] = regexEscape(shortPieces[i]);
+            longPieces[i] = regexEscape(longPieces[i]);
+            mixedPieces[i] = regexEscape(mixedPieces[i]);
+        }
+
+        this._weekdaysRegex = new RegExp('^(' + mixedPieces.join('|') + ')', 'i');
+        this._weekdaysShortRegex = this._weekdaysRegex;
+        this._weekdaysMinRegex = this._weekdaysRegex;
+
+        this._weekdaysStrictRegex = new RegExp('^(' + longPieces.join('|') + ')', 'i');
+        this._weekdaysShortStrictRegex = new RegExp('^(' + shortPieces.join('|') + ')', 'i');
+        this._weekdaysMinStrictRegex = new RegExp('^(' + minPieces.join('|') + ')', 'i');
+    }
+
     // FORMATTING
 
     addFormatToken('DDD', ['DDDD', 3], 'DDDo', 'dayOfYear');
@@ -77238,8 +78534,13 @@ and dependencies (minified).
         return this.hours() % 12 || 12;
     }
 
+    function kFormat() {
+        return this.hours() || 24;
+    }
+
     addFormatToken('H', ['HH', 2], 0, 'hour');
     addFormatToken('h', ['hh', 2], 0, hFormat);
+    addFormatToken('k', ['kk', 2], 0, kFormat);
 
     addFormatToken('hmm', 0, 0, function () {
         return '' + hFormat.apply(this) + zeroFill(this.minutes(), 2);
@@ -77656,21 +78957,6 @@ and dependencies (minified).
         return isFunction(format) ? format(output) : format.replace(/%s/i, output);
     }
 
-    function locale_set__set (config) {
-        var prop, i;
-        for (i in config) {
-            prop = config[i];
-            if (isFunction(prop)) {
-                this[i] = prop;
-            } else {
-                this['_' + i] = prop;
-            }
-        }
-        // Lenient ordinal parsing accepts just a number in addition to
-        // number + (possibly) stuff coming from _ordinalParseLenient.
-        this._ordinalParseLenient = new RegExp(this._ordinalParse.source + '|' + (/\d{1,2}/).source);
-    }
-
     var prototype__proto = Locale.prototype;
 
     prototype__proto._calendar       = defaultCalendar;
@@ -77715,6 +79001,13 @@ and dependencies (minified).
     prototype__proto._weekdaysShort = defaultLocaleWeekdaysShort;
     prototype__proto.weekdaysParse  =        localeWeekdaysParse;
 
+    prototype__proto._weekdaysRegex      = defaultWeekdaysRegex;
+    prototype__proto.weekdaysRegex       =        weekdaysRegex;
+    prototype__proto._weekdaysShortRegex = defaultWeekdaysShortRegex;
+    prototype__proto.weekdaysShortRegex  =        weekdaysShortRegex;
+    prototype__proto._weekdaysMinRegex   = defaultWeekdaysMinRegex;
+    prototype__proto.weekdaysMinRegex    =        weekdaysMinRegex;
+
     // Hours
     prototype__proto.isPM = localeIsPM;
     prototype__proto._meridiemParse = defaultLocaleMeridiemParse;
@@ -77726,7 +79019,7 @@ and dependencies (minified).
         return locale[field](utc, format);
     }
 
-    function list (format, index, field, count, setter) {
+    function listMonthsImpl (format, index, field) {
         if (typeof format === 'number') {
             index = format;
             format = undefined;
@@ -77735,35 +79028,79 @@ and dependencies (minified).
         format = format || '';
 
         if (index != null) {
-            return lists__get(format, index, field, setter);
+            return lists__get(format, index, field, 'month');
         }
 
         var i;
         var out = [];
-        for (i = 0; i < count; i++) {
-            out[i] = lists__get(format, i, field, setter);
+        for (i = 0; i < 12; i++) {
+            out[i] = lists__get(format, i, field, 'month');
+        }
+        return out;
+    }
+
+    // ()
+    // (5)
+    // (fmt, 5)
+    // (fmt)
+    // (true)
+    // (true, 5)
+    // (true, fmt, 5)
+    // (true, fmt)
+    function listWeekdaysImpl (localeSorted, format, index, field) {
+        if (typeof localeSorted === 'boolean') {
+            if (typeof format === 'number') {
+                index = format;
+                format = undefined;
+            }
+
+            format = format || '';
+        } else {
+            format = localeSorted;
+            index = format;
+            localeSorted = false;
+
+            if (typeof format === 'number') {
+                index = format;
+                format = undefined;
+            }
+
+            format = format || '';
+        }
+
+        var locale = locale_locales__getLocale(),
+            shift = localeSorted ? locale._week.dow : 0;
+
+        if (index != null) {
+            return lists__get(format, (index + shift) % 7, field, 'day');
+        }
+
+        var i;
+        var out = [];
+        for (i = 0; i < 7; i++) {
+            out[i] = lists__get(format, (i + shift) % 7, field, 'day');
         }
         return out;
     }
 
     function lists__listMonths (format, index) {
-        return list(format, index, 'months', 12, 'month');
+        return listMonthsImpl(format, index, 'months');
     }
 
     function lists__listMonthsShort (format, index) {
-        return list(format, index, 'monthsShort', 12, 'month');
+        return listMonthsImpl(format, index, 'monthsShort');
     }
 
-    function lists__listWeekdays (format, index) {
-        return list(format, index, 'weekdays', 7, 'day');
+    function lists__listWeekdays (localeSorted, format, index) {
+        return listWeekdaysImpl(localeSorted, format, index, 'weekdays');
     }
 
-    function lists__listWeekdaysShort (format, index) {
-        return list(format, index, 'weekdaysShort', 7, 'day');
+    function lists__listWeekdaysShort (localeSorted, format, index) {
+        return listWeekdaysImpl(localeSorted, format, index, 'weekdaysShort');
     }
 
-    function lists__listWeekdaysMin (format, index) {
-        return list(format, index, 'weekdaysMin', 7, 'day');
+    function lists__listWeekdaysMin (localeSorted, format, index) {
+        return listWeekdaysImpl(localeSorted, format, index, 'weekdaysMin');
     }
 
     locale_locales__getSetGlobalLocale('en', {
@@ -78134,7 +79471,7 @@ and dependencies (minified).
     // Side effect imports
 
 
-    utils_hooks__hooks.version = '2.11.1';
+    utils_hooks__hooks.version = '2.13.0';
 
     setHookCallback(local__createLocal);
 
@@ -78157,6 +79494,8 @@ and dependencies (minified).
     utils_hooks__hooks.monthsShort           = lists__listMonthsShort;
     utils_hooks__hooks.weekdaysMin           = lists__listWeekdaysMin;
     utils_hooks__hooks.defineLocale          = defineLocale;
+    utils_hooks__hooks.updateLocale          = updateLocale;
+    utils_hooks__hooks.locales               = locale_locales__listLocales;
     utils_hooks__hooks.weekdaysShort         = lists__listWeekdaysShort;
     utils_hooks__hooks.normalizeUnits        = normalizeUnits;
     utils_hooks__hooks.relativeTimeThreshold = duration_humanize__getSetRelativeTimeThreshold;
@@ -78167,7 +79506,7 @@ and dependencies (minified).
     return _moment;
 
 }));
-},{}],54:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 (function(angular, factory) {
     'use strict';
 
@@ -80467,13 +81806,13 @@ angular.module('ngTable').run(['$templateCache', function ($templateCache) {
     return angular.module('ngTable');
 }));
 
-},{}],55:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 (function (global){
 /*!
- * Waves v0.7.4
+ * Waves v0.7.5
  * http://fian.my.id/Waves
  *
- * Copyright 2014 Alfiana E. Sibuea and other contributors
+ * Copyright 2014-2016 Alfiana E. Sibuea and other contributors
  * Released under the MIT license
  * https://github.com/fians/Waves/blob/master/LICENSE
  */
@@ -80531,7 +81870,7 @@ angular.module('ngTable').run(['$templateCache', function ($templateCache) {
 
         if (stringRepr === '[object String]') {
             return $$(nodes);
-        } else if (isObject(nodes) && /^\[object (HTMLCollection|NodeList|Object)\]$/.test(stringRepr) && nodes.hasOwnProperty('length')) {
+        } else if (isObject(nodes) && /^\[object (Array|HTMLCollection|NodeList|Object)\]$/.test(stringRepr) && nodes.hasOwnProperty('length')) {
             return nodes;
         } else if (isDOMNode(nodes)) {
             return [nodes];
@@ -81053,7 +82392,7 @@ angular.module('ngTable').run(['$templateCache', function ($templateCache) {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],56:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 /**
  * oclazyload - Load modules on demand (lazy load) with angularJS
  * @version v1.0.9
@@ -82392,7 +83731,7 @@ if (!Array.prototype.indexOf) {
         return -1;
     };
 }
-},{}],57:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -82425,7 +83764,7 @@ var defaultParams = {
 
 exports['default'] = defaultParams;
 module.exports = exports['default'];
-},{}],58:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -82561,7 +83900,7 @@ exports['default'] = {
   handleCancel: handleCancel
 };
 module.exports = exports['default'];
-},{"./handle-dom":59,"./handle-swal-dom":61,"./utils":64}],59:[function(require,module,exports){
+},{"./handle-dom":62,"./handle-swal-dom":64,"./utils":67}],62:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -82753,7 +84092,7 @@ exports.fadeIn = fadeIn;
 exports.fadeOut = fadeOut;
 exports.fireClick = fireClick;
 exports.stopEventPropagation = stopEventPropagation;
-},{}],60:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -82833,7 +84172,7 @@ var handleKeyDown = function handleKeyDown(event, params, modal) {
 
 exports['default'] = handleKeyDown;
 module.exports = exports['default'];
-},{"./handle-dom":59,"./handle-swal-dom":61}],61:[function(require,module,exports){
+},{"./handle-dom":62,"./handle-swal-dom":64}],64:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -83001,7 +84340,7 @@ exports.openModal = openModal;
 exports.resetInput = resetInput;
 exports.resetInputError = resetInputError;
 exports.fixVerticalPosition = fixVerticalPosition;
-},{"./default-params":57,"./handle-dom":59,"./injected-html":62,"./utils":64}],62:[function(require,module,exports){
+},{"./default-params":60,"./handle-dom":62,"./injected-html":65,"./utils":67}],65:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -83044,7 +84383,7 @@ var injectedHTML =
 
 exports["default"] = injectedHTML;
 module.exports = exports["default"];
-},{}],63:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -83270,7 +84609,7 @@ var setParameters = function setParameters(params) {
 
 exports['default'] = setParameters;
 module.exports = exports['default'];
-},{"./handle-dom":59,"./handle-swal-dom":61,"./utils":64}],64:[function(require,module,exports){
+},{"./handle-dom":62,"./handle-swal-dom":64,"./utils":67}],67:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -83344,7 +84683,7 @@ exports.hexToRgb = hexToRgb;
 exports.isIE8 = isIE8;
 exports.logStr = logStr;
 exports.colorLuminance = colorLuminance;
-},{}],65:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -83648,7 +84987,7 @@ if (typeof window !== 'undefined') {
   _extend$hexToRgb$isIE8$logStr$colorLuminance.logStr('SweetAlert is a frontend module!');
 }
 module.exports = exports['default'];
-},{"./modules/default-params":57,"./modules/handle-click":58,"./modules/handle-dom":59,"./modules/handle-key":60,"./modules/handle-swal-dom":61,"./modules/set-params":63,"./modules/utils":64}],66:[function(require,module,exports){
+},{"./modules/default-params":60,"./modules/handle-click":61,"./modules/handle-dom":62,"./modules/handle-key":63,"./modules/handle-swal-dom":64,"./modules/set-params":66,"./modules/utils":67}],69:[function(require,module,exports){
 /*!
  * FullCalendar v2.4.0
  * Docs & License: http://fullcalendar.io/
@@ -83658,7 +84997,7 @@ module.exports = exports['default'];
 }}),db=ra.extend({grid:null,rowCoords:null,colCoords:null,containerEl:null,bounds:null,constructor:function(a){this.grid=a},build:function(){this.grid.build(),this.rowCoords=this.grid.computeRowCoords(),this.colCoords=this.grid.computeColCoords(),this.computeBounds()},clear:function(){this.grid.clear(),this.rowCoords=null,this.colCoords=null},getCell:function(b,c){var d,e,f,g=this.rowCoords,h=g.length,i=this.colCoords,j=i.length,k=null,l=null;if(this.inBounds(b,c)){for(d=0;h>d;d++)if(e=g[d],c>=e.top&&c<e.bottom){k=d;break}for(d=0;j>d;d++)if(e=i[d],b>=e.left&&b<e.right){l=d;break}if(null!==k&&null!==l)return f=this.grid.getCell(k,l),f.grid=this.grid,a.extend(f,g[k],i[l]),f}return null},computeBounds:function(){this.bounds=this.containerEl?p(this.containerEl):null},inBounds:function(a,b){var c=this.bounds;return c?a>=c.left&&a<c.right&&b>=c.top&&b<c.bottom:!0}}),eb=ra.extend({coordMaps:null,constructor:function(a){this.coordMaps=a},build:function(){var a,b=this.coordMaps;for(a=0;a<b.length;a++)b[a].build()},getCell:function(a,b){var c,d=this.coordMaps,e=null;for(c=0;c<d.length&&!e;c++)e=d[c].getCell(a,b);return e},clear:function(){var a,b=this.coordMaps;for(a=0;a<b.length;a++)b[a].clear()}}),fb=Ma.DragListener=ra.extend({options:null,isListening:!1,isDragging:!1,originX:null,originY:null,mousemoveProxy:null,mouseupProxy:null,subjectEl:null,subjectHref:null,scrollEl:null,scrollBounds:null,scrollTopVel:null,scrollLeftVel:null,scrollIntervalId:null,scrollHandlerProxy:null,scrollSensitivity:30,scrollSpeed:200,scrollIntervalMs:50,constructor:function(a){a=a||{},this.options=a,this.subjectEl=a.subjectEl},mousedown:function(a){v(a)&&(a.preventDefault(),this.startListening(a),this.options.distance||this.startDrag(a))},startListening:function(b){var c;this.isListening||(b&&this.options.scroll&&(c=n(a(b.target)),c.is(window)||c.is(document)||(this.scrollEl=c,this.scrollHandlerProxy=da(ca(this,"scrollHandler"),100),this.scrollEl.on("scroll",this.scrollHandlerProxy))),a(document).on("mousemove",this.mousemoveProxy=ca(this,"mousemove")).on("mouseup",this.mouseupProxy=ca(this,"mouseup")).on("selectstart",this.preventDefault),b?(this.originX=b.pageX,this.originY=b.pageY):(this.originX=0,this.originY=0),this.isListening=!0,this.listenStart(b))},listenStart:function(a){this.trigger("listenStart",a)},mousemove:function(a){var b,c,d=a.pageX-this.originX,e=a.pageY-this.originY;this.isDragging||(b=this.options.distance||1,c=d*d+e*e,c>=b*b&&this.startDrag(a)),this.isDragging&&this.drag(d,e,a)},startDrag:function(a){this.isListening||this.startListening(),this.isDragging||(this.isDragging=!0,this.dragStart(a))},dragStart:function(a){var b=this.subjectEl;this.trigger("dragStart",a),(this.subjectHref=b?b.attr("href"):null)&&b.removeAttr("href")},drag:function(a,b,c){this.trigger("drag",a,b,c),this.updateScroll(c)},mouseup:function(a){this.stopListening(a)},stopDrag:function(a){this.isDragging&&(this.stopScrolling(),this.dragStop(a),this.isDragging=!1)},dragStop:function(a){var b=this;this.trigger("dragStop",a),setTimeout(function(){b.subjectHref&&b.subjectEl.attr("href",b.subjectHref)},0)},stopListening:function(b){this.stopDrag(b),this.isListening&&(this.scrollEl&&(this.scrollEl.off("scroll",this.scrollHandlerProxy),this.scrollHandlerProxy=null),a(document).off("mousemove",this.mousemoveProxy).off("mouseup",this.mouseupProxy).off("selectstart",this.preventDefault),this.mousemoveProxy=null,this.mouseupProxy=null,this.isListening=!1,this.listenStop(b))},listenStop:function(a){this.trigger("listenStop",a)},trigger:function(a){this.options[a]&&this.options[a].apply(this,Array.prototype.slice.call(arguments,1))},preventDefault:function(a){a.preventDefault()},computeScrollBounds:function(){var a=this.scrollEl;this.scrollBounds=a?o(a):null},updateScroll:function(a){var b,c,d,e,f=this.scrollSensitivity,g=this.scrollBounds,h=0,i=0;g&&(b=(f-(a.pageY-g.top))/f,c=(f-(g.bottom-a.pageY))/f,d=(f-(a.pageX-g.left))/f,e=(f-(g.right-a.pageX))/f,b>=0&&1>=b?h=b*this.scrollSpeed*-1:c>=0&&1>=c&&(h=c*this.scrollSpeed),d>=0&&1>=d?i=d*this.scrollSpeed*-1:e>=0&&1>=e&&(i=e*this.scrollSpeed)),this.setScrollVel(h,i)},setScrollVel:function(a,b){this.scrollTopVel=a,this.scrollLeftVel=b,this.constrainScrollVel(),!this.scrollTopVel&&!this.scrollLeftVel||this.scrollIntervalId||(this.scrollIntervalId=setInterval(ca(this,"scrollIntervalFunc"),this.scrollIntervalMs))},constrainScrollVel:function(){var a=this.scrollEl;this.scrollTopVel<0?a.scrollTop()<=0&&(this.scrollTopVel=0):this.scrollTopVel>0&&a.scrollTop()+a[0].clientHeight>=a[0].scrollHeight&&(this.scrollTopVel=0),this.scrollLeftVel<0?a.scrollLeft()<=0&&(this.scrollLeftVel=0):this.scrollLeftVel>0&&a.scrollLeft()+a[0].clientWidth>=a[0].scrollWidth&&(this.scrollLeftVel=0)},scrollIntervalFunc:function(){var a=this.scrollEl,b=this.scrollIntervalMs/1e3;this.scrollTopVel&&a.scrollTop(a.scrollTop()+this.scrollTopVel*b),this.scrollLeftVel&&a.scrollLeft(a.scrollLeft()+this.scrollLeftVel*b),this.constrainScrollVel(),this.scrollTopVel||this.scrollLeftVel||this.stopScrolling()},stopScrolling:function(){this.scrollIntervalId&&(clearInterval(this.scrollIntervalId),this.scrollIntervalId=null,this.scrollStop())},scrollHandler:function(){this.scrollIntervalId||this.scrollStop()},scrollStop:function(){}}),gb=fb.extend({coordMap:null,origCell:null,cell:null,coordAdjust:null,constructor:function(a,b){fb.prototype.constructor.call(this,b),this.coordMap=a},listenStart:function(a){var b,c,d,e=this.subjectEl;fb.prototype.listenStart.apply(this,arguments),this.computeCoords(),a?(c={left:a.pageX,top:a.pageY},d=c,e&&(b=o(e),d=x(d,b)),this.origCell=this.getCell(d.left,d.top),e&&this.options.subjectCenter&&(this.origCell&&(b=w(this.origCell,b)||b),d=y(b)),this.coordAdjust=z(d,c)):(this.origCell=null,this.coordAdjust=null)},computeCoords:function(){this.coordMap.build(),this.computeScrollBounds()},dragStart:function(a){var b;fb.prototype.dragStart.apply(this,arguments),b=this.getCell(a.pageX,a.pageY),b&&this.cellOver(b)},drag:function(a,b,c){var d;fb.prototype.drag.apply(this,arguments),d=this.getCell(c.pageX,c.pageY),sa(d,this.cell)||(this.cell&&this.cellOut(),d&&this.cellOver(d))},dragStop:function(){this.cellDone(),fb.prototype.dragStop.apply(this,arguments)},cellOver:function(a){this.cell=a,this.trigger("cellOver",a,sa(a,this.origCell),this.origCell)},cellOut:function(){this.cell&&(this.trigger("cellOut",this.cell),this.cellDone(),this.cell=null)},cellDone:function(){this.cell&&this.trigger("cellDone",this.cell)},listenStop:function(){fb.prototype.listenStop.apply(this,arguments),this.origCell=this.cell=null,this.coordMap.clear()},scrollStop:function(){fb.prototype.scrollStop.apply(this,arguments),this.computeCoords()},getCell:function(a,b){return this.coordAdjust&&(a+=this.coordAdjust.left,b+=this.coordAdjust.top),this.coordMap.getCell(a,b)}}),hb=ra.extend({options:null,sourceEl:null,el:null,parentEl:null,top0:null,left0:null,mouseY0:null,mouseX0:null,topDelta:null,leftDelta:null,mousemoveProxy:null,isFollowing:!1,isHidden:!1,isAnimating:!1,constructor:function(b,c){this.options=c=c||{},this.sourceEl=b,this.parentEl=c.parentEl?a(c.parentEl):b.parent()},start:function(b){this.isFollowing||(this.isFollowing=!0,this.mouseY0=b.pageY,this.mouseX0=b.pageX,this.topDelta=0,this.leftDelta=0,this.isHidden||this.updatePosition(),a(document).on("mousemove",this.mousemoveProxy=ca(this,"mousemove")))},stop:function(b,c){function d(){this.isAnimating=!1,e.removeElement(),this.top0=this.left0=null,c&&c()}var e=this,f=this.options.revertDuration;this.isFollowing&&!this.isAnimating&&(this.isFollowing=!1,a(document).off("mousemove",this.mousemoveProxy),b&&f&&!this.isHidden?(this.isAnimating=!0,this.el.animate({top:this.top0,left:this.left0},{duration:f,complete:d})):d())},getEl:function(){var a=this.el;return a||(this.sourceEl.width(),a=this.el=this.sourceEl.clone().css({position:"absolute",visibility:"",display:this.isHidden?"none":"",margin:0,right:"auto",bottom:"auto",width:this.sourceEl.width(),height:this.sourceEl.height(),opacity:this.options.opacity||"",zIndex:this.options.zIndex}).appendTo(this.parentEl)),a},removeElement:function(){this.el&&(this.el.remove(),this.el=null)},updatePosition:function(){var a,b;this.getEl(),null===this.top0&&(this.sourceEl.width(),a=this.sourceEl.offset(),b=this.el.offsetParent().offset(),this.top0=a.top-b.top,this.left0=a.left-b.left),this.el.css({top:this.top0+this.topDelta,left:this.left0+this.leftDelta})},mousemove:function(a){this.topDelta=a.pageY-this.mouseY0,this.leftDelta=a.pageX-this.mouseX0,this.isHidden||this.updatePosition()},hide:function(){this.isHidden||(this.isHidden=!0,this.el&&this.el.hide())},show:function(){this.isHidden&&(this.isHidden=!1,this.updatePosition(),this.getEl().show())}}),ib=ra.extend({view:null,isRTL:null,cellHtml:"<td/>",constructor:function(a){this.view=a,this.isRTL=a.opt("isRTL")},rowHtml:function(a,b){var c,d,e=this.getHtmlRenderer("cell",a),f="";for(b=b||0,c=0;c<this.colCnt;c++)d=this.getCell(b,c),f+=e(d);return f=this.bookendCells(f,a,b),"<tr>"+f+"</tr>"},bookendCells:function(a,b,c){var d=this.getHtmlRenderer("intro",b)(c||0),e=this.getHtmlRenderer("outro",b)(c||0),f=this.isRTL?e:d,g=this.isRTL?d:e;return"string"==typeof a?f+a+g:a.prepend(f).append(g)},getHtmlRenderer:function(a,b){var c,d,e,f,g=this.view;return c=a+"Html",b&&(d=b+_(a)+"Html"),d&&(f=g[d])?e=g:d&&(f=this[d])?e=this:(f=g[c])?e=g:(f=this[c])&&(e=this),"function"==typeof f?function(){return f.apply(e,arguments)||""}:function(){return f||""}}}),jb=Ma.Grid=ib.extend({start:null,end:null,rowCnt:0,colCnt:0,el:null,coordMap:null,elsByFill:null,externalDragStartProxy:null,colHeadFormat:null,eventTimeFormat:null,displayEventTime:null,displayEventEnd:null,cellDuration:null,largeUnit:null,constructor:function(){ib.apply(this,arguments),this.coordMap=new db(this),this.elsByFill={},this.externalDragStartProxy=ca(this,"externalDragStart")},computeColHeadFormat:function(){},computeEventTimeFormat:function(){return this.view.opt("smallTimeFormat")},computeDisplayEventTime:function(){return!0},computeDisplayEventEnd:function(){return!0},setRange:function(a){this.start=a.start.clone(),this.end=a.end.clone(),this.rangeUpdated(),this.processRangeOptions()},rangeUpdated:function(){},processRangeOptions:function(){var a,b,c=this.view;this.colHeadFormat=c.opt("columnFormat")||this.computeColHeadFormat(),this.eventTimeFormat=c.opt("eventTimeFormat")||c.opt("timeFormat")||this.computeEventTimeFormat(),a=c.opt("displayEventTime"),null==a&&(a=this.computeDisplayEventTime()),b=c.opt("displayEventEnd"),null==b&&(b=this.computeDisplayEventEnd()),this.displayEventTime=a,this.displayEventEnd=b},build:function(){},clear:function(){},rangeToSegs:function(a){},diffDates:function(a,b){return this.largeUnit?H(a,b,this.largeUnit):F(a,b)},getCell:function(b,c){var d;return null==c&&("number"==typeof b?(c=b%this.colCnt,b=Math.floor(b/this.colCnt)):(c=b.col,b=b.row)),d={row:b,col:c},a.extend(d,this.getRowData(b),this.getColData(c)),a.extend(d,this.computeCellRange(d)),d},computeCellRange:function(a){var b=this.computeCellDate(a);return{start:b,end:b.clone().add(this.cellDuration)}},computeCellDate:function(a){},getRowData:function(a){return{}},getColData:function(a){return{}},getRowEl:function(a){},getColEl:function(a){},getCellDayEl:function(a){return this.getColEl(a.col)||this.getRowEl(a.row)},computeRowCoords:function(){var a,b,c,d=[];for(a=0;a<this.rowCnt;a++)b=this.getRowEl(a),c=b.offset().top,d.push({top:c,bottom:c+b.outerHeight()});return d},computeColCoords:function(){var a,b,c,d=[];for(a=0;a<this.colCnt;a++)b=this.getColEl(a),c=b.offset().left,d.push({left:c,right:c+b.outerWidth()});return d},setElement:function(b){var c=this;this.el=b,b.on("mousedown",function(b){a(b.target).is(".fc-event-container *, .fc-more")||a(b.target).closest(".fc-popover").length||c.dayMousedown(b)}),this.bindSegHandlers(),this.bindGlobalHandlers()},removeElement:function(){this.unbindGlobalHandlers(),this.el.remove()},renderSkeleton:function(){},renderDates:function(){},unrenderDates:function(){},bindGlobalHandlers:function(){a(document).on("dragstart sortstart",this.externalDragStartProxy)},unbindGlobalHandlers:function(){a(document).off("dragstart sortstart",this.externalDragStartProxy)},dayMousedown:function(a){var b,c,d=this,e=this.view,f=e.opt("selectable"),i=new gb(this.coordMap,{scroll:e.opt("dragScroll"),dragStart:function(){e.unselect()},cellOver:function(a,e,h){h&&(b=e?a:null,f&&(c=d.computeSelection(h,a),c?d.renderSelection(c):g()))},cellOut:function(a){b=null,c=null,d.unrenderSelection(),h()},listenStop:function(a){b&&e.triggerDayClick(b,d.getCellDayEl(b),a),c&&e.reportSelection(c,a),h()}});i.mousedown(a)},renderRangeHelper:function(a,b){var c=this.fabricateHelperEvent(a,b);this.renderHelper(c,b)},fabricateHelperEvent:function(a,b){var c=b?R(b.event):{};return c.start=a.start.clone(),c.end=a.end?a.end.clone():null,c.allDay=null,this.view.calendar.normalizeEventRange(c),c.className=(c.className||[]).concat("fc-helper"),b||(c.editable=!1),c},renderHelper:function(a,b){},unrenderHelper:function(){},renderSelection:function(a){this.renderHighlight(this.selectionRangeToSegs(a))},unrenderSelection:function(){this.unrenderHighlight()},computeSelection:function(a,b){var c,d=[a.start,a.end,b.start,b.end];return d.sort(aa),c={start:d[0].clone(),end:d[3].clone()},this.view.calendar.isSelectionRangeAllowed(c)?c:null},selectionRangeToSegs:function(a){return this.rangeToSegs(a)},renderHighlight:function(a){this.renderFill("highlight",a)},unrenderHighlight:function(){this.unrenderFill("highlight")},highlightSegClasses:function(){return["fc-highlight"]},renderFill:function(a,b){},unrenderFill:function(a){var b=this.elsByFill[a];b&&(b.remove(),delete this.elsByFill[a])},renderFillSegEls:function(b,c){var d,e=this,f=this[b+"SegEl"],g="",h=[];if(c.length){for(d=0;d<c.length;d++)g+=this.fillSegHtml(b,c[d]);a(g).each(function(b,d){var g=c[b],i=a(d);f&&(i=f.call(e,g,i)),i&&(i=a(i),i.is(e.fillSegTag)&&(g.el=i,h.push(g)))})}return h},fillSegTag:"div",fillSegHtml:function(a,b){var c=this[a+"SegClasses"],d=this[a+"SegCss"],e=c?c.call(this,b):[],f=$(d?d.call(this,b):{});return"<"+this.fillSegTag+(e.length?' class="'+e.join(" ")+'"':"")+(f?' style="'+f+'"':"")+" />"},headHtml:function(){return'<div class="fc-row '+this.view.widgetHeaderClass+'"><table><thead>'+this.rowHtml("head")+"</thead></table></div>"},headCellHtml:function(a){var b=this.view,c=a.start;return'<th class="fc-day-header '+b.widgetHeaderClass+" fc-"+Qa[c.day()]+'">'+Y(c.format(this.colHeadFormat))+"</th>"},bgCellHtml:function(a){var b=this.view,c=a.start,d=this.getDayClasses(c);return d.unshift("fc-day",b.widgetContentClass),'<td class="'+d.join(" ")+'" data-date="'+c.format("YYYY-MM-DD")+'"></td>'},getDayClasses:function(a){var b=this.view,c=b.calendar.getNow().stripTime(),d=["fc-"+Qa[a.day()]];return 1==b.intervalDuration.as("months")&&a.month()!=b.intervalStart.month()&&d.push("fc-other-month"),a.isSame(c,"day")?d.push("fc-today",b.highlightStateClass):c>a?d.push("fc-past"):d.push("fc-future"),d}});jb.mixin({mousedOverSeg:null,isDraggingSeg:!1,isResizingSeg:!1,isDraggingExternal:!1,segs:null,renderEvents:function(a){var b,c,d=this.eventsToSegs(a),e=[],f=[];for(b=0;b<d.length;b++)c=d[b],ta(c.event)?e.push(c):f.push(c);e=this.renderBgSegs(e)||e,f=this.renderFgSegs(f)||f,this.segs=e.concat(f)},unrenderEvents:function(){this.triggerSegMouseout(),this.unrenderFgSegs(),this.unrenderBgSegs(),this.segs=null},getEventSegs:function(){return this.segs||[]},renderFgSegs:function(a){},unrenderFgSegs:function(){},renderFgSegEls:function(b,c){var d,e=this.view,f="",g=[];if(b.length){for(d=0;d<b.length;d++)f+=this.fgSegHtml(b[d],c);a(f).each(function(c,d){var f=b[c],h=e.resolveEventEl(f.event,a(d));h&&(h.data("fc-seg",f),f.el=h,g.push(f))})}return g},fgSegHtml:function(a,b){},renderBgSegs:function(a){return this.renderFill("bgEvent",a)},unrenderBgSegs:function(){this.unrenderFill("bgEvent")},bgEventSegEl:function(a,b){return this.view.resolveEventEl(a.event,b)},bgEventSegClasses:function(a){var b=a.event,c=b.source||{};return["fc-bgevent"].concat(b.className,c.className||[])},bgEventSegCss:function(a){var b=this.view,c=a.event,d=c.source||{};return{"background-color":c.backgroundColor||c.color||d.backgroundColor||d.color||b.opt("eventBackgroundColor")||b.opt("eventColor")}},businessHoursSegClasses:function(a){return["fc-nonbusiness","fc-bgevent"]},bindSegHandlers:function(){var b=this,c=this.view;a.each({mouseenter:function(a,c){b.triggerSegMouseover(a,c)},mouseleave:function(a,c){b.triggerSegMouseout(a,c)},click:function(a,b){return c.trigger("eventClick",this,a.event,b)},mousedown:function(d,e){a(e.target).is(".fc-resizer")&&c.isEventResizable(d.event)?b.segResizeMousedown(d,e,a(e.target).is(".fc-start-resizer")):c.isEventDraggable(d.event)&&b.segDragMousedown(d,e)}},function(c,d){b.el.on(c,".fc-event-container > *",function(c){var e=a(this).data("fc-seg");return!e||b.isDraggingSeg||b.isResizingSeg?void 0:d.call(this,e,c)})})},triggerSegMouseover:function(a,b){this.mousedOverSeg||(this.mousedOverSeg=a,this.view.trigger("eventMouseover",a.el[0],a.event,b))},triggerSegMouseout:function(a,b){b=b||{},this.mousedOverSeg&&(a=a||this.mousedOverSeg,this.mousedOverSeg=null,this.view.trigger("eventMouseout",a.el[0],a.event,b))},segDragMousedown:function(a,b){var c,d=this,e=this.view,f=e.calendar,i=a.el,j=a.event,k=new hb(a.el,{parentEl:e.el,opacity:e.opt("dragOpacity"),revertDuration:e.opt("dragRevertDuration"),zIndex:2}),l=new gb(e.coordMap,{distance:5,scroll:e.opt("dragScroll"),subjectEl:i,subjectCenter:!0,listenStart:function(a){k.hide(),k.start(a)},dragStart:function(b){d.triggerSegMouseout(a,b),d.segDragStart(a,b),e.hideEvent(j)},cellOver:function(b,h,i){a.cell&&(i=a.cell),c=d.computeEventDrop(i,b,j),c&&!f.isEventRangeAllowed(c,j)&&(g(),c=null),c&&e.renderDrag(c,a)?k.hide():k.show(),h&&(c=null)},cellOut:function(){e.unrenderDrag(),k.show(),c=null},cellDone:function(){h()},dragStop:function(b){k.stop(!c,function(){e.unrenderDrag(),e.showEvent(j),d.segDragStop(a,b),c&&e.reportEventDrop(j,c,this.largeUnit,i,b)})},listenStop:function(){k.stop()}});l.mousedown(b)},segDragStart:function(a,b){this.isDraggingSeg=!0,this.view.trigger("eventDragStart",a.el[0],a.event,b,{})},segDragStop:function(a,b){this.isDraggingSeg=!1,this.view.trigger("eventDragStop",a.el[0],a.event,b,{})},computeEventDrop:function(a,b,c){var d,e,f=this.view.calendar,g=a.start,h=b.start;return g.hasTime()===h.hasTime()?(d=this.diffDates(h,g),c.allDay&&N(d)?(e={start:c.start.clone(),end:f.getEventEnd(c),allDay:!1},f.normalizeEventRangeTimes(e)):e={start:c.start.clone(),end:c.end?c.end.clone():null,allDay:c.allDay},e.start.add(d),e.end&&e.end.add(d)):e={start:h.clone(),end:null,allDay:!h.hasTime()},e},applyDragOpacity:function(a){var b=this.view.opt("dragOpacity");null!=b&&a.each(function(a,c){c.style.opacity=b})},externalDragStart:function(b,c){var d,e,f=this.view;f.opt("droppable")&&(d=a((c?c.item:null)||b.target),e=f.opt("dropAccept"),(a.isFunction(e)?e.call(d[0],d):d.is(e))&&(this.isDraggingExternal||this.listenToExternalDrag(d,b,c)))},listenToExternalDrag:function(a,b,c){var d,e,f=this,i=ya(a);d=new gb(this.coordMap,{listenStart:function(){f.isDraggingExternal=!0},cellOver:function(a){e=f.computeExternalDrop(a,i),e?f.renderDrag(e):g()},cellOut:function(){e=null,f.unrenderDrag(),h()},dragStop:function(){f.unrenderDrag(),h(),e&&f.view.reportExternalDrop(i,e,a,b,c)},listenStop:function(){f.isDraggingExternal=!1}}),d.startDrag(b)},computeExternalDrop:function(a,b){var c={start:a.start.clone(),end:null};return b.startTime&&!c.start.hasTime()&&c.start.time(b.startTime),b.duration&&(c.end=c.start.clone().add(b.duration)),this.view.calendar.isExternalDropRangeAllowed(c,b.eventProps)?c:null},renderDrag:function(a,b){},unrenderDrag:function(){},segResizeMousedown:function(a,b,c){var d,e,f=this,i=this.view,j=i.calendar,k=a.el,l=a.event,m=j.getEventEnd(l);d=new gb(this.coordMap,{distance:5,scroll:i.opt("dragScroll"),subjectEl:k,dragStart:function(b){f.triggerSegMouseout(a,b),f.segResizeStart(a,b)},cellOver:function(b,d,h){e=c?f.computeEventStartResize(h,b,l):f.computeEventEndResize(h,b,l),e&&(j.isEventRangeAllowed(e,l)?e.start.isSame(l.start)&&e.end.isSame(m)&&(e=null):(g(),e=null)),e&&(i.hideEvent(l),f.renderEventResize(e,a))},cellOut:function(){e=null},cellDone:function(){f.unrenderEventResize(),i.showEvent(l),h()},dragStop:function(b){f.segResizeStop(a,b),e&&i.reportEventResize(l,e,this.largeUnit,k,b)}}),d.mousedown(b)},segResizeStart:function(a,b){this.isResizingSeg=!0,this.view.trigger("eventResizeStart",a.el[0],a.event,b,{})},segResizeStop:function(a,b){this.isResizingSeg=!1,this.view.trigger("eventResizeStop",a.el[0],a.event,b,{})},computeEventStartResize:function(a,b,c){return this.computeEventResize("start",a,b,c)},computeEventEndResize:function(a,b,c){return this.computeEventResize("end",a,b,c)},computeEventResize:function(a,b,c,d){var e,f,g=this.view.calendar,h=this.diffDates(c[a],b[a]);return e={start:d.start.clone(),end:g.getEventEnd(d),allDay:d.allDay},e.allDay&&N(h)&&(e.allDay=!1,g.normalizeEventRangeTimes(e)),e[a].add(h),e.start.isBefore(e.end)||(f=d.allDay?g.defaultAllDayEventDuration:g.defaultTimedEventDuration,this.cellDuration&&this.cellDuration<f&&(f=this.cellDuration),"start"==a?e.start=e.end.clone().subtract(f):e.end=e.start.clone().add(f)),e},renderEventResize:function(a,b){},unrenderEventResize:function(){},getEventTimeText:function(a,b,c){return null==b&&(b=this.eventTimeFormat),null==c&&(c=this.displayEventEnd),this.displayEventTime&&a.start.hasTime()?c&&a.end?this.view.formatRange(a,b):a.start.format(b):""},getSegClasses:function(a,b,c){var d=a.event,e=["fc-event",a.isStart?"fc-start":"fc-not-start",a.isEnd?"fc-end":"fc-not-end"].concat(d.className,d.source?d.source.className:[]);return b&&e.push("fc-draggable"),c&&e.push("fc-resizable"),e},getEventSkinCss:function(a){var b=this.view,c=a.source||{},d=a.color,e=c.color,f=b.opt("eventColor");return{"background-color":a.backgroundColor||d||c.backgroundColor||e||b.opt("eventBackgroundColor")||f,"border-color":a.borderColor||d||c.borderColor||e||b.opt("eventBorderColor")||f,color:a.textColor||c.textColor||b.opt("eventTextColor")}},eventsToSegs:function(a,b){var c,d=this.eventsToRanges(a),e=[];for(c=0;c<d.length;c++)e.push.apply(e,this.eventRangeToSegs(d[c],b));return e},eventsToRanges:function(b){var c=this,d=wa(b),e=[];return a.each(d,function(a,b){b.length&&e.push.apply(e,ua(b[0])?c.eventsToInverseRanges(b):c.eventsToNormalRanges(b))}),e},eventsToNormalRanges:function(a){var b,c,d,e,f=this.view.calendar,g=[];for(b=0;b<a.length;b++)c=a[b],d=c.start.clone().stripZone(),e=f.getEventEnd(c).stripZone(),g.push({event:c,start:d,end:e,eventStartMS:+d,eventDurationMS:e-d});return g},eventsToInverseRanges:function(a){var b,c,d=this.view,e=d.start.clone().stripZone(),f=d.end.clone().stripZone(),g=this.eventsToNormalRanges(a),h=[],i=a[0],j=e;for(g.sort(xa),b=0;b<g.length;b++)c=g[b],c.start>j&&h.push({event:i,start:j,end:c.start}),j=c.end;return f>j&&h.push({event:i,start:j,end:f}),h},eventRangeToSegs:function(a,b){var c,d,e;for(a=this.view.calendar.ensureVisibleEventRange(a),c=b?b(a):this.rangeToSegs(a),d=0;d<c.length;d++)e=c[d],e.event=a.event,e.eventStartMS=a.eventStartMS,e.eventDurationMS=a.eventDurationMS;return c},sortSegs:function(a){a.sort(ca(this,"compareSegs"))},compareSegs:function(a,b){return a.eventStartMS-b.eventStartMS||b.eventDurationMS-a.eventDurationMS||b.event.allDay-a.event.allDay||B(a.event,b.event,this.view.eventOrderSpecs)}}),Ma.dataAttrPrefix="";var kb=jb.extend({numbersVisible:!1,bottomCoordPadding:0,breakOnWeeks:null,cellDates:null,dayToCellOffsets:null,rowEls:null,dayEls:null,helperEls:null,constructor:function(){jb.apply(this,arguments),this.cellDuration=b.duration(1,"day")},renderDates:function(a){var b,c,d,e=this.view,f=this.rowCnt,g=this.colCnt,h=f*g,i="";for(b=0;f>b;b++)i+=this.dayRowHtml(b,a);for(this.el.html(i),this.rowEls=this.el.find(".fc-row"),this.dayEls=this.el.find(".fc-day"),c=0;h>c;c++)d=this.getCell(c),e.trigger("dayRender",null,d.start,this.dayEls.eq(c))},unrenderDates:function(){this.removeSegPopover()},renderBusinessHours:function(){var a=this.view.calendar.getBusinessHoursEvents(!0),b=this.eventsToSegs(a);this.renderFill("businessHours",b,"bgevent")},dayRowHtml:function(a,b){var c=this.view,d=["fc-row","fc-week",c.widgetContentClass];return b&&d.push("fc-rigid"),'<div class="'+d.join(" ")+'"><div class="fc-bg"><table>'+this.rowHtml("day",a)+'</table></div><div class="fc-content-skeleton"><table>'+(this.numbersVisible?"<thead>"+this.rowHtml("number",a)+"</thead>":"")+"</table></div></div>"},dayCellHtml:function(a){return this.bgCellHtml(a)},computeColHeadFormat:function(){return this.rowCnt>1?"ddd":this.colCnt>1?this.view.opt("dayOfMonthFormat"):"dddd"},computeEventTimeFormat:function(){return this.view.opt("extraSmallTimeFormat")},computeDisplayEventEnd:function(){return 1==this.colCnt},rangeUpdated:function(){var a,b,c,d;if(this.updateCellDates(),a=this.cellDates,this.breakOnWeeks){for(b=a[0].day(),d=1;d<a.length&&a[d].day()!=b;d++);c=Math.ceil(a.length/d)}else c=1,d=a.length;this.rowCnt=c,this.colCnt=d},updateCellDates:function(){for(var a=this.view,b=this.start.clone(),c=[],d=-1,e=[];b.isBefore(this.end);)a.isHiddenDay(b)?e.push(d+.5):(d++,e.push(d),c.push(b.clone())),b.add(1,"days");this.cellDates=c,this.dayToCellOffsets=e},computeCellDate:function(a){var b=this.colCnt,c=a.row*b+(this.isRTL?b-a.col-1:a.col);return this.cellDates[c].clone()},getRowEl:function(a){return this.rowEls.eq(a)},getColEl:function(a){return this.dayEls.eq(a)},getCellDayEl:function(a){return this.dayEls.eq(a.row*this.colCnt+a.col)},computeRowCoords:function(){var a=jb.prototype.computeRowCoords.call(this);return a[a.length-1].bottom+=this.bottomCoordPadding,a},rangeToSegs:function(a){var b,c,d,e,f,g,h,i,j,k,l=this.isRTL,m=this.rowCnt,n=this.colCnt,o=[];for(a=this.view.computeDayRange(a),b=this.dateToCellOffset(a.start),c=this.dateToCellOffset(a.end.subtract(1,"days")),d=0;m>d;d++)e=d*n,f=e+n-1,i=Math.max(e,b),j=Math.min(f,c),i=Math.ceil(i),j=Math.floor(j),j>=i&&(g=i===b,h=j===c,i-=e,j-=e,k={row:d,isStart:g,isEnd:h},l?(k.leftCol=n-j-1,k.rightCol=n-i-1):(k.leftCol=i,k.rightCol=j),o.push(k));return o},dateToCellOffset:function(a){var b=this.dayToCellOffsets,c=a.diff(this.start,"days");return 0>c?b[0]-1:c>=b.length?b[b.length-1]+1:b[c]},renderDrag:function(a,b){return this.renderHighlight(this.eventRangeToSegs(a)),b&&!b.el.closest(this.el).length?(this.renderRangeHelper(a,b),this.applyDragOpacity(this.helperEls),!0):void 0},unrenderDrag:function(){this.unrenderHighlight(),this.unrenderHelper()},renderEventResize:function(a,b){this.renderHighlight(this.eventRangeToSegs(a)),this.renderRangeHelper(a,b)},unrenderEventResize:function(){this.unrenderHighlight(),this.unrenderHelper()},renderHelper:function(b,c){var d,e=[],f=this.eventsToSegs([b]);f=this.renderFgSegEls(f),d=this.renderSegRows(f),this.rowEls.each(function(b,f){var g,h=a(f),i=a('<div class="fc-helper-skeleton"><table/></div>');g=c&&c.row===b?c.el.position().top:h.find(".fc-content-skeleton tbody").position().top,i.css("top",g).find("table").append(d[b].tbodyEl),h.append(i),e.push(i[0])}),this.helperEls=a(e)},unrenderHelper:function(){this.helperEls&&(this.helperEls.remove(),this.helperEls=null)},fillSegTag:"td",renderFill:function(b,c,d){var e,f,g,h=[];for(c=this.renderFillSegEls(b,c),e=0;e<c.length;e++)f=c[e],g=this.renderFillRow(b,f,d),this.rowEls.eq(f.row).append(g),h.push(g[0]);return this.elsByFill[b]=a(h),c},renderFillRow:function(b,c,d){var e,f,g=this.colCnt,h=c.leftCol,i=c.rightCol+1;return d=d||b.toLowerCase(),e=a('<div class="fc-'+d+'-skeleton"><table><tr/></table></div>'),f=e.find("tr"),h>0&&f.append('<td colspan="'+h+'"/>'),f.append(c.el.attr("colspan",i-h)),g>i&&f.append('<td colspan="'+(g-i)+'"/>'),this.bookendCells(f,b),e}});kb.mixin({rowStructs:null,unrenderEvents:function(){this.removeSegPopover(),jb.prototype.unrenderEvents.apply(this,arguments)},getEventSegs:function(){return jb.prototype.getEventSegs.call(this).concat(this.popoverSegs||[])},renderBgSegs:function(b){var c=a.grep(b,function(a){return a.event.allDay});return jb.prototype.renderBgSegs.call(this,c)},renderFgSegs:function(b){var c;return b=this.renderFgSegEls(b),c=this.rowStructs=this.renderSegRows(b),this.rowEls.each(function(b,d){a(d).find(".fc-content-skeleton > table").append(c[b].tbodyEl)}),b},unrenderFgSegs:function(){for(var a,b=this.rowStructs||[];a=b.pop();)a.tbodyEl.remove();this.rowStructs=null},renderSegRows:function(a){var b,c,d=[];for(b=this.groupSegRows(a),c=0;c<b.length;c++)d.push(this.renderSegRow(c,b[c]));return d},fgSegHtml:function(a,b){var c,d,e=this.view,f=a.event,g=e.isEventDraggable(f),h=!b&&f.allDay&&a.isStart&&e.isEventResizableFromStart(f),i=!b&&f.allDay&&a.isEnd&&e.isEventResizableFromEnd(f),j=this.getSegClasses(a,g,h||i),k=$(this.getEventSkinCss(f)),l="";return j.unshift("fc-day-grid-event","fc-h-event"),a.isStart&&(c=this.getEventTimeText(f),c&&(l='<span class="fc-time">'+Y(c)+"</span>")),d='<span class="fc-title">'+(Y(f.title||"")||"&nbsp;")+"</span>",'<a class="'+j.join(" ")+'"'+(f.url?' href="'+Y(f.url)+'"':"")+(k?' style="'+k+'"':"")+'><div class="fc-content">'+(this.isRTL?d+" "+l:l+" "+d)+"</div>"+(h?'<div class="fc-resizer fc-start-resizer" />':"")+(i?'<div class="fc-resizer fc-end-resizer" />':"")+"</a>"},renderSegRow:function(b,c){function d(b){for(;b>g;)k=(r[e-1]||[])[g],k?k.attr("rowspan",parseInt(k.attr("rowspan")||1,10)+1):(k=a("<td/>"),h.append(k)),q[e][g]=k,r[e][g]=k,g++}var e,f,g,h,i,j,k,l=this.colCnt,m=this.buildSegLevels(c),n=Math.max(1,m.length),o=a("<tbody/>"),p=[],q=[],r=[];for(e=0;n>e;e++){if(f=m[e],g=0,h=a("<tr/>"),p.push([]),q.push([]),r.push([]),f)for(i=0;i<f.length;i++){for(j=f[i],d(j.leftCol),k=a('<td class="fc-event-container"/>').append(j.el),j.leftCol!=j.rightCol?k.attr("colspan",j.rightCol-j.leftCol+1):r[e][g]=k;g<=j.rightCol;)q[e][g]=k,p[e][g]=j,g++;h.append(k)}d(l),this.bookendCells(h,"eventSkeleton"),o.append(h)}return{row:b,tbodyEl:o,cellMatrix:q,segMatrix:p,segLevels:m,segs:c}},buildSegLevels:function(a){var b,c,d,e=[];for(this.sortSegs(a),b=0;b<a.length;b++){for(c=a[b],d=0;d<e.length&&za(c,e[d]);d++);c.level=d,(e[d]||(e[d]=[])).push(c)}for(d=0;d<e.length;d++)e[d].sort(Aa);return e},groupSegRows:function(a){var b,c=[];for(b=0;b<this.rowCnt;b++)c.push([]);for(b=0;b<a.length;b++)c[a[b].row].push(a[b]);return c}}),kb.mixin({segPopover:null,popoverSegs:null,removeSegPopover:function(){this.segPopover&&this.segPopover.hide()},limitRows:function(a){var b,c,d=this.rowStructs||[];for(b=0;b<d.length;b++)this.unlimitRow(b),c=a?"number"==typeof a?a:this.computeRowLevelLimit(b):!1,c!==!1&&this.limitRow(b,c)},computeRowLevelLimit:function(b){function c(b,c){f=Math.max(f,a(c).outerHeight())}var d,e,f,g=this.rowEls.eq(b),h=g.height(),i=this.rowStructs[b].tbodyEl.children();for(d=0;d<i.length;d++)if(e=i.eq(d).removeClass("fc-limited"),f=0,e.find("> td > :first-child").each(c),e.position().top+f>h)return d;return!1},limitRow:function(b,c){function d(d){for(;d>x;)e=u.getCell(b,x),k=u.getCellSegs(e,c),k.length&&(n=g[c-1][x],t=u.renderMoreLink(e,k),s=a("<div/>").append(t),n.append(s),w.push(s[0])),x++}var e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u=this,v=this.rowStructs[b],w=[],x=0;if(c&&c<v.segLevels.length){for(f=v.segLevels[c-1],g=v.cellMatrix,h=v.tbodyEl.children().slice(c).addClass("fc-limited").get(),i=0;i<f.length;i++){for(j=f[i],d(j.leftCol),m=[],l=0;x<=j.rightCol;)e=this.getCell(b,x),k=this.getCellSegs(e,c),m.push(k),l+=k.length,x++;if(l){for(n=g[c-1][j.leftCol],o=n.attr("rowspan")||1,p=[],q=0;q<m.length;q++)r=a('<td class="fc-more-cell"/>').attr("rowspan",o),k=m[q],e=this.getCell(b,j.leftCol+q),t=this.renderMoreLink(e,[j].concat(k)),s=a("<div/>").append(t),r.append(s),p.push(r[0]),w.push(r[0]);n.addClass("fc-limited").after(a(p)),h.push(n[0])}}d(this.colCnt),v.moreEls=a(w),v.limitedEls=a(h)}},
 unlimitRow:function(a){var b=this.rowStructs[a];b.moreEls&&(b.moreEls.remove(),b.moreEls=null),b.limitedEls&&(b.limitedEls.removeClass("fc-limited"),b.limitedEls=null)},renderMoreLink:function(b,c){var d=this,e=this.view;return a('<a class="fc-more"/>').text(this.getMoreLinkText(c.length)).on("click",function(f){var g=e.opt("eventLimitClick"),h=b.start,i=a(this),j=d.getCellDayEl(b),k=d.getCellSegs(b),l=d.resliceDaySegs(k,h),m=d.resliceDaySegs(c,h);"function"==typeof g&&(g=e.trigger("eventLimitClick",null,{date:h,dayEl:j,moreEl:i,segs:l,hiddenSegs:m},f)),"popover"===g?d.showSegPopover(b,i,l):"string"==typeof g&&e.calendar.zoomTo(h,g)})},showSegPopover:function(a,b,c){var d,e,f=this,g=this.view,h=b.parent();d=1==this.rowCnt?g.el:this.rowEls.eq(a.row),e={className:"fc-more-popover",content:this.renderSegPopoverContent(a,c),parentEl:this.el,top:d.offset().top,autoHide:!0,viewportConstrain:g.opt("popoverViewportConstrain"),hide:function(){f.segPopover.removeElement(),f.segPopover=null,f.popoverSegs=null}},this.isRTL?e.right=h.offset().left+h.outerWidth()+1:e.left=h.offset().left-1,this.segPopover=new cb(e),this.segPopover.show()},renderSegPopoverContent:function(b,c){var d,e=this.view,f=e.opt("theme"),g=b.start.format(e.opt("dayPopoverFormat")),h=a('<div class="fc-header '+e.widgetHeaderClass+'"><span class="fc-close '+(f?"ui-icon ui-icon-closethick":"fc-icon fc-icon-x")+'"></span><span class="fc-title">'+Y(g)+'</span><div class="fc-clear"/></div><div class="fc-body '+e.widgetContentClass+'"><div class="fc-event-container"></div></div>'),i=h.find(".fc-event-container");for(c=this.renderFgSegEls(c,!0),this.popoverSegs=c,d=0;d<c.length;d++)c[d].cell=b,i.append(c[d].el);return h},resliceDaySegs:function(b,c){var d=a.map(b,function(a){return a.event}),e=c.clone().stripTime(),f=e.clone().add(1,"days"),g={start:e,end:f};return b=this.eventsToSegs(d,function(a){var b=E(a,g);return b?[b]:[]}),this.sortSegs(b),b},getMoreLinkText:function(a){var b=this.view.opt("eventLimitText");return"function"==typeof b?b(a):"+"+a+" "+b},getCellSegs:function(a,b){for(var c,d=this.rowStructs[a.row].segMatrix,e=b||0,f=[];e<d.length;)c=d[e][a.col],c&&f.push(c),e++;return f}});var lb=jb.extend({slotDuration:null,snapDuration:null,minTime:null,maxTime:null,colDates:null,labelFormat:null,labelInterval:null,dayEls:null,slatEls:null,slatTops:null,helperEl:null,businessHourSegs:null,constructor:function(){jb.apply(this,arguments),this.processOptions()},renderDates:function(){this.el.html(this.renderHtml()),this.dayEls=this.el.find(".fc-day"),this.slatEls=this.el.find(".fc-slats tr")},renderBusinessHours:function(){var a=this.view.calendar.getBusinessHoursEvents();this.businessHourSegs=this.renderFill("businessHours",this.eventsToSegs(a),"bgevent")},renderHtml:function(){return'<div class="fc-bg"><table>'+this.rowHtml("slotBg")+'</table></div><div class="fc-slats"><table>'+this.slatRowHtml()+"</table></div>"},slotBgCellHtml:function(a){return this.bgCellHtml(a)},slatRowHtml:function(){for(var a,c,d,e=this.view,f=this.isRTL,g="",h=b.duration(+this.minTime);h<this.maxTime;)a=this.start.clone().time(h),c=ba(L(h,this.labelInterval)),d='<td class="fc-axis fc-time '+e.widgetContentClass+'" '+e.axisStyleAttr()+">"+(c?"<span>"+Y(a.format(this.labelFormat))+"</span>":"")+"</td>",g+="<tr "+(c?"":'class="fc-minor"')+">"+(f?"":d)+'<td class="'+e.widgetContentClass+'"/>'+(f?d:"")+"</tr>",h.add(this.slotDuration);return g},processOptions:function(){var c,d=this.view,e=d.opt("slotDuration"),f=d.opt("snapDuration");e=b.duration(e),f=f?b.duration(f):e,this.slotDuration=e,this.snapDuration=f,this.cellDuration=f,this.minTime=b.duration(d.opt("minTime")),this.maxTime=b.duration(d.opt("maxTime")),c=d.opt("slotLabelFormat"),a.isArray(c)&&(c=c[c.length-1]),this.labelFormat=c||d.opt("axisFormat")||d.opt("smallTimeFormat"),c=d.opt("slotLabelInterval"),this.labelInterval=c?b.duration(c):this.computeLabelInterval(e)},computeLabelInterval:function(a){var c,d,e;for(c=yb.length-1;c>=0;c--)if(d=b.duration(yb[c]),e=L(d,a),ba(e)&&e>1)return d;return b.duration(a)},computeColHeadFormat:function(){return this.colCnt>1?this.view.opt("dayOfMonthFormat"):"dddd"},computeEventTimeFormat:function(){return this.view.opt("noMeridiemTimeFormat")},computeDisplayEventEnd:function(){return!0},rangeUpdated:function(){var a,b=this.view,c=[];for(a=this.start.clone();a.isBefore(this.end);)c.push(a.clone()),a.add(1,"day"),a=b.skipHiddenDays(a);this.isRTL&&c.reverse(),this.colDates=c,this.colCnt=c.length,this.rowCnt=Math.ceil((this.maxTime-this.minTime)/this.snapDuration)},computeCellDate:function(a){var b=this.colDates[a.col],c=this.computeSnapTime(a.row);return b=this.view.calendar.rezoneDate(b),b.time(c),b},getColEl:function(a){return this.dayEls.eq(a)},computeSnapTime:function(a){return b.duration(this.minTime+this.snapDuration*a)},rangeToSegs:function(a){var b,c,d,e,f=this.colCnt,g=[];for(a={start:a.start.clone().stripZone(),end:a.end.clone().stripZone()},c=0;f>c;c++)d=this.colDates[c],e={start:d.clone().time(this.minTime),end:d.clone().time(this.maxTime)},b=E(a,e),b&&(b.col=c,g.push(b));return g},updateSize:function(a){this.computeSlatTops(),a&&this.updateSegVerticals()},computeRowCoords:function(){var a,b,c=this.el.offset().top,d=[];for(a=0;a<this.rowCnt;a++)b={top:c+this.computeTimeTop(this.computeSnapTime(a))},a>0&&(d[a-1].bottom=b.top),d.push(b);return b.bottom=b.top+this.computeTimeTop(this.computeSnapTime(a)),d},computeDateTop:function(a,c){return this.computeTimeTop(b.duration(a.clone().stripZone()-c.clone().stripTime()))},computeTimeTop:function(a){var b,c,d,e,f=(a-this.minTime)/this.slotDuration;return f=Math.max(0,f),f=Math.min(this.slatEls.length,f),b=Math.floor(f),c=f-b,d=this.slatTops[b],c?(e=this.slatTops[b+1],d+(e-d)*c):d},computeSlatTops:function(){var b,c=[];this.slatEls.each(function(d,e){b=a(e).position().top,c.push(b)}),c.push(b+this.slatEls.last().outerHeight()),this.slatTops=c},renderDrag:function(a,b){return b?(this.renderRangeHelper(a,b),this.applyDragOpacity(this.helperEl),!0):void this.renderHighlight(this.eventRangeToSegs(a))},unrenderDrag:function(){this.unrenderHelper(),this.unrenderHighlight()},renderEventResize:function(a,b){this.renderRangeHelper(a,b)},unrenderEventResize:function(){this.unrenderHelper()},renderHelper:function(b,c){var d,e,f,g,h=this.eventsToSegs([b]);for(h=this.renderFgSegEls(h),d=this.renderSegTable(h),e=0;e<h.length;e++)f=h[e],c&&c.col===f.col&&(g=c.el,f.el.css({left:g.css("left"),right:g.css("right"),"margin-left":g.css("margin-left"),"margin-right":g.css("margin-right")}));this.helperEl=a('<div class="fc-helper-skeleton"/>').append(d).appendTo(this.el)},unrenderHelper:function(){this.helperEl&&(this.helperEl.remove(),this.helperEl=null)},renderSelection:function(a){this.view.opt("selectHelper")?this.renderRangeHelper(a):this.renderHighlight(this.selectionRangeToSegs(a))},unrenderSelection:function(){this.unrenderHelper(),this.unrenderHighlight()},renderFill:function(b,c,d){var e,f,g,h,i,j,k,l,m,n;if(c.length){for(c=this.renderFillSegEls(b,c),e=this.groupSegCols(c),d=d||b.toLowerCase(),f=a('<div class="fc-'+d+'-skeleton"><table><tr/></table></div>'),g=f.find("tr"),h=0;h<e.length;h++)if(i=e[h],j=a("<td/>").appendTo(g),i.length)for(k=a('<div class="fc-'+d+'-container"/>').appendTo(j),l=this.colDates[h],m=0;m<i.length;m++)n=i[m],k.append(n.el.css({top:this.computeDateTop(n.start,l),bottom:-this.computeDateTop(n.end,l)}));this.bookendCells(g,b),this.el.append(f),this.elsByFill[b]=f}return c}});lb.mixin({eventSkeletonEl:null,renderFgSegs:function(b){return b=this.renderFgSegEls(b),this.el.append(this.eventSkeletonEl=a('<div class="fc-content-skeleton"/>').append(this.renderSegTable(b))),b},unrenderFgSegs:function(a){this.eventSkeletonEl&&(this.eventSkeletonEl.remove(),this.eventSkeletonEl=null)},renderSegTable:function(b){var c,d,e,f,g,h,i=a("<table><tr/></table>"),j=i.find("tr");for(c=this.groupSegCols(b),this.computeSegVerticals(b),f=0;f<c.length;f++){for(g=c[f],this.placeSlotSegs(g),h=a('<div class="fc-event-container"/>'),d=0;d<g.length;d++)e=g[d],e.el.css(this.generateSegPositionCss(e)),e.bottom-e.top<30&&e.el.addClass("fc-short"),h.append(e.el);j.append(a("<td/>").append(h))}return this.bookendCells(j,"eventSkeleton"),i},placeSlotSegs:function(a){var b,c,d;if(this.sortSegs(a),b=Ba(a),Ca(b),c=b[0]){for(d=0;d<c.length;d++)Da(c[d]);for(d=0;d<c.length;d++)this.computeSlotSegCoords(c[d],0,0)}},computeSlotSegCoords:function(a,b,c){var d,e=a.forwardSegs;if(void 0===a.forwardCoord)for(e.length?(this.sortForwardSlotSegs(e),this.computeSlotSegCoords(e[0],b+1,c),a.forwardCoord=e[0].backwardCoord):a.forwardCoord=1,a.backwardCoord=a.forwardCoord-(a.forwardCoord-c)/(b+1),d=0;d<e.length;d++)this.computeSlotSegCoords(e[d],0,a.forwardCoord)},updateSegVerticals:function(){var a,b=(this.segs||[]).concat(this.businessHourSegs||[]);for(this.computeSegVerticals(b),a=0;a<b.length;a++)b[a].el.css(this.generateSegVerticalCss(b[a]))},computeSegVerticals:function(a){var b,c;for(b=0;b<a.length;b++)c=a[b],c.top=this.computeDateTop(c.start,c.start),c.bottom=this.computeDateTop(c.end,c.start)},fgSegHtml:function(a,b){var c,d,e,f=this.view,g=a.event,h=f.isEventDraggable(g),i=!b&&a.isStart&&f.isEventResizableFromStart(g),j=!b&&a.isEnd&&f.isEventResizableFromEnd(g),k=this.getSegClasses(a,h,i||j),l=$(this.getEventSkinCss(g));return k.unshift("fc-time-grid-event","fc-v-event"),f.isMultiDayEvent(g)?(a.isStart||a.isEnd)&&(c=this.getEventTimeText(a),d=this.getEventTimeText(a,"LT"),e=this.getEventTimeText(a,null,!1)):(c=this.getEventTimeText(g),d=this.getEventTimeText(g,"LT"),e=this.getEventTimeText(g,null,!1)),'<a class="'+k.join(" ")+'"'+(g.url?' href="'+Y(g.url)+'"':"")+(l?' style="'+l+'"':"")+'><div class="fc-content">'+(c?'<div class="fc-time" data-start="'+Y(e)+'" data-full="'+Y(d)+'"><span>'+Y(c)+"</span></div>":"")+(g.title?'<div class="fc-title">'+Y(g.title)+"</div>":"")+'</div><div class="fc-bg"/>'+(j?'<div class="fc-resizer fc-end-resizer" />':"")+"</a>"},generateSegPositionCss:function(a){var b,c,d=this.view.opt("slotEventOverlap"),e=a.backwardCoord,f=a.forwardCoord,g=this.generateSegVerticalCss(a);return d&&(f=Math.min(1,e+2*(f-e))),this.isRTL?(b=1-f,c=e):(b=e,c=1-f),g.zIndex=a.level+1,g.left=100*b+"%",g.right=100*c+"%",d&&a.forwardPressure&&(g[this.isRTL?"marginLeft":"marginRight"]=20),g},generateSegVerticalCss:function(a){return{top:a.top,bottom:-a.bottom}},groupSegCols:function(a){var b,c=[];for(b=0;b<this.colCnt;b++)c.push([]);for(b=0;b<a.length;b++)c[a[b].col].push(a[b]);return c},sortForwardSlotSegs:function(a){a.sort(ca(this,"compareForwardSlotSegs"))},compareForwardSlotSegs:function(a,b){return b.forwardPressure-a.forwardPressure||(a.backwardCoord||0)-(b.backwardCoord||0)||this.compareSegs(a,b)}});var mb=Ma.View=ra.extend({type:null,name:null,title:null,calendar:null,options:null,coordMap:null,el:null,displaying:null,isSkeletonRendered:!1,isEventsRendered:!1,start:null,end:null,intervalStart:null,intervalEnd:null,intervalDuration:null,intervalUnit:null,isRTL:!1,isSelected:!1,eventOrderSpecs:null,scrollerEl:null,scrollTop:null,widgetHeaderClass:null,widgetContentClass:null,highlightStateClass:null,nextDayThreshold:null,isHiddenDayHash:null,documentMousedownProxy:null,constructor:function(a,c,d,e){this.calendar=a,this.type=this.name=c,this.options=d,this.intervalDuration=e||b.duration(1,"day"),this.nextDayThreshold=b.duration(this.opt("nextDayThreshold")),this.initThemingProps(),this.initHiddenDays(),this.isRTL=this.opt("isRTL"),this.eventOrderSpecs=A(this.opt("eventOrder")),this.documentMousedownProxy=ca(this,"documentMousedown"),this.initialize()},initialize:function(){},opt:function(a){return this.options[a]},trigger:function(a,b){var c=this.calendar;return c.trigger.apply(c,[a,b||this].concat(Array.prototype.slice.call(arguments,2),[this]))},setDate:function(a){this.setRange(this.computeRange(a))},setRange:function(b){a.extend(this,b),this.updateTitle()},computeRange:function(a){var b,c,d=I(this.intervalDuration),e=a.clone().startOf(d),f=e.clone().add(this.intervalDuration);return/year|month|week|day/.test(d)?(e.stripTime(),f.stripTime()):(e.hasTime()||(e=this.calendar.rezoneDate(e)),f.hasTime()||(f=this.calendar.rezoneDate(f))),b=e.clone(),b=this.skipHiddenDays(b),c=f.clone(),c=this.skipHiddenDays(c,-1,!0),{intervalUnit:d,intervalStart:e,intervalEnd:f,start:b,end:c}},computePrevDate:function(a){return this.massageCurrentDate(a.clone().startOf(this.intervalUnit).subtract(this.intervalDuration),-1)},computeNextDate:function(a){return this.massageCurrentDate(a.clone().startOf(this.intervalUnit).add(this.intervalDuration))},massageCurrentDate:function(a,b){return this.intervalDuration.as("days")<=1&&this.isHiddenDay(a)&&(a=this.skipHiddenDays(a,b),a.startOf("day")),a},updateTitle:function(){this.title=this.computeTitle()},computeTitle:function(){return this.formatRange({start:this.intervalStart,end:this.intervalEnd},this.opt("titleFormat")||this.computeTitleFormat(),this.opt("titleRangeSeparator"))},computeTitleFormat:function(){return"year"==this.intervalUnit?"YYYY":"month"==this.intervalUnit?this.opt("monthYearFormat"):this.intervalDuration.as("days")>1?"ll":"LL"},formatRange:function(a,b,c){var d=a.end;return d.hasTime()||(d=d.clone().subtract(1)),ma(a.start,d,b,c,this.opt("isRTL"))},setElement:function(a){this.el=a,this.bindGlobalHandlers()},removeElement:function(){this.clear(),this.isSkeletonRendered&&(this.unrenderSkeleton(),this.isSkeletonRendered=!1),this.unbindGlobalHandlers(),this.el.remove()},display:function(b){var c=this,d=null;return this.displaying&&(d=this.queryScroll()),this.clear().then(function(){return c.displaying=a.when(c.displayView(b)).then(function(){c.forceScroll(c.computeInitialScroll(d)),c.triggerRender()})})},clear:function(){var b=this,c=this.displaying;return c?c.then(function(){return b.displaying=null,b.clearEvents(),b.clearView()}):a.when()},displayView:function(a){this.isSkeletonRendered||(this.renderSkeleton(),this.isSkeletonRendered=!0),this.setDate(a),this.render&&this.render(),this.renderDates(),this.updateSize(),this.renderBusinessHours()},clearView:function(){this.unselect(),this.triggerUnrender(),this.unrenderBusinessHours(),this.unrenderDates(),this.destroy&&this.destroy()},renderSkeleton:function(){},unrenderSkeleton:function(){},renderDates:function(){},unrenderDates:function(){},renderBusinessHours:function(){},unrenderBusinessHours:function(){},triggerRender:function(){this.trigger("viewRender",this,this,this.el)},triggerUnrender:function(){this.trigger("viewDestroy",this,this,this.el)},bindGlobalHandlers:function(){a(document).on("mousedown",this.documentMousedownProxy)},unbindGlobalHandlers:function(){a(document).off("mousedown",this.documentMousedownProxy)},initThemingProps:function(){var a=this.opt("theme")?"ui":"fc";this.widgetHeaderClass=a+"-widget-header",this.widgetContentClass=a+"-widget-content",this.highlightStateClass=a+"-state-highlight"},updateSize:function(a){var b;a&&(b=this.queryScroll()),this.updateHeight(a),this.updateWidth(a),a&&this.setScroll(b)},updateWidth:function(a){},updateHeight:function(a){var b=this.calendar;this.setHeight(b.getSuggestedViewHeight(),b.isHeightAuto())},setHeight:function(a,b){},computeScrollerHeight:function(a){var b,c,d=this.scrollerEl;return b=this.el.add(d),b.css({position:"relative",left:-1}),c=this.el.outerHeight()-d.height(),b.css({position:"",left:""}),a-c},computeInitialScroll:function(a){return 0},queryScroll:function(){return this.scrollerEl?this.scrollerEl.scrollTop():void 0},setScroll:function(a){return this.scrollerEl?this.scrollerEl.scrollTop(a):void 0},forceScroll:function(a){var b=this;this.setScroll(a),setTimeout(function(){b.setScroll(a)},0)},displayEvents:function(a){var b=this.queryScroll();this.clearEvents(),this.renderEvents(a),this.isEventsRendered=!0,this.setScroll(b),this.triggerEventRender()},clearEvents:function(){this.isEventsRendered&&(this.triggerEventUnrender(),this.destroyEvents&&this.destroyEvents(),this.unrenderEvents(),this.isEventsRendered=!1)},renderEvents:function(a){},unrenderEvents:function(){},triggerEventRender:function(){this.renderedEventSegEach(function(a){this.trigger("eventAfterRender",a.event,a.event,a.el)}),this.trigger("eventAfterAllRender")},triggerEventUnrender:function(){this.renderedEventSegEach(function(a){this.trigger("eventDestroy",a.event,a.event,a.el)})},resolveEventEl:function(b,c){var d=this.trigger("eventRender",b,b,c);return d===!1?c=null:d&&d!==!0&&(c=a(d)),c},showEvent:function(a){this.renderedEventSegEach(function(a){a.el.css("visibility","")},a)},hideEvent:function(a){this.renderedEventSegEach(function(a){a.el.css("visibility","hidden")},a)},renderedEventSegEach:function(a,b){var c,d=this.getEventSegs();for(c=0;c<d.length;c++)b&&d[c].event._id!==b._id||d[c].el&&a.call(this,d[c])},getEventSegs:function(){return[]},isEventDraggable:function(a){var b=a.source||{};return X(a.startEditable,b.startEditable,this.opt("eventStartEditable"),a.editable,b.editable,this.opt("editable"))},reportEventDrop:function(a,b,c,d,e){var f=this.calendar,g=f.mutateEvent(a,b,c),h=function(){g.undo(),f.reportEventChange()};this.triggerEventDrop(a,g.dateDelta,h,d,e),f.reportEventChange()},triggerEventDrop:function(a,b,c,d,e){this.trigger("eventDrop",d[0],a,b,c,e,{})},reportExternalDrop:function(b,c,d,e,f){var g,h,i=b.eventProps;i&&(g=a.extend({},i,c),h=this.calendar.renderEvent(g,b.stick)[0]),this.triggerExternalDrop(h,c,d,e,f)},triggerExternalDrop:function(a,b,c,d,e){this.trigger("drop",c[0],b.start,d,e),a&&this.trigger("eventReceive",null,a)},renderDrag:function(a,b){},unrenderDrag:function(){},isEventResizableFromStart:function(a){return this.opt("eventResizableFromStart")&&this.isEventResizable(a)},isEventResizableFromEnd:function(a){return this.isEventResizable(a)},isEventResizable:function(a){var b=a.source||{};return X(a.durationEditable,b.durationEditable,this.opt("eventDurationEditable"),a.editable,b.editable,this.opt("editable"))},reportEventResize:function(a,b,c,d,e){var f=this.calendar,g=f.mutateEvent(a,b,c),h=function(){g.undo(),f.reportEventChange()};this.triggerEventResize(a,g.durationDelta,h,d,e),f.reportEventChange()},triggerEventResize:function(a,b,c,d,e){this.trigger("eventResize",d[0],a,b,c,e,{})},select:function(a,b){this.unselect(b),this.renderSelection(a),this.reportSelection(a,b)},renderSelection:function(a){},reportSelection:function(a,b){this.isSelected=!0,this.triggerSelect(a,b)},triggerSelect:function(a,b){this.trigger("select",null,a.start,a.end,b)},unselect:function(a){this.isSelected&&(this.isSelected=!1,this.destroySelection&&this.destroySelection(),this.unrenderSelection(),this.trigger("unselect",null,a))},unrenderSelection:function(){},documentMousedown:function(b){var c;this.isSelected&&this.opt("unselectAuto")&&v(b)&&(c=this.opt("unselectCancel"),c&&a(b.target).closest(c).length||this.unselect(b))},triggerDayClick:function(a,b,c){this.trigger("dayClick",b,a.start,c)},initHiddenDays:function(){var b,c=this.opt("hiddenDays")||[],d=[],e=0;for(this.opt("weekends")===!1&&c.push(0,6),b=0;7>b;b++)(d[b]=-1!==a.inArray(b,c))||e++;if(!e)throw"invalid hiddenDays";this.isHiddenDayHash=d},isHiddenDay:function(a){return b.isMoment(a)&&(a=a.day()),this.isHiddenDayHash[a]},skipHiddenDays:function(a,b,c){var d=a.clone();for(b=b||1;this.isHiddenDayHash[(d.day()+(c?b:0)+7)%7];)d.add(b,"days");return d},computeDayRange:function(a){var b,c=a.start.clone().stripTime(),d=a.end,e=null;return d&&(e=d.clone().stripTime(),b=+d.time(),b&&b>=this.nextDayThreshold&&e.add(1,"days")),(!d||c>=e)&&(e=c.clone().add(1,"days")),{start:c,end:e}},isMultiDayEvent:function(a){var b=this.computeDayRange(a);return b.end.diff(b.start,"days")>1}}),nb=Ma.Calendar=ra.extend({dirDefaults:null,langDefaults:null,overrides:null,options:null,viewSpecCache:null,view:null,header:null,loadingLevel:0,constructor:Ga,initialize:function(){},initOptions:function(a){var b,e,f,g;a=d(a),b=a.lang,e=ob[b],e||(b=nb.defaults.lang,e=ob[b]||{}),f=X(a.isRTL,e.isRTL,nb.defaults.isRTL),g=f?nb.rtlDefaults:{},this.dirDefaults=g,this.langDefaults=e,this.overrides=a,this.options=c([nb.defaults,g,e,a]),Ha(this.options),this.viewSpecCache={}},getViewSpec:function(a){var b=this.viewSpecCache;return b[a]||(b[a]=this.buildViewSpec(a))},getUnitViewSpec:function(b){var c,d,e;if(-1!=a.inArray(b,Ra))for(c=this.header.getViewsWithButtons(),a.each(Ma.views,function(a){c.push(a)}),d=0;d<c.length;d++)if(e=this.getViewSpec(c[d]),e&&e.singleUnit==b)return e},buildViewSpec:function(a){for(var d,e,f,g,h=this.overrides.views||{},i=[],j=[],k=[],l=a;l;)d=Na[l],e=h[l],l=null,"function"==typeof d&&(d={"class":d}),d&&(i.unshift(d),j.unshift(d.defaults||{}),f=f||d.duration,l=l||d.type),e&&(k.unshift(e),f=f||e.duration,l=l||e.type);return d=Q(i),d.type=a,d["class"]?(f&&(f=b.duration(f),f.valueOf()&&(d.duration=f,g=I(f),1===f.as(g)&&(d.singleUnit=g,k.unshift(h[g]||{})))),d.defaults=c(j),d.overrides=c(k),this.buildViewSpecOptions(d),this.buildViewSpecButtonText(d,a),d):!1},buildViewSpecOptions:function(a){a.options=c([nb.defaults,a.defaults,this.dirDefaults,this.langDefaults,this.overrides,a.overrides]),Ha(a.options)},buildViewSpecButtonText:function(a,b){function c(c){var d=c.buttonText||{};return d[b]||(a.singleUnit?d[a.singleUnit]:null)}a.buttonTextOverride=c(this.overrides)||a.overrides.buttonText,a.buttonTextDefault=c(this.langDefaults)||c(this.dirDefaults)||a.defaults.buttonText||c(nb.defaults)||(a.duration?this.humanizeDuration(a.duration):null)||b},instantiateView:function(a){var b=this.getViewSpec(a);return new b["class"](this,a,b.options,b.duration)},isValidViewType:function(a){return Boolean(this.getViewSpec(a))},pushLoading:function(){this.loadingLevel++||this.trigger("loading",null,!0,this.view)},popLoading:function(){--this.loadingLevel||this.trigger("loading",null,!1,this.view)},buildSelectRange:function(a,b){return a=this.moment(a),b=b?this.moment(b):a.hasTime()?a.clone().add(this.defaultTimedEventDuration):a.clone().add(this.defaultAllDayEventDuration),{start:a,end:b}}});nb.mixin(bb),nb.defaults={titleRangeSeparator:" — ",monthYearFormat:"MMMM YYYY",defaultTimedEventDuration:"02:00:00",defaultAllDayEventDuration:{days:1},forceEventDuration:!1,nextDayThreshold:"09:00:00",defaultView:"month",aspectRatio:1.35,header:{left:"title",center:"",right:"today prev,next"},weekends:!0,weekNumbers:!1,weekNumberTitle:"W",weekNumberCalculation:"local",scrollTime:"06:00:00",lazyFetching:!0,startParam:"start",endParam:"end",timezoneParam:"timezone",timezone:!1,isRTL:!1,buttonText:{prev:"prev",next:"next",prevYear:"prev year",nextYear:"next year",year:"year",today:"today",month:"month",week:"week",day:"day"},buttonIcons:{prev:"left-single-arrow",next:"right-single-arrow",prevYear:"left-double-arrow",nextYear:"right-double-arrow"},theme:!1,themeButtonIcons:{prev:"circle-triangle-w",next:"circle-triangle-e",prevYear:"seek-prev",nextYear:"seek-next"},dragOpacity:.75,dragRevertDuration:500,dragScroll:!0,unselectAuto:!0,dropAccept:"*",eventOrder:"title",eventLimit:!1,eventLimitText:"more",eventLimitClick:"popover",dayPopoverFormat:"LL",handleWindowResize:!0,windowResizeDelay:200},nb.englishDefaults={dayPopoverFormat:"dddd, MMMM D"},nb.rtlDefaults={header:{left:"next,prev today",center:"",right:"title"},buttonIcons:{prev:"right-single-arrow",next:"left-single-arrow",prevYear:"right-double-arrow",nextYear:"left-double-arrow"},themeButtonIcons:{prev:"circle-triangle-e",next:"circle-triangle-w",nextYear:"seek-prev",prevYear:"seek-next"}};var ob=Ma.langs={};Ma.datepickerLang=function(b,c,d){var e=ob[b]||(ob[b]={});e.isRTL=d.isRTL,e.weekNumberTitle=d.weekHeader,a.each(pb,function(a,b){e[a]=b(d)}),a.datepicker&&(a.datepicker.regional[c]=a.datepicker.regional[b]=d,a.datepicker.regional.en=a.datepicker.regional[""],a.datepicker.setDefaults(d))},Ma.lang=function(b,d){var e,f;e=ob[b]||(ob[b]={}),d&&(e=ob[b]=c([e,d])),f=Ia(b),a.each(qb,function(a,b){null==e[a]&&(e[a]=b(f,e))}),nb.defaults.lang=b};var pb={buttonText:function(a){return{prev:Z(a.prevText),next:Z(a.nextText),today:Z(a.currentText)}},monthYearFormat:function(a){return a.showMonthAfterYear?"YYYY["+a.yearSuffix+"] MMMM":"MMMM YYYY["+a.yearSuffix+"]"}},qb={dayOfMonthFormat:function(a,b){var c=a.longDateFormat("l");return c=c.replace(/^Y+[^\w\s]*|[^\w\s]*Y+$/g,""),b.isRTL?c+=" ddd":c="ddd "+c,c},mediumTimeFormat:function(a){return a.longDateFormat("LT").replace(/\s*a$/i,"a")},smallTimeFormat:function(a){return a.longDateFormat("LT").replace(":mm","(:mm)").replace(/(\Wmm)$/,"($1)").replace(/\s*a$/i,"a")},extraSmallTimeFormat:function(a){return a.longDateFormat("LT").replace(":mm","(:mm)").replace(/(\Wmm)$/,"($1)").replace(/\s*a$/i,"t")},hourFormat:function(a){return a.longDateFormat("LT").replace(":mm","").replace(/(\Wmm)$/,"").replace(/\s*a$/i,"a")},noMeridiemTimeFormat:function(a){return a.longDateFormat("LT").replace(/\s*a$/i,"")}},rb={smallDayDateFormat:function(a){return a.isRTL?"D dd":"dd D"},weekFormat:function(a){return a.isRTL?"w[ "+a.weekNumberTitle+"]":"["+a.weekNumberTitle+" ]w"},smallWeekFormat:function(a){return a.isRTL?"w["+a.weekNumberTitle+"]":"["+a.weekNumberTitle+"]w"}};Ma.lang("en",nb.englishDefaults),Ma.sourceNormalizers=[],Ma.sourceFetchers=[];var sb={dataType:"json",cache:!1},tb=1;nb.prototype.getPeerEvents=function(a,b){var c,d,e=this.getEventCache(),f=[];for(c=0;c<e.length;c++)d=e[c],a&&a._id===d._id||f.push(d);return f};var ub=mb.extend({dayGrid:null,dayNumbersVisible:!1,weekNumbersVisible:!1,weekNumberWidth:null,headRowEl:null,initialize:function(){this.dayGrid=new kb(this),this.coordMap=this.dayGrid.coordMap},setRange:function(a){mb.prototype.setRange.call(this,a),this.dayGrid.breakOnWeeks=/year|month|week/.test(this.intervalUnit),this.dayGrid.setRange(a)},computeRange:function(a){var b=mb.prototype.computeRange.call(this,a);return/year|month/.test(b.intervalUnit)&&(b.start.startOf("week"),b.start=this.skipHiddenDays(b.start),b.end.weekday()&&(b.end.add(1,"week").startOf("week"),b.end=this.skipHiddenDays(b.end,-1,!0))),b},renderDates:function(){this.dayNumbersVisible=this.dayGrid.rowCnt>1,this.weekNumbersVisible=this.opt("weekNumbers"),this.dayGrid.numbersVisible=this.dayNumbersVisible||this.weekNumbersVisible,this.el.addClass("fc-basic-view").html(this.renderHtml()),this.headRowEl=this.el.find("thead .fc-row"),this.scrollerEl=this.el.find(".fc-day-grid-container"),this.dayGrid.coordMap.containerEl=this.scrollerEl,this.dayGrid.setElement(this.el.find(".fc-day-grid")),this.dayGrid.renderDates(this.hasRigidRows())},unrenderDates:function(){this.dayGrid.unrenderDates(),this.dayGrid.removeElement()},renderBusinessHours:function(){this.dayGrid.renderBusinessHours()},renderHtml:function(){return'<table><thead class="fc-head"><tr><td class="'+this.widgetHeaderClass+'">'+this.dayGrid.headHtml()+'</td></tr></thead><tbody class="fc-body"><tr><td class="'+this.widgetContentClass+'"><div class="fc-day-grid-container"><div class="fc-day-grid"/></div></td></tr></tbody></table>'},headIntroHtml:function(){return this.weekNumbersVisible?'<th class="fc-week-number '+this.widgetHeaderClass+'" '+this.weekNumberStyleAttr()+"><span>"+Y(this.opt("weekNumberTitle"))+"</span></th>":void 0},numberIntroHtml:function(a){return this.weekNumbersVisible?'<td class="fc-week-number" '+this.weekNumberStyleAttr()+"><span>"+this.dayGrid.getCell(a,0).start.format("w")+"</span></td>":void 0},dayIntroHtml:function(){return this.weekNumbersVisible?'<td class="fc-week-number '+this.widgetContentClass+'" '+this.weekNumberStyleAttr()+"></td>":void 0},introHtml:function(){return this.weekNumbersVisible?'<td class="fc-week-number" '+this.weekNumberStyleAttr()+"></td>":void 0},numberCellHtml:function(a){var b,c=a.start;return this.dayNumbersVisible?(b=this.dayGrid.getDayClasses(c),b.unshift("fc-day-number"),'<td class="'+b.join(" ")+'" data-date="'+c.format()+'">'+c.date()+"</td>"):"<td/>"},weekNumberStyleAttr:function(){return null!==this.weekNumberWidth?'style="width:'+this.weekNumberWidth+'px"':""},hasRigidRows:function(){var a=this.opt("eventLimit");return a&&"number"!=typeof a},updateWidth:function(){this.weekNumbersVisible&&(this.weekNumberWidth=k(this.el.find(".fc-week-number")))},setHeight:function(a,b){var c,d=this.opt("eventLimit");m(this.scrollerEl),f(this.headRowEl),this.dayGrid.removeSegPopover(),d&&"number"==typeof d&&this.dayGrid.limitRows(d),c=this.computeScrollerHeight(a),this.setGridHeight(c,b),d&&"number"!=typeof d&&this.dayGrid.limitRows(d),!b&&l(this.scrollerEl,c)&&(e(this.headRowEl,r(this.scrollerEl)),c=this.computeScrollerHeight(a),this.scrollerEl.height(c))},setGridHeight:function(a,b){b?j(this.dayGrid.rowEls):i(this.dayGrid.rowEls,a,!0)},renderEvents:function(a){this.dayGrid.renderEvents(a),this.updateHeight()},getEventSegs:function(){return this.dayGrid.getEventSegs()},unrenderEvents:function(){this.dayGrid.unrenderEvents()},renderDrag:function(a,b){return this.dayGrid.renderDrag(a,b)},unrenderDrag:function(){this.dayGrid.unrenderDrag()},renderSelection:function(a){this.dayGrid.renderSelection(a)},unrenderSelection:function(){this.dayGrid.unrenderSelection()}}),vb=ub.extend({computeRange:function(a){var b,c=ub.prototype.computeRange.call(this,a);return this.isFixedWeeks()&&(b=Math.ceil(c.end.diff(c.start,"weeks",!0)),c.end.add(6-b,"weeks")),c},setGridHeight:function(a,b){b=b||"variable"===this.opt("weekMode"),b&&(a*=this.rowCnt/6),i(this.dayGrid.rowEls,a,!b)},isFixedWeeks:function(){var a=this.opt("weekMode");return a?"fixed"===a:this.opt("fixedWeekCount")}});Na.basic={"class":ub},Na.basicDay={type:"basic",duration:{days:1}},Na.basicWeek={type:"basic",duration:{weeks:1}},Na.month={"class":vb,duration:{months:1},defaults:{fixedWeekCount:!0}};var wb=mb.extend({timeGrid:null,dayGrid:null,axisWidth:null,noScrollRowEls:null,bottomRuleEl:null,bottomRuleHeight:null,initialize:function(){this.timeGrid=new lb(this),this.opt("allDaySlot")?(this.dayGrid=new kb(this),this.coordMap=new eb([this.dayGrid.coordMap,this.timeGrid.coordMap])):this.coordMap=this.timeGrid.coordMap},setRange:function(a){mb.prototype.setRange.call(this,a),this.timeGrid.setRange(a),this.dayGrid&&this.dayGrid.setRange(a)},renderDates:function(){this.el.addClass("fc-agenda-view").html(this.renderHtml()),this.scrollerEl=this.el.find(".fc-time-grid-container"),this.timeGrid.coordMap.containerEl=this.scrollerEl,this.timeGrid.setElement(this.el.find(".fc-time-grid")),this.timeGrid.renderDates(),this.bottomRuleEl=a('<hr class="fc-divider '+this.widgetHeaderClass+'"/>').appendTo(this.timeGrid.el),this.dayGrid&&(this.dayGrid.setElement(this.el.find(".fc-day-grid")),this.dayGrid.renderDates(),this.dayGrid.bottomCoordPadding=this.dayGrid.el.next("hr").outerHeight()),this.noScrollRowEls=this.el.find(".fc-row:not(.fc-scroller *)")},unrenderDates:function(){this.timeGrid.unrenderDates(),this.timeGrid.removeElement(),this.dayGrid&&(this.dayGrid.unrenderDates(),this.dayGrid.removeElement())},renderBusinessHours:function(){this.timeGrid.renderBusinessHours(),this.dayGrid&&this.dayGrid.renderBusinessHours()},renderHtml:function(){return'<table><thead class="fc-head"><tr><td class="'+this.widgetHeaderClass+'">'+this.timeGrid.headHtml()+'</td></tr></thead><tbody class="fc-body"><tr><td class="'+this.widgetContentClass+'">'+(this.dayGrid?'<div class="fc-day-grid"/><hr class="fc-divider '+this.widgetHeaderClass+'"/>':"")+'<div class="fc-time-grid-container"><div class="fc-time-grid"/></div></td></tr></tbody></table>'},headIntroHtml:function(){var a,b;return this.opt("weekNumbers")?(a=this.timeGrid.getCell(0).start,b=a.format(this.opt("smallWeekFormat")),'<th class="fc-axis fc-week-number '+this.widgetHeaderClass+'" '+this.axisStyleAttr()+"><span>"+Y(b)+"</span></th>"):'<th class="fc-axis '+this.widgetHeaderClass+'" '+this.axisStyleAttr()+"></th>"},dayIntroHtml:function(){return'<td class="fc-axis '+this.widgetContentClass+'" '+this.axisStyleAttr()+"><span>"+(this.opt("allDayHtml")||Y(this.opt("allDayText")))+"</span></td>"},slotBgIntroHtml:function(){return'<td class="fc-axis '+this.widgetContentClass+'" '+this.axisStyleAttr()+"></td>";
 },introHtml:function(){return'<td class="fc-axis" '+this.axisStyleAttr()+"></td>"},axisStyleAttr:function(){return null!==this.axisWidth?'style="width:'+this.axisWidth+'px"':""},updateSize:function(a){this.timeGrid.updateSize(a),mb.prototype.updateSize.call(this,a)},updateWidth:function(){this.axisWidth=k(this.el.find(".fc-axis"))},setHeight:function(a,b){var c,d;null===this.bottomRuleHeight&&(this.bottomRuleHeight=this.bottomRuleEl.outerHeight()),this.bottomRuleEl.hide(),this.scrollerEl.css("overflow",""),m(this.scrollerEl),f(this.noScrollRowEls),this.dayGrid&&(this.dayGrid.removeSegPopover(),c=this.opt("eventLimit"),c&&"number"!=typeof c&&(c=xb),c&&this.dayGrid.limitRows(c)),b||(d=this.computeScrollerHeight(a),l(this.scrollerEl,d)?(e(this.noScrollRowEls,r(this.scrollerEl)),d=this.computeScrollerHeight(a),this.scrollerEl.height(d)):(this.scrollerEl.height(d).css("overflow","hidden"),this.bottomRuleEl.show()))},computeInitialScroll:function(){var a=b.duration(this.opt("scrollTime")),c=this.timeGrid.computeTimeTop(a);return c=Math.ceil(c),c&&c++,c},renderEvents:function(a){var b,c,d=[],e=[],f=[];for(c=0;c<a.length;c++)a[c].allDay?d.push(a[c]):e.push(a[c]);b=this.timeGrid.renderEvents(e),this.dayGrid&&(f=this.dayGrid.renderEvents(d)),this.updateHeight()},getEventSegs:function(){return this.timeGrid.getEventSegs().concat(this.dayGrid?this.dayGrid.getEventSegs():[])},unrenderEvents:function(){this.timeGrid.unrenderEvents(),this.dayGrid&&this.dayGrid.unrenderEvents()},renderDrag:function(a,b){return a.start.hasTime()?this.timeGrid.renderDrag(a,b):this.dayGrid?this.dayGrid.renderDrag(a,b):void 0},unrenderDrag:function(){this.timeGrid.unrenderDrag(),this.dayGrid&&this.dayGrid.unrenderDrag()},renderSelection:function(a){a.start.hasTime()||a.end.hasTime()?this.timeGrid.renderSelection(a):this.dayGrid&&this.dayGrid.renderSelection(a)},unrenderSelection:function(){this.timeGrid.unrenderSelection(),this.dayGrid&&this.dayGrid.unrenderSelection()}}),xb=5,yb=[{hours:1},{minutes:30},{minutes:15},{seconds:30},{seconds:15}];return Na.agenda={"class":wb,defaults:{allDaySlot:!0,allDayText:"all-day",slotDuration:"00:30:00",minTime:"00:00:00",maxTime:"24:00:00",slotEventOverlap:!0}},Na.agendaDay={type:"agenda",duration:{days:1}},Na.agendaWeek={type:"agenda",duration:{weeks:1}},Ma});
-},{"jquery":49,"moment":53}],67:[function(require,module,exports){
+},{"jquery":52,"moment":56}],70:[function(require,module,exports){
 /*!
 * jQuery UI 1.8.1
 *
@@ -83833,7 +85172,7 @@ g / 2; if (a.at[1] === "bottom") i.top += h; else if (a.at[1] === "center") i.to
     })
 })(jQuery);
 ;
-},{}],68:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 'use strict';
 
 var $ = require('jquery');
@@ -83980,7 +85319,7 @@ setTimeout(function () {
 
 module.exports = 'app';
 
-},{"./assets/fullcalendar.min":66,"./assets/jquery-ui.custom.min":67,"./config":70,"./directives":82,"./home":93,"./models":96,"./modules":102,"./services":109,"./template":119,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":45,"bootstrap-notify/bootstrap-notify":46,"flot.tooltip/js/jquery.flot.tooltip":47,"flot/jquery.flot":48,"jquery":49,"malihu-custom-scrollbar-plugin":51,"sweetalert":65}],69:[function(require,module,exports){
+},{"./assets/fullcalendar.min":69,"./assets/jquery-ui.custom.min":70,"./config":73,"./directives":85,"./home":96,"./models":99,"./modules":105,"./services":115,"./template":125,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":48,"bootstrap-notify/bootstrap-notify":49,"flot.tooltip/js/jquery.flot.tooltip":50,"flot/jquery.flot":51,"jquery":52,"malihu-custom-scrollbar-plugin":54,"sweetalert":68}],72:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84010,14 +85349,14 @@ module.exports = angular.module('webAdminApp', globalDependencies)
     SpotifyProvider.setScope('user-read-private playlist-read-private playlist-modify-private playlist-modify-public');
 });
 
-},{"angular":43,"angular-animate":3,"angular-facebook":4,"angular-input-masks":5,"angular-loading-bar":31,"angular-resource":33,"angular-sanitize":35,"angular-spotify":36,"angular-summernote/dist/angular-summernote":37,"angular-translate":38,"angular-ui-bootstrap":39,"angular-ui-router":41,"ng-table/dist/ng-table":54,"oclazyload":56}],70:[function(require,module,exports){
+},{"angular":46,"angular-animate":3,"angular-facebook":4,"angular-input-masks":5,"angular-loading-bar":34,"angular-resource":36,"angular-sanitize":38,"angular-spotify":39,"angular-summernote/dist/angular-summernote":40,"angular-translate":41,"angular-ui-bootstrap":42,"angular-ui-router":44,"ng-table/dist/ng-table":57,"oclazyload":59}],73:[function(require,module,exports){
 require('./app');
 require('./route');
 require('./translate');
 
 module.exports = 'config';
 
-},{"./app":69,"./route":71,"./translate":72}],71:[function(require,module,exports){
+},{"./app":72,"./route":74,"./translate":75}],74:[function(require,module,exports){
 'use strict';
 
 require('./app')
@@ -84047,6 +85386,10 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
             url: '/list',
             templateUrl: 'views/events/list.html'
         })
+        .state ('about', {
+            url: '/about',
+            templateUrl: 'views/pages/about.html'
+        })
         .state ('profile', {
             url: '/profile',
             templateUrl: 'views/profile/index.html'
@@ -84069,7 +85412,7 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
         });
 };
 
-},{"./app":69}],72:[function(require,module,exports){
+},{"./app":72}],75:[function(require,module,exports){
 'use strict';
 
 require('./app')
@@ -84082,7 +85425,7 @@ function TranslateConfig($translateProvider) {
     $translateProvider.preferredLanguage('pt-br');
 }
 
-},{"../../resources/i18n/en":120,"../../resources/i18n/pt-br":121,"./app":69}],73:[function(require,module,exports){
+},{"../../resources/i18n/en":126,"../../resources/i18n/pt-br":127,"./app":72}],76:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84102,7 +85445,7 @@ function aPrevent() {
     }
 }
 
-},{"angular":43}],74:[function(require,module,exports){
+},{"angular":46}],77:[function(require,module,exports){
 'use strict';
 
 var $ = require('jquery');
@@ -84124,7 +85467,7 @@ function cOverflow(scrollService) {
     }
 }
 
-},{"angular":43,"jquery":49}],75:[function(require,module,exports){
+},{"angular":46,"jquery":52}],78:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84347,7 +85690,7 @@ angular
     })
 
 
-},{"angular":43,"jquery":49}],76:[function(require,module,exports){
+},{"angular":46,"jquery":52}],79:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84396,7 +85739,7 @@ function ChangeLayout() {
 
 
 
-},{"angular":43}],77:[function(require,module,exports){
+},{"angular":46}],80:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84417,7 +85760,7 @@ function autoSize() {
     }
 }
 
-},{"angular":43,"autosize":44}],78:[function(require,module,exports){
+},{"angular":46,"autosize":47}],81:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84448,7 +85791,7 @@ function btn() {
     }
 }
 
-},{"angular":43,"node-waves":55}],79:[function(require,module,exports){
+},{"angular":46,"node-waves":58}],82:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84470,7 +85813,7 @@ function dateTimePicker() {
 }
 
 
-},{"angular":43}],80:[function(require,module,exports){
+},{"angular":46}],83:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84597,7 +85940,7 @@ function fgLine() {
     //     }
     // })
 
-},{"angular":43,"jquery":49}],81:[function(require,module,exports){
+},{"angular":46,"jquery":52}],84:[function(require,module,exports){
 require('./fg-line');
 require('./auto-size');
 require('./btn');
@@ -84605,7 +85948,7 @@ require('./date-time-picker');
 
 module.exports = 'form-directives';
 
-},{"./auto-size":77,"./btn":78,"./date-time-picker":79,"./fg-line":80}],82:[function(require,module,exports){
+},{"./auto-size":80,"./btn":81,"./date-time-picker":82,"./fg-line":83}],85:[function(require,module,exports){
 require('./a-prevent');
 require('./change-layout');
 require('./print');
@@ -84622,7 +85965,7 @@ require('./form');
 
 module.exports = 'directives';
 
-},{"./a-prevent":73,"./c-overflow":74,"./calendar":75,"./change-layout":76,"./form":81,"./lightbox":83,"./media-element":84,"./print":85,"./stop-propagate":86,"./toggle-sidebar":87,"./toggle-submenu":88,"./youtube-directive":89}],83:[function(require,module,exports){
+},{"./a-prevent":76,"./c-overflow":77,"./calendar":78,"./change-layout":79,"./form":84,"./lightbox":86,"./media-element":87,"./print":88,"./stop-propagate":89,"./toggle-sidebar":90,"./toggle-submenu":91,"./youtube-directive":92}],86:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84642,7 +85985,7 @@ function lightbox() {
     }
 }
 
-},{"angular":43}],84:[function(require,module,exports){
+},{"angular":46}],87:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84660,7 +86003,7 @@ function mediaElement() {
     }
 }
 
-},{"angular":43}],85:[function(require,module,exports){
+},{"angular":46}],88:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84680,7 +86023,7 @@ function print() {
     }
 }
 
-},{"angular":43}],86:[function(require,module,exports){
+},{"angular":46}],89:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84700,7 +86043,7 @@ function stopPropagate() {
     }
 }
 
-},{"angular":43}],87:[function(require,module,exports){
+},{"angular":46}],90:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84751,7 +86094,7 @@ function toggleSidebar() {
     }
 }
 
-},{"angular":43}],88:[function(require,module,exports){
+},{"angular":46}],91:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84772,7 +86115,7 @@ function toggleSubmenu() {
     }
 }
 
-},{"angular":43}],89:[function(require,module,exports){
+},{"angular":46}],92:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84801,12 +86144,12 @@ function Youtube($sce) {
   };
 }
 
-},{"angular":43}],90:[function(require,module,exports){
+},{"angular":46}],93:[function(require,module,exports){
 require('./main');
 
 module.exports = 'controllers';
 
-},{"./main":91}],91:[function(require,module,exports){
+},{"./main":94}],94:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84823,20 +86166,20 @@ function MainController() {
 
 }
 
-},{"angular":43}],92:[function(require,module,exports){
+},{"angular":46}],95:[function(require,module,exports){
 module.exports = 'directives';
 
-},{}],93:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 require('./controllers');
 require('./directives');
 require('./resources');
 
 module.exports = 'home';
 
-},{"./controllers":90,"./directives":92,"./resources":94}],94:[function(require,module,exports){
+},{"./controllers":93,"./directives":95,"./resources":97}],97:[function(require,module,exports){
 module.exports = 'resources';
 
-},{}],95:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84858,12 +86201,12 @@ function EventModel($resource) {
     return $resource(url, params, options);
 }
 
-},{"angular":43}],96:[function(require,module,exports){
+},{"angular":46}],99:[function(require,module,exports){
 require('./event-model');
 
 module.exports = 'models';
 
-},{"./event-model":95}],97:[function(require,module,exports){
+},{"./event-model":98}],100:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -84944,7 +86287,7 @@ function AddEventController($scope, event, eventService, userService, utilsServi
     };
 }
 
-},{"angular":43}],98:[function(require,module,exports){
+},{"angular":46}],101:[function(require,module,exports){
 var angular = require('angular');
 var $ = require('jquery');
 
@@ -85055,14 +86398,14 @@ angular
         }
     })
 
-},{"angular":43,"jquery":49}],99:[function(require,module,exports){
+},{"angular":46,"jquery":52}],102:[function(require,module,exports){
 require('./add-event-controller');
 require('./list-event-controller');
 require('./calendar');
 
 module.exports = 'controllers';
 
-},{"./add-event-controller":97,"./calendar":98,"./list-event-controller":100}],100:[function(require,module,exports){
+},{"./add-event-controller":100,"./calendar":101,"./list-event-controller":103}],103:[function(require,module,exports){
 'use strict';
 
 
@@ -85127,20 +86470,63 @@ function ListEventController($scope, eventService, Spotify) {
     loadEvents_();
 }
 
-},{"angular":43}],101:[function(require,module,exports){
+},{"angular":46}],104:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'home';
 
-},{"./controllers/index":99}],102:[function(require,module,exports){
+},{"./controllers/index":102}],105:[function(require,module,exports){
 require('./profile/index');
 require('./events/index');
+require('./pages/index');
 
 module.exports = 'modules';
 
-},{"./events/index":101,"./profile/index":105}],103:[function(require,module,exports){
-arguments[4][90][0].apply(exports,arguments)
-},{"./main":104,"dup":90}],104:[function(require,module,exports){
+},{"./events/index":104,"./pages/index":108,"./profile/index":111}],106:[function(require,module,exports){
+'use strict';
+
+var angular = require('angular');
+
+angular
+    .module('webAdminApp')
+    .controller('AboutCtrl', AboutCtrl);
+
+function AboutCtrl() {
+    var vm = this;
+
+    vm.users = [{
+        phone: '+55 85 996994462',
+        email: 'fgleilsonf@gmail.com',
+        photo_profile: 'https://fbcdn-sphotos-b-a.akamaihd.net/hphotos-ak-xtp1/v/t1.0-9/13051601_794963017305595_6116474065762148471_n.jpg?oh=2479bfa0b16454a899835acfdb8e5fde&oe=57DE3AAD&__gda__=1474702491_2e3386eecbcf0e401d029f7d3f32e58d',
+        photo_cover: 'https://scontent-gru2-1.xx.fbcdn.net/v/t1.0-9/13015287_794160034052560_7575695178305307468_n.jpg?oh=32237a15ea685812cf2c3f4b946e7c6f&oe=57DA7AB2',
+        name: 'Gleilson Ferreira',
+        profession: 'Desenvolvedor',
+        linkedin: 'https://br.linkedin.com/in/gleilson-ferreira-84948a104'
+    },
+    {
+        phone: '+55 85 996994462',
+        email: 'fgleilsonf@gmail.com',
+        photo_profile: 'https://scontent-gru2-1.xx.fbcdn.net/v/t1.0-9/12472551_910676339030457_8388931635245596009_n.jpg?oh=2db59ed5dd79362ebdedc8d7dcadf96d&oe=579C8E30',
+        photo_cover: 'https://scontent-gru2-1.xx.fbcdn.net/v/t1.0-9/10149830_564632626968165_999168583_n.jpg?oh=eada1c946c0ac0853dc2c32df1a0358e&oe=57ACC85C',
+        name: 'Maurício Filho',
+        profession: 'Desenvolvedor',
+        linkedin: 'https://br.linkedin.com/in/gleilson-ferreira-84948a104'
+    }];
+}
+
+},{"angular":46}],107:[function(require,module,exports){
+require('./about');
+
+module.exports = 'controllers';
+
+},{"./about":106}],108:[function(require,module,exports){
+require('./controllers/index');
+
+module.exports = 'pages';
+
+},{"./controllers/index":107}],109:[function(require,module,exports){
+arguments[4][93][0].apply(exports,arguments)
+},{"./main":110,"dup":93}],110:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85194,12 +86580,12 @@ function profileCtrl(growlService) {
     }
 }
 
-},{"angular":43,"lightgallery/dist/js/lightgallery":50}],105:[function(require,module,exports){
+},{"angular":46,"lightgallery/dist/js/lightgallery":53}],111:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'profile';
 
-},{"./controllers/index":103}],106:[function(require,module,exports){
+},{"./controllers/index":109}],112:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85220,7 +86606,7 @@ function BestsellingService($resource) {
     }
 }
 
-},{"angular":43}],107:[function(require,module,exports){
+},{"angular":46}],113:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85242,7 +86628,7 @@ function EventService($http) {
     };
 }
 
-},{"angular":43}],108:[function(require,module,exports){
+},{"angular":46}],114:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85281,7 +86667,7 @@ function growlService() {
     return gs;
 }
 
-},{"angular":43,"jquery":49}],109:[function(require,module,exports){
+},{"angular":46,"jquery":52}],115:[function(require,module,exports){
 require('./growl-service');
 require('./best-selling-service');
 require('./message-service');
@@ -85293,7 +86679,7 @@ require('./utils-service');
 
 module.exports = 'services';
 
-},{"./best-selling-service":106,"./event-service":107,"./growl-service":108,"./message-service":110,"./scroll-service":111,"./table-service":112,"./user-service":113,"./utils-service":114}],110:[function(require,module,exports){
+},{"./best-selling-service":112,"./event-service":113,"./growl-service":114,"./message-service":116,"./scroll-service":117,"./table-service":118,"./user-service":119,"./utils-service":120}],116:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85314,7 +86700,7 @@ function MessageService($resource) {
     }
 }
 
-},{"angular":43}],111:[function(require,module,exports){
+},{"angular":46}],117:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85342,7 +86728,7 @@ function scrollService() {
     return ss;
 }
 
-},{"angular":43,"jquery":49}],112:[function(require,module,exports){
+},{"angular":46,"jquery":52}],118:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85496,7 +86882,7 @@ function tableService() {
         }
     ];
 }
-},{"angular":43}],113:[function(require,module,exports){
+},{"angular":46}],119:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85527,7 +86913,7 @@ function UserService(Facebook) {
     };
 }
 
-},{"angular":43}],114:[function(require,module,exports){
+},{"angular":46}],120:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85545,7 +86931,7 @@ function UtilsService() {
   };
 }
 
-},{"angular":43}],115:[function(require,module,exports){
+},{"angular":46}],121:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85562,7 +86948,7 @@ function BestSellingController(bestSellingService) {
     this.bsResult = bestSellingService.getBestselling(this.img, this.name, this.range);
 }
 
-},{"angular":43}],116:[function(require,module,exports){
+},{"angular":46}],122:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85673,14 +87059,14 @@ function HeaderController($timeout, messageService){
     }
 };
 
-},{"angular":43,"jquery":49}],117:[function(require,module,exports){
+},{"angular":46,"jquery":52}],123:[function(require,module,exports){
 require('./layout');
 require('./header');
 require('./best-selling');
 
 module.exports = 'controllers';
 
-},{"./best-selling":115,"./header":116,"./layout":118}],118:[function(require,module,exports){
+},{"./best-selling":121,"./header":122,"./layout":124}],124:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85793,15 +87179,15 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
     };
 };
 
-},{"angular":43}],119:[function(require,module,exports){
+},{"angular":46}],125:[function(require,module,exports){
 require('./controllers');
 
 module.exports = 'template';
 
-},{"./controllers":117}],120:[function(require,module,exports){
+},{"./controllers":123}],126:[function(require,module,exports){
 module.exports={
 }
 
-},{}],121:[function(require,module,exports){
-arguments[4][120][0].apply(exports,arguments)
-},{"dup":120}]},{},[68]);
+},{}],127:[function(require,module,exports){
+arguments[4][126][0].apply(exports,arguments)
+},{"dup":126}]},{},[71]);

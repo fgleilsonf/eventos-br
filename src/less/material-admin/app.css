@@ -7528,11 +7528,11 @@ button.close {
 }
 /*!
  * Waves v0.7.4
- * http://fian.my.id/Waves 
- * 
- * Copyright 2014 Alfiana E. Sibuea and other contributors 
- * Released under the MIT license 
- * https://github.com/fians/Waves/blob/master/LICENSE 
+ * http://fian.my.id/Waves
+ *
+ * Copyright 2014 Alfiana E. Sibuea and other contributors
+ * Released under the MIT license
+ * https://github.com/fians/Waves/blob/master/LICENSE
  */
 .waves-effect {
   position: relative;
@@ -7980,7 +7980,7 @@ a.waves-effect .waves-ripple {
 .di-block {
   display: inline-block !important;
 }
-/* 
+/*
  * Material Background Colors
  */
 .bgm-white {
@@ -8128,7 +8128,7 @@ a.waves-effect .waves-ripple {
   width: 100% !important;
 }
 /*
- * Border Radius 
+ * Border Radius
  */
 .brd-2 {
   border-radius: 2px;
@@ -10589,7 +10589,6 @@ a.lv-footer:hover {
   position: relative;
   height: 145px;
   width: 100%;
-  background-image: url('../img/headers/sm/4.png');
   background-repeat: no-repeat;
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -11937,7 +11936,7 @@ a.thumbnail.active {
   box-shadow: 0 0 6px #EAEAEA;
 }
 /*
- * Lightbox  
+ * Lightbox
  */
 .lightbox .lightbox-item > img {
   width: 100%;

@@ -1,0 +1,49 @@
+<div class="container" ui-view>
+    <div ng-controller="AboutCtrl as aboutCtrl">
+        <div class="block-header">
+            <h2>Eventos BR</h2>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h2>Informações</h2>
+            </div>
+
+            <div class="card-body card-padding">
+                <blockquote class="m-b-25">
+                    <p>O que é ?</p>
+                </blockquote>
+                <p>Sistema para cadastro de eventos, onde voce pode visualizar seus eventos, ver os eventos do dia</p>
+
+                <blockquote class="m-b-25">
+                    <p>Quem somos ?</p>
+                </blockquote>
+                <p>Alunos do curso de Sistema de Informação da Faculdade Sete de Setembro.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4" ng-repeat="user in aboutCtrl.users">
+                <div class="card profile-view">
+                    <div class="pv-header" style="background-image: url('{{ user.photo_cover }}');">
+                        <img ng-src="{{ user.photo_profile }}"
+                             class="pv-main" alt="">
+                    </div>
+
+                    <div class="pv-body">
+                        <h2>{{ user.name }}</h2>
+                        <small>{{ user.email }} </small>
+
+                        <ul class="pv-contact">
+                            <li><i class="zmdi zmdi-phone"></i> {{ user.phone }}</li>
+                        </ul>
+
+                        <ul class="pv-follow">
+                            <li>{{ user.profession }}</li>
+                        </ul>
+
+                        <a href="{{ user.linkedin }}" target="_blank" class="pv-follow-btn">Visualizar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
