@@ -85208,113 +85208,113 @@ require('./home');
 require('./modules');
 require('./models');
 
-var geocoder;
-var map;
-var marker;
-
-setTimeout(function () {
-
-    function initialize() {
-        var latlng = new google.maps.LatLng(-18.8800397, -47.05878999999999);
-        var options = {
-            zoom: 5,
-            center: latlng,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
-
-        map = new google.maps.Map(document.getElementById("mapa"), options);
-
-        geocoder = new google.maps.Geocoder();
-
-        marker = new google.maps.Marker({
-            map: map,
-            draggable: true,
-        });
-
-        marker.setPosition(latlng);
-    }
-
-    $(document).ready(function () {
-
-        initialize();
-
-        function carregarNoMapa(endereco) {
-            geocoder.geocode({ 'address': endereco + ', Brasil', 'region': 'BR' }, function (results, status) {
-                if (status == google.maps.GeocoderStatus.OK) {
-                    if (results[0]) {
-                        var latitude = results[0].geometry.location.lat();
-                        var longitude = results[0].geometry.location.lng();
-
-                        $('#location').val(results[0].formatted_address);
-                        $('#txtLatitude').val(latitude);
-                        $('#txtLongitude').val(longitude);
-
-                        var location = new google.maps.LatLng(latitude, longitude);
-                        marker.setPosition(location);
-                        map.setCenter(location);
-                        map.setZoom(16);
-                    }
-                }
-            })
-        }
-
-        $("#btnEndereco").click(function() {
-            if($(this).val() != "")
-                carregarNoMapa($("#location").val());
-        })
-
-        $("#location").blur(function() {
-            if($(this).val() != "")
-                carregarNoMapa($(this).val());
-        })
-
-        google.maps.event.addListener(marker, 'drag', function () {
-            geocoder.geocode({ 'latLng': marker.getPosition() }, function (results, status) {
-                if (status == google.maps.GeocoderStatus.OK) {
-                    if (results[0]) {
-                        $('#location').val(results[0].formatted_address);
-                        $('#txtLatitude').val(marker.getPosition().lat());
-                        $('#txtLongitude').val(marker.getPosition().lng());
-                    }
-                }
-            });
-        });
-
-        $("#location").autocomplete({
-            source: function (request, response) {
-                geocoder.geocode({ 'address': request.term + ', Brasil', 'region': 'BR' }, function (results, status) {
-                    response($.map(results, function (item) {
-                        return {
-                            label: item.formatted_address,
-                            value: item.formatted_address,
-                            latitude: item.geometry.location.lat(),
-                            longitude: item.geometry.location.lng()
-                        }
-                    }));
-                })
-            },
-            select: function (event, ui) {
-                $("#txtLatitude").val(ui.item.latitude);
-                $("#txtLongitude").val(ui.item.longitude);
-                var location = new google.maps.LatLng(ui.item.latitude, ui.item.longitude);
-                marker.setPosition(location);
-                map.setCenter(location);
-                map.setZoom(16);
-            }
-        });
-
-        $("form").submit(function(event) {
-            event.preventDefault();
-
-            var endereco = $("#location").val();
-            var latitude = $("#txtLatitude").val();
-            var longitude = $("#txtLongitude").val();
-
-            alert("Endereço: " + endereco + "\nLatitude: " + latitude + "\nLongitude: " + longitude);
-        });
-
-    });
-}, 5000);
+// var geocoder;
+// var map;
+// var marker;
+//
+// setTimeout(function () {
+//
+//     function initialize() {
+//         var latlng = new google.maps.LatLng(-18.8800397, -47.05878999999999);
+//         var options = {
+//             zoom: 5,
+//             center: latlng,
+//             mapTypeId: google.maps.MapTypeId.ROADMAP
+//         };
+//
+//         map = new google.maps.Map(document.getElementById("mapa"), options);
+//
+//         geocoder = new google.maps.Geocoder();
+//
+//         marker = new google.maps.Marker({
+//             map: map,
+//             draggable: true,
+//         });
+//
+//         marker.setPosition(latlng);
+//     }
+//
+//     $(document).ready(function () {
+//
+//         initialize();
+//
+//         function carregarNoMapa(endereco) {
+//             geocoder.geocode({ 'address': endereco + ', Brasil', 'region': 'BR' }, function (results, status) {
+//                 if (status == google.maps.GeocoderStatus.OK) {
+//                     if (results[0]) {
+//                         var latitude = results[0].geometry.location.lat();
+//                         var longitude = results[0].geometry.location.lng();
+//
+//                         $('#location').val(results[0].formatted_address);
+//                         $('#txtLatitude').val(latitude);
+//                         $('#txtLongitude').val(longitude);
+//
+//                         var location = new google.maps.LatLng(latitude, longitude);
+//                         marker.setPosition(location);
+//                         map.setCenter(location);
+//                         map.setZoom(16);
+//                     }
+//                 }
+//             })
+//         }
+//
+//         $("#btnEndereco").click(function() {
+//             if($(this).val() != "")
+//                 carregarNoMapa($("#location").val());
+//         })
+//
+//         $("#location").blur(function() {
+//             if($(this).val() != "")
+//                 carregarNoMapa($(this).val());
+//         })
+//
+//         google.maps.event.addListener(marker, 'drag', function () {
+//             geocoder.geocode({ 'latLng': marker.getPosition() }, function (results, status) {
+//                 if (status == google.maps.GeocoderStatus.OK) {
+//                     if (results[0]) {
+//                         $('#location').val(results[0].formatted_address);
+//                         $('#txtLatitude').val(marker.getPosition().lat());
+//                         $('#txtLongitude').val(marker.getPosition().lng());
+//                     }
+//                 }
+//             });
+//         });
+//
+//         $("#location").autocomplete({
+//             source: function (request, response) {
+//                 geocoder.geocode({ 'address': request.term + ', Brasil', 'region': 'BR' }, function (results, status) {
+//                     response($.map(results, function (item) {
+//                         return {
+//                             label: item.formatted_address,
+//                             value: item.formatted_address,
+//                             latitude: item.geometry.location.lat(),
+//                             longitude: item.geometry.location.lng()
+//                         }
+//                     }));
+//                 })
+//             },
+//             select: function (event, ui) {
+//                 $("#txtLatitude").val(ui.item.latitude);
+//                 $("#txtLongitude").val(ui.item.longitude);
+//                 var location = new google.maps.LatLng(ui.item.latitude, ui.item.longitude);
+//                 marker.setPosition(location);
+//                 map.setCenter(location);
+//                 map.setZoom(16);
+//             }
+//         });
+//
+//         $("form").submit(function(event) {
+//             event.preventDefault();
+//
+//             var endereco = $("#location").val();
+//             var latitude = $("#txtLatitude").val();
+//             var longitude = $("#txtLongitude").val();
+//
+//             alert("Endereço: " + endereco + "\nLatitude: " + latitude + "\nLongitude: " + longitude);
+//         });
+//
+//     });
+// }, 5000);
 
 
 module.exports = 'app';
@@ -86215,7 +86215,15 @@ angular
     .module('webAdminApp')
     .controller('AddEventController', AddEventController);
 
-function AddEventController($scope, event, eventService, userService, utilsService, growlService) {
+function AddEventController(Facebook, $scope, event, eventService, userService, utilsService, growlService) {
+
+    var self = this;
+
+    Facebook.getLoginStatus(function() {
+        userService.getFriends().then(function (response) {
+            self.friends = response.data;
+        });
+    });
 
     event.get({id: 10}, function(data) {
         console.log('event', data);
@@ -86230,7 +86238,7 @@ function AddEventController($scope, event, eventService, userService, utilsServi
     vm.event = {
         videos: []
     };
-
+    
     vm.isYoutubeUrl = function() {
         if (!vm.urlYoutube) {
             return false;
@@ -86535,18 +86543,24 @@ require('lightgallery/dist/js/lightgallery');
 
 angular
     .module('webAdminApp')
-    .controller('profileCtrl', profileCtrl);
+    .controller('ProfileCtrl', ProfileCtrl);
 
-function profileCtrl(growlService) {
+function ProfileCtrl($q, growlService, userService, Facebook) {
 
-    //Get Profile Information from profileService Service
+    var self = this;
+
+    Facebook.getLoginStatus(function() {
+        userService.getFriends().then(function (response) {
+            self.friends = response.data;
+        });
+    });
 
     //User
     this.profileSummary = "Sed eu est vulputate, fringilla ligula ac, maximus arcu. Donec sed felis vel magna mattis ornare ut non turpis. Sed id arcu elit. Sed nec sagittis tortor. Mauris ante urna, ornare sit amet mollis eu, aliquet ac ligula. Nullam dolor metus, suscipit ac imperdiet nec, consectetur sed ex. Sed cursus porttitor leo.";
 
-    this.fullName = "Mallinda Hollaway";
-    this.gender = "female";
-    this.birthDay = "23/06/1988";
+    this.fullName = "Gleilson Ferreira";
+    this.gender = "male";
+    this.birthDay = "15/04/1995";
     this.martialStatus = "Single";
     this.mobileNumber = "00971123456789";
     this.emailAddress = "malinda.h@gmail.com";
@@ -86908,7 +86922,10 @@ function UserService(Facebook) {
     self.getFriends = function() {
         var url = '/me/friends';
         return Facebook.api(url, function(response) {
+
             console.log('response', response);
+
+            return response.data;
         });
     };
 }
@@ -87094,11 +87111,15 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
 
     self.login = function() {
         Facebook.getLoginStatus(function(response) {
+            console.log('response', response);
             if(response.status === 'connected') {
                 self.getUser();
             } else {
                 Facebook.login(function() {
                     self.getUser();
+                }, {
+                    scope: 'publish_actions, user_friends, user_relationships',
+                    return_scopes: true
                 });
             }
         });

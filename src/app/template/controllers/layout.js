@@ -25,11 +25,15 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
 
     self.login = function() {
         Facebook.getLoginStatus(function(response) {
+            console.log('response', response);
             if(response.status === 'connected') {
                 self.getUser();
             } else {
                 Facebook.login(function() {
                     self.getUser();
+                }, {
+                    scope: 'publish_actions, user_friends, user_relationships',
+                    return_scopes: true
                 });
             }
         });

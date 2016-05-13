@@ -104,5 +104,31 @@
                 </div>
             </div>
         </div>
+        <div class="col-s6 col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Convidados <small>Lista de convidados</small></h2>
+                </div>
+                <div class="card-body card-padding">
+                    <div class="contacts c-profile clearfix row">
+                        <div class="col-md-3 col-sm-6 col-xs-6" ng-repeat="friend in addEventCtrl.friends">
+                            <div class="c-item">
+                                <a href="" class="ci-avatar">
+                                    <img src="http://graph.facebook.com/{{ friend.id }}/picture?type=large" alt="">
+                                </a>
+
+                                <div class="c-info">
+                                    <strong>{{ friend.name }}</strong>
+                                </div>
+
+                                <div class="c-footer">
+                                    <button class="waves-effect"><i class="zmdi zmdi-person-add"></i> Convidar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

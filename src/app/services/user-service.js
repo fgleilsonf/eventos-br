@@ -23,7 +23,10 @@ function UserService(Facebook) {
     self.getFriends = function() {
         var url = '/me/friends';
         return Facebook.api(url, function(response) {
+
             console.log('response', response);
+
+            return response.data;
         });
     };
 }

@@ -6,7 +6,15 @@ angular
     .module('webAdminApp')
     .controller('AddEventController', AddEventController);
 
-function AddEventController($scope, event, eventService, userService, utilsService, growlService) {
+function AddEventController(Facebook, $scope, event, eventService, userService, utilsService, growlService) {
+
+    var self = this;
+
+    Facebook.getLoginStatus(function() {
+        userService.getFriends().then(function (response) {
+            self.friends = response.data;
+        });
+    });
 
     event.get({id: 10}, function(data) {
         console.log('event', data);
@@ -21,7 +29,7 @@ function AddEventController($scope, event, eventService, userService, utilsServi
     vm.event = {
         videos: []
     };
-
+    
     vm.isYoutubeUrl = function() {
         if (!vm.urlYoutube) {
             return false;

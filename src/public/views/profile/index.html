@@ -1,30 +1,9 @@
 <div class="container">
-
     <div class="block-header">
         <h2>{{ mactrl.user.name }} <small>Informações do usuário</small></h2>
-
-        <ul class="actions m-t-20 hidden-xs">
-            <li class="dropdown" uib-dropdown>
-                <a href="" uib-dropdown-toggle>
-                    <i class="zmdi zmdi-more-vert"></i>
-                </a>
-
-                <ul class="dropdown-menu dropdown-menu-right">
-                    <li>
-                        <a href="">Privacy Settings</a>
-                    </li>
-                    <li>
-                        <a href="">Account Settings</a>
-                    </li>
-                    <li>
-                        <a href="">Other Settings</a>
-                    </li>
-                </ul>
-            </li>
-        </ul>
     </div>
 
-    <div class="card" id="profile-main" ng-controller="profileCtrl as pctrl">
+    <div class="card" id="profile-main" ng-controller="ProfileCtrl as profileCtrl">
         <div class="pm-overview c-overflow">
             <div class="pmo-pic">
                 <div class="p-relative">
@@ -43,78 +22,41 @@
                             <button class="btn bgm-green btn-float"><i class="zmdi zmdi-mail-send"></i></button>
                         </div>
                     </div>
-
-                    <a href="" class="pmop-edit">
-                        <i class="zmdi zmdi-camera"></i> <span class="hidden-xs">Update Profile Picture</span>
-                    </a>
                 </div>
 
 
                 <div class="pmo-stat">
-                    <h2 class="m-0 c-white">1562</h2>
-                    Total Connections
+                    <h2 class="m-0 c-white">{{ profileCtrl.friends.length }}</h2>
+                    Total de amigos
                 </div>
             </div>
 
             <div class="pmo-block pmo-contact hidden-xs">
-                <h2>Contact</h2>
+                <h2>Contato</h2>
 
                 <ul>
-                    <li><i class="zmdi zmdi-phone"></i> {{ pctrl.mobileNumber }}</li>
-                    <li><i class="zmdi zmdi-email"></i> {{ pctrl.emailAddress }}</li>
-                    <li><i class="zmdi zmdi-facebook-box"></i> {{ pctrl.skype }}</li>
+                    <li><i class="zmdi zmdi-phone"></i> {{ mactrl.user.email || 'Phone não recuperado' }}</li>
+                    <li><i class="zmdi zmdi-email"></i> {{ mactrl.user.name || 'Email não recuperado' }}</li>
+                    <li><i class="zmdi zmdi-facebook-box"></i> {{ pctrl.skype || 'Skype não recuperado' }}</li>
                     <li><i class="zmdi zmdi-twitter"></i> {{ pctrl.twitter }} (twitter.com/malinda)</li>
                     <li>
                         <i class="zmdi zmdi-pin"></i>
                         <address class="m-b-0">
-                            {{ pctrl.addressSuite }}, <br/>
-                            {{ pctrl.addressCity }}, <br/>
-                            {{ pctrl.addressCountry }}
+                            {{ mactrl.addressSuite || 'Email não address Suite'  }}, <br/>
+                            {{ mactrl.addressCity  || 'Email não address City' }}, <br/>
+                            {{ mactrl.addressCountry || 'Email não address country'}}
                         </address>
                     </li>
                 </ul>
             </div>
 
             <div class="pmo-block pmo-items hidden-xs">
-                <h2>Connections</h2>
+                <h2>Amigos</h2>
 
                 <div class="pmob-body">
                     <div class="row">
-                        <a href="" class="col-xs-2">
-                            <img class="img-circle" src="assets/img/profile-pics/1.jpg" alt="">
-                        </a>
-                        <a href="" class="col-xs-2">
-                            <img class="img-circle" src="assets/img/profile-pics/2.jpg" alt="">
-                        </a>
-                        <a href="" class="col-xs-2">
-                            <img class="img-circle" src="assets/img/profile-pics/3.jpg" alt="">
-                        </a>
-                        <a href="" class="col-xs-2">
-                            <img class="img-circle" src="assets/img/profile-pics/4.jpg" alt="">
-                        </a>
-                        <a href="" class="col-xs-2">
-                            <img class="img-circle" src="assets/img/profile-pics/5.jpg" alt="">
-                        </a>
-                        <a href="" class="col-xs-2">
-                            <img class="img-circle" src="assets/img/profile-pics/6.jpg" alt="">
-                        </a>
-                        <a href="" class="col-xs-2">
-                            <img class="img-circle" src="assets/img/profile-pics/7.jpg" alt="">
-                        </a>
-                        <a href="" class="col-xs-2">
-                            <img class="img-circle" src="assets/img/profile-pics/8.jpg" alt="">
-                        </a>
-                        <a href="" class="col-xs-2">
-                            <img class="img-circle" src="assets/img/profile-pics/1.jpg" alt="">
-                        </a>
-                        <a href="" class="col-xs-2">
-                            <img class="img-circle" src="assets/img/profile-pics/2.jpg" alt="">
-                        </a>
-                        <a href="" class="col-xs-2">
-                            <img class="img-circle" src="assets/img/profile-pics/3.jpg" alt="">
-                        </a>
-                        <a href="" class="col-xs-2">
-                            <img class="img-circle" src="assets/img/profile-pics/4.jpg" alt="">
+                        <a href="" class="col-xs-2" ng-repeat="friend in profileCtrl.friends">
+                            <img class="img-circle" src="http://graph.facebook.com/{{ friend.id }}/picture?type=large" alt="">
                         </a>
                     </div>
                 </div>
