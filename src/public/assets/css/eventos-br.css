@@ -35553,3 +35553,7 @@ select.chosen {
   color: #666 !important;
   display: block;
 }
+.item-list-comment:hover {
+  opacity: 0.2;
+  border: 2px solid red;
+}

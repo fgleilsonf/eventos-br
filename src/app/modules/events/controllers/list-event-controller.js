@@ -8,13 +8,14 @@ angular
     .controller('ListEventController', ListEventController);
 
 function ListEventController($scope, eventService, Spotify) {
-    var vm = this;
+    var self = this;
 
-    vm.login = function () {
+    self.events = [];
+    self.countComments = 0;
+
+    self.login = function () {
         Spotify.login().then(function(data) {
-
             Spotify.setAuthToken(data);
-
             Spotify.getTracksAudioFeatures('5wZUvwWGKaZ6NG8yckZcTM').then(function (data) {
                 console.log(data);
             });
@@ -30,20 +31,17 @@ function ListEventController($scope, eventService, Spotify) {
     //    console.log(data);
     //});
 
-    vm.events = [];
-
     var loadEvents_ = function() {
        eventService.get().success(function(response) {
-           vm.events = response;
+           self.events = response;
 
-           console.log('vm.events', vm.events);
-
+           console.log('self.events', self.events);
        });
     };
 
-    vm.myInterval = 0;
+    self.myInterval = 0;
 
-    vm.slides = [
+    self.slides = [
         {
             img: 'c-1.jpg',
             title: 'First Slide Label',
@@ -58,6 +56,12 @@ function ListEventController($scope, eventService, Spotify) {
             img: 'c-3.jpg'
         }
     ];
+
+    var onLoadListComments_ = function (event, countComments) {
+        self.countComments = countComments;
+    };
+
+    $scope.$on('call-load-list-comments', onLoadListComments_);
 
     loadEvents_();
 }

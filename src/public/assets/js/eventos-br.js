@@ -85206,120 +85206,120 @@ require('./directives');
 require('./template');
 require('./home');
 require('./modules');
-require('./models');
+require('./entities');
 
-// var geocoder;
-// var map;
-// var marker;
-//
-// setTimeout(function () {
-//
-//     function initialize() {
-//         var latlng = new google.maps.LatLng(-18.8800397, -47.05878999999999);
-//         var options = {
-//             zoom: 5,
-//             center: latlng,
-//             mapTypeId: google.maps.MapTypeId.ROADMAP
-//         };
-//
-//         map = new google.maps.Map(document.getElementById("mapa"), options);
-//
-//         geocoder = new google.maps.Geocoder();
-//
-//         marker = new google.maps.Marker({
-//             map: map,
-//             draggable: true,
-//         });
-//
-//         marker.setPosition(latlng);
-//     }
-//
-//     $(document).ready(function () {
-//
-//         initialize();
-//
-//         function carregarNoMapa(endereco) {
-//             geocoder.geocode({ 'address': endereco + ', Brasil', 'region': 'BR' }, function (results, status) {
-//                 if (status == google.maps.GeocoderStatus.OK) {
-//                     if (results[0]) {
-//                         var latitude = results[0].geometry.location.lat();
-//                         var longitude = results[0].geometry.location.lng();
-//
-//                         $('#location').val(results[0].formatted_address);
-//                         $('#txtLatitude').val(latitude);
-//                         $('#txtLongitude').val(longitude);
-//
-//                         var location = new google.maps.LatLng(latitude, longitude);
-//                         marker.setPosition(location);
-//                         map.setCenter(location);
-//                         map.setZoom(16);
-//                     }
-//                 }
-//             })
-//         }
-//
-//         $("#btnEndereco").click(function() {
-//             if($(this).val() != "")
-//                 carregarNoMapa($("#location").val());
-//         })
-//
-//         $("#location").blur(function() {
-//             if($(this).val() != "")
-//                 carregarNoMapa($(this).val());
-//         })
-//
-//         google.maps.event.addListener(marker, 'drag', function () {
-//             geocoder.geocode({ 'latLng': marker.getPosition() }, function (results, status) {
-//                 if (status == google.maps.GeocoderStatus.OK) {
-//                     if (results[0]) {
-//                         $('#location').val(results[0].formatted_address);
-//                         $('#txtLatitude').val(marker.getPosition().lat());
-//                         $('#txtLongitude').val(marker.getPosition().lng());
-//                     }
-//                 }
-//             });
-//         });
-//
-//         $("#location").autocomplete({
-//             source: function (request, response) {
-//                 geocoder.geocode({ 'address': request.term + ', Brasil', 'region': 'BR' }, function (results, status) {
-//                     response($.map(results, function (item) {
-//                         return {
-//                             label: item.formatted_address,
-//                             value: item.formatted_address,
-//                             latitude: item.geometry.location.lat(),
-//                             longitude: item.geometry.location.lng()
-//                         }
-//                     }));
-//                 })
-//             },
-//             select: function (event, ui) {
-//                 $("#txtLatitude").val(ui.item.latitude);
-//                 $("#txtLongitude").val(ui.item.longitude);
-//                 var location = new google.maps.LatLng(ui.item.latitude, ui.item.longitude);
-//                 marker.setPosition(location);
-//                 map.setCenter(location);
-//                 map.setZoom(16);
-//             }
-//         });
-//
-//         $("form").submit(function(event) {
-//             event.preventDefault();
-//
-//             var endereco = $("#location").val();
-//             var latitude = $("#txtLatitude").val();
-//             var longitude = $("#txtLongitude").val();
-//
-//             alert("Endereço: " + endereco + "\nLatitude: " + latitude + "\nLongitude: " + longitude);
-//         });
-//
-//     });
-// }, 5000);
+var geocoder;
+var map;
+var marker;
+
+setTimeout(function () {
+
+    function initialize() {
+        var latlng = new google.maps.LatLng(-18.8800397, -47.05878999999999);
+        var options = {
+            zoom: 5,
+            center: latlng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+
+        map = new google.maps.Map(document.getElementById("mapa"), options);
+
+        geocoder = new google.maps.Geocoder();
+
+        marker = new google.maps.Marker({
+            map: map,
+            draggable: true,
+        });
+
+        marker.setPosition(latlng);
+    }
+
+    $(document).ready(function () {
+
+        initialize();
+
+        function carregarNoMapa(endereco) {
+            geocoder.geocode({ 'address': endereco + ', Brasil', 'region': 'BR' }, function (results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    if (results[0]) {
+                        var latitude = results[0].geometry.location.lat();
+                        var longitude = results[0].geometry.location.lng();
+
+                        $('#location').val(results[0].formatted_address);
+                        $('#txtLatitude').val(latitude);
+                        $('#txtLongitude').val(longitude);
+
+                        var location = new google.maps.LatLng(latitude, longitude);
+                        marker.setPosition(location);
+                        map.setCenter(location);
+                        map.setZoom(16);
+                    }
+                }
+            })
+        }
+
+        $("#btnEndereco").click(function() {
+            if($(this).val() != "")
+                carregarNoMapa($("#location").val());
+        })
+
+        $("#location").blur(function() {
+            if($(this).val() != "")
+                carregarNoMapa($(this).val());
+        })
+
+        google.maps.event.addListener(marker, 'drag', function () {
+            geocoder.geocode({ 'latLng': marker.getPosition() }, function (results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    if (results[0]) {
+                        $('#location').val(results[0].formatted_address);
+                        $('#txtLatitude').val(marker.getPosition().lat());
+                        $('#txtLongitude').val(marker.getPosition().lng());
+                    }
+                }
+            });
+        });
+
+        $("#location").autocomplete({
+            source: function (request, response) {
+                geocoder.geocode({ 'address': request.term + ', Brasil', 'region': 'BR' }, function (results, status) {
+                    response($.map(results, function (item) {
+                        return {
+                            label: item.formatted_address,
+                            value: item.formatted_address,
+                            latitude: item.geometry.location.lat(),
+                            longitude: item.geometry.location.lng()
+                        }
+                    }));
+                })
+            },
+            select: function (event, ui) {
+                $("#txtLatitude").val(ui.item.latitude);
+                $("#txtLongitude").val(ui.item.longitude);
+                var location = new google.maps.LatLng(ui.item.latitude, ui.item.longitude);
+                marker.setPosition(location);
+                map.setCenter(location);
+                map.setZoom(16);
+            }
+        });
+
+        $("form").submit(function(event) {
+            event.preventDefault();
+
+            var endereco = $("#location").val();
+            var latitude = $("#txtLatitude").val();
+            var longitude = $("#txtLongitude").val();
+
+            alert("Endereço: " + endereco + "\nLatitude: " + latitude + "\nLongitude: " + longitude);
+        });
+
+    });
+}, 5000);
 
 
 module.exports = 'app';
 
-},{"./assets/fullcalendar.min":69,"./assets/jquery-ui.custom.min":70,"./config":73,"./directives":85,"./home":96,"./models":99,"./modules":105,"./services":115,"./template":125,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":48,"bootstrap-notify/bootstrap-notify":49,"flot.tooltip/js/jquery.flot.tooltip":50,"flot/jquery.flot":51,"jquery":52,"malihu-custom-scrollbar-plugin":54,"sweetalert":68}],72:[function(require,module,exports){
+},{"./assets/fullcalendar.min":69,"./assets/jquery-ui.custom.min":70,"./config":73,"./directives":85,"./entities":94,"./home":98,"./modules":109,"./services":119,"./template":129,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":48,"bootstrap-notify/bootstrap-notify":49,"flot.tooltip/js/jquery.flot.tooltip":50,"flot/jquery.flot":51,"jquery":52,"malihu-custom-scrollbar-plugin":54,"sweetalert":68}],72:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85425,7 +85425,7 @@ function TranslateConfig($translateProvider) {
     $translateProvider.preferredLanguage('pt-br');
 }
 
-},{"../../resources/i18n/en":126,"../../resources/i18n/pt-br":127,"./app":72}],76:[function(require,module,exports){
+},{"../../resources/i18n/en":130,"../../resources/i18n/pt-br":131,"./app":72}],76:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86145,11 +86145,38 @@ function Youtube($sce) {
 }
 
 },{"angular":46}],93:[function(require,module,exports){
+'use strict';
+
+var angular = require('angular');
+
+angular
+    .module('webAdminApp')
+    .factory('Comment', Comment);
+
+function Comment($resource) {
+    var url = 'http://localhost:8000/comments/:id';
+    var params = { id: '@id'};
+
+    var options =  {
+        update: {
+            method: 'PUT'
+        }
+    };
+
+    return $resource(url, params, options);
+}
+
+},{"angular":46}],94:[function(require,module,exports){
+require('./comment');
+
+module.exports = 'entities';
+
+},{"./comment":93}],95:[function(require,module,exports){
 require('./main');
 
 module.exports = 'controllers';
 
-},{"./main":94}],94:[function(require,module,exports){
+},{"./main":96}],96:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86166,47 +86193,66 @@ function MainController() {
 
 }
 
-},{"angular":46}],95:[function(require,module,exports){
+},{"angular":46}],97:[function(require,module,exports){
 module.exports = 'directives';
 
-},{}],96:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 require('./controllers');
 require('./directives');
 require('./resources');
 
 module.exports = 'home';
 
-},{"./controllers":93,"./directives":95,"./resources":97}],97:[function(require,module,exports){
+},{"./controllers":95,"./directives":97,"./resources":99}],99:[function(require,module,exports){
 module.exports = 'resources';
 
-},{}],98:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
 
 angular
     .module('webAdminApp')
-    .factory('event', EventModel);
+    .controller('AddCommentController', AddCommentController);
 
-function EventModel($resource) {
-    var url = 'http://localhost:8000/events/:id';
-    var params = { id: '@id'};
+function AddCommentController($scope, Comment) {
+    var self = this;
 
-    var options =  {
-        update: {
-            method: 'PUT'
-        }
+    self.isOpenForm = false;
+
+    self.openForm = function (flag) {
+        self.isOpenForm = flag;
+
+        setTimeout(function () {
+            angular.element('#messageComment').focus();
+        });
     };
 
-    return $resource(url, params, options);
+    self.save = function() {
+        var comment = new Comment();
+        comment.user_id = 1;
+        comment.event_id = 6;
+        comment.message = self.comment.message;
+
+        comment.$save(function () {
+            self.comment.message = '';
+
+            $scope.$emit('call-load-comments');
+        });
+    };
 }
 
-},{"angular":46}],99:[function(require,module,exports){
-require('./event-model');
+},{"angular":46}],101:[function(require,module,exports){
+require('./add-comment-controller');
 
-module.exports = 'models';
+module.exports = 'controllers';
 
-},{"./event-model":98}],100:[function(require,module,exports){
+},{"./add-comment-controller":100}],102:[function(require,module,exports){
+require('./controllers/index');
+
+module.exports = 'comments';
+
+},{"./controllers/index":101}],103:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86238,7 +86284,7 @@ function AddEventController(Facebook, $scope, event, eventService, userService, 
     vm.event = {
         videos: []
     };
-    
+
     vm.isYoutubeUrl = function() {
         if (!vm.urlYoutube) {
             return false;
@@ -86260,9 +86306,12 @@ function AddEventController(Facebook, $scope, event, eventService, userService, 
     };
 
     vm.save = function() {
-        eventService.add(vm.event);
 
         console.log('vm.event', vm.event);
+
+        // eventService.add(vm.event);
+        //
+        // console.log('vm.event', vm.event);
     };
 
     $scope.today = function () {
@@ -86295,7 +86344,7 @@ function AddEventController(Facebook, $scope, event, eventService, userService, 
     };
 }
 
-},{"angular":46}],101:[function(require,module,exports){
+},{"angular":46}],104:[function(require,module,exports){
 var angular = require('angular');
 var $ = require('jquery');
 
@@ -86406,14 +86455,47 @@ angular
         }
     })
 
-},{"angular":46,"jquery":52}],102:[function(require,module,exports){
+},{"angular":46,"jquery":52}],105:[function(require,module,exports){
+'use strict';
+
+var angular = require('angular');
+
+angular
+    .module('webAdminApp')
+    .controller('CommentController', CommentController);
+
+function CommentController($scope, Comment) {
+
+    var self = this;
+
+    self.comments = [];
+
+    self.delete = function (comment) {
+        comment.$remove(load_);
+    };
+
+    var load_ = function () {
+        Comment.query({event_id: 6}, function (comments) {
+            self.comments = comments;
+
+            $scope.$emit('call-load-list-comments', self.comments.length);
+        });
+    };
+
+    $scope.$on('call-load-comments', load_);
+
+    load_();
+}
+
+},{"angular":46}],106:[function(require,module,exports){
 require('./add-event-controller');
 require('./list-event-controller');
 require('./calendar');
+require('./comment-controller');
 
 module.exports = 'controllers';
 
-},{"./add-event-controller":100,"./calendar":101,"./list-event-controller":103}],103:[function(require,module,exports){
+},{"./add-event-controller":103,"./calendar":104,"./comment-controller":105,"./list-event-controller":107}],107:[function(require,module,exports){
 'use strict';
 
 
@@ -86424,13 +86506,14 @@ angular
     .controller('ListEventController', ListEventController);
 
 function ListEventController($scope, eventService, Spotify) {
-    var vm = this;
+    var self = this;
 
-    vm.login = function () {
+    self.events = [];
+    self.countComments = 0;
+
+    self.login = function () {
         Spotify.login().then(function(data) {
-
             Spotify.setAuthToken(data);
-
             Spotify.getTracksAudioFeatures('5wZUvwWGKaZ6NG8yckZcTM').then(function (data) {
                 console.log(data);
             });
@@ -86446,20 +86529,17 @@ function ListEventController($scope, eventService, Spotify) {
     //    console.log(data);
     //});
 
-    vm.events = [];
-
     var loadEvents_ = function() {
        eventService.get().success(function(response) {
-           vm.events = response;
+           self.events = response;
 
-           console.log('vm.events', vm.events);
-
+           console.log('self.events', self.events);
        });
     };
 
-    vm.myInterval = 0;
+    self.myInterval = 0;
 
-    vm.slides = [
+    self.slides = [
         {
             img: 'c-1.jpg',
             title: 'First Slide Label',
@@ -86475,22 +86555,29 @@ function ListEventController($scope, eventService, Spotify) {
         }
     ];
 
+    var onLoadListComments_ = function (event, countComments) {
+        self.countComments = countComments;
+    };
+
+    $scope.$on('call-load-list-comments', onLoadListComments_);
+
     loadEvents_();
 }
 
-},{"angular":46}],104:[function(require,module,exports){
+},{"angular":46}],108:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'home';
 
-},{"./controllers/index":102}],105:[function(require,module,exports){
+},{"./controllers/index":106}],109:[function(require,module,exports){
+require('./comments/index');
 require('./profile/index');
 require('./events/index');
 require('./pages/index');
 
 module.exports = 'modules';
 
-},{"./events/index":104,"./pages/index":108,"./profile/index":111}],106:[function(require,module,exports){
+},{"./comments/index":102,"./events/index":108,"./pages/index":112,"./profile/index":115}],110:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86522,19 +86609,19 @@ function AboutCtrl() {
     }];
 }
 
-},{"angular":46}],107:[function(require,module,exports){
+},{"angular":46}],111:[function(require,module,exports){
 require('./about');
 
 module.exports = 'controllers';
 
-},{"./about":106}],108:[function(require,module,exports){
+},{"./about":110}],112:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'pages';
 
-},{"./controllers/index":107}],109:[function(require,module,exports){
-arguments[4][93][0].apply(exports,arguments)
-},{"./main":110,"dup":93}],110:[function(require,module,exports){
+},{"./controllers/index":111}],113:[function(require,module,exports){
+arguments[4][95][0].apply(exports,arguments)
+},{"./main":114,"dup":95}],114:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86594,12 +86681,12 @@ function ProfileCtrl($q, growlService, userService, Facebook) {
     }
 }
 
-},{"angular":46,"lightgallery/dist/js/lightgallery":53}],111:[function(require,module,exports){
+},{"angular":46,"lightgallery/dist/js/lightgallery":53}],115:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'profile';
 
-},{"./controllers/index":109}],112:[function(require,module,exports){
+},{"./controllers/index":113}],116:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86620,7 +86707,7 @@ function BestsellingService($resource) {
     }
 }
 
-},{"angular":46}],113:[function(require,module,exports){
+},{"angular":46}],117:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86642,7 +86729,7 @@ function EventService($http) {
     };
 }
 
-},{"angular":46}],114:[function(require,module,exports){
+},{"angular":46}],118:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86681,7 +86768,7 @@ function growlService() {
     return gs;
 }
 
-},{"angular":46,"jquery":52}],115:[function(require,module,exports){
+},{"angular":46,"jquery":52}],119:[function(require,module,exports){
 require('./growl-service');
 require('./best-selling-service');
 require('./message-service');
@@ -86693,7 +86780,7 @@ require('./utils-service');
 
 module.exports = 'services';
 
-},{"./best-selling-service":112,"./event-service":113,"./growl-service":114,"./message-service":116,"./scroll-service":117,"./table-service":118,"./user-service":119,"./utils-service":120}],116:[function(require,module,exports){
+},{"./best-selling-service":116,"./event-service":117,"./growl-service":118,"./message-service":120,"./scroll-service":121,"./table-service":122,"./user-service":123,"./utils-service":124}],120:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86714,7 +86801,7 @@ function MessageService($resource) {
     }
 }
 
-},{"angular":46}],117:[function(require,module,exports){
+},{"angular":46}],121:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86742,7 +86829,7 @@ function scrollService() {
     return ss;
 }
 
-},{"angular":46,"jquery":52}],118:[function(require,module,exports){
+},{"angular":46,"jquery":52}],122:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86896,7 +86983,7 @@ function tableService() {
         }
     ];
 }
-},{"angular":46}],119:[function(require,module,exports){
+},{"angular":46}],123:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86930,7 +87017,7 @@ function UserService(Facebook) {
     };
 }
 
-},{"angular":46}],120:[function(require,module,exports){
+},{"angular":46}],124:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86948,7 +87035,7 @@ function UtilsService() {
   };
 }
 
-},{"angular":46}],121:[function(require,module,exports){
+},{"angular":46}],125:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86965,7 +87052,7 @@ function BestSellingController(bestSellingService) {
     this.bsResult = bestSellingService.getBestselling(this.img, this.name, this.range);
 }
 
-},{"angular":46}],122:[function(require,module,exports){
+},{"angular":46}],126:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87076,14 +87163,14 @@ function HeaderController($timeout, messageService){
     }
 };
 
-},{"angular":46,"jquery":52}],123:[function(require,module,exports){
+},{"angular":46,"jquery":52}],127:[function(require,module,exports){
 require('./layout');
 require('./header');
 require('./best-selling');
 
 module.exports = 'controllers';
 
-},{"./best-selling":121,"./header":122,"./layout":124}],124:[function(require,module,exports){
+},{"./best-selling":125,"./header":126,"./layout":128}],128:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87164,9 +87251,6 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
     //Listview menu toggle in small screens
     this.lvMenuStat = false;
 
-    //Blog
-    this.wallCommenting = [];
-
     this.wallImage = false;
     this.wallVideo = false;
     this.wallLink = false;
@@ -87200,15 +87284,15 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
     };
 };
 
-},{"angular":46}],125:[function(require,module,exports){
+},{"angular":46}],129:[function(require,module,exports){
 require('./controllers');
 
 module.exports = 'template';
 
-},{"./controllers":123}],126:[function(require,module,exports){
+},{"./controllers":127}],130:[function(require,module,exports){
 module.exports={
 }
 
-},{}],127:[function(require,module,exports){
-arguments[4][126][0].apply(exports,arguments)
-},{"dup":126}]},{},[71]);
+},{}],131:[function(require,module,exports){
+arguments[4][130][0].apply(exports,arguments)
+},{"dup":130}]},{},[71]);

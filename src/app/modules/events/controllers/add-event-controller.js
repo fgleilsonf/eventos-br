@@ -29,7 +29,7 @@ function AddEventController(Facebook, $scope, event, eventService, userService, 
     vm.event = {
         videos: []
     };
-    
+
     vm.isYoutubeUrl = function() {
         if (!vm.urlYoutube) {
             return false;
@@ -51,9 +51,12 @@ function AddEventController(Facebook, $scope, event, eventService, userService, 
     };
 
     vm.save = function() {
-        eventService.add(vm.event);
 
         console.log('vm.event', vm.event);
+
+        // eventService.add(vm.event);
+        //
+        // console.log('vm.event', vm.event);
     };
 
     $scope.today = function () {

@@ -1,0 +1,24 @@
+<div class="wall-comment-list" ng-controller="CommentController as commentCtrl">
+    <div class="wcl-list" ng-repeat="comment in commentCtrl.comments">
+        <div class="media">
+            <a href="" class="pull-left">
+                <img src="http://graph.facebook.com/{{ comment.user.facebook_id }}/picture?type=large" alt="" class="lv-img-sm">
+            </a>
+
+            <div class="pull-right p-0">
+                <ul class="actions">
+                    <li>
+                        <a href="" ng-click="commentCtrl.delete(comment);">
+                            <i class="zmdi zmdi-close c-gray"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="media-body">
+                <a href="" class="a-title">{{ comment.user.name }}</a> <small class="c-gray m-l-10">3 mins ago...</small>
+                <p class="m-t-5 m-b-5">{{ comment.message }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="m-t-5" ng-include="'views/comments/add-comment.html'"></div>
+</div>

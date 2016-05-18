@@ -4,10 +4,10 @@ var angular = require('angular');
 
 angular
     .module('webAdminApp')
-    .factory('event', EventModel);
+    .factory('Comment', Comment);
 
-function EventModel($resource) {
-    var url = 'http://localhost:8000/events/:id';
+function Comment($resource) {
+    var url = 'http://localhost:8000/comments/:id';
     var params = { id: '@id'};
 
     var options =  {

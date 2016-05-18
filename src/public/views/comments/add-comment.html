@@ -1,0 +1,20 @@
+<div class="wcl-form" ng-controller="AddCommentController as addCommentCtrl">
+    <div class="wc-comment"
+         ng-if="!addCommentCtrl.isOpenForm"
+         ng-click="addCommentCtrl.openForm(true);">
+        <div class="wcc-inner">
+            Escreva um comentário
+        </div>
+    </div>
+    <div class="wc-comment" ng-if="addCommentCtrl.isOpenForm">
+        <div class="wcc-inner">
+            <textarea ng-model="addCommentCtrl.comment.message" id="messageComment" class="wcci-text"
+                      data-auto-size placeholder="Escreva um comentário">
+            </textarea>
+        </div>
+        <div class="m-t-15">
+            <button class="btn btn-sm btn-primary" ng-click="addCommentCtrl.save();">Postar</button>
+            <button class="btn btn-sm btn-link" ng-click="addCommentCtrl.openForm(false);">Cancelar</button>
+        </div>
+    </div>
+</div>

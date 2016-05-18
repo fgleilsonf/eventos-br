@@ -78,9 +78,6 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
     //Listview menu toggle in small screens
     this.lvMenuStat = false;
 
-    //Blog
-    this.wallCommenting = [];
-
     this.wallImage = false;
     this.wallVideo = false;
     this.wallLink = false;

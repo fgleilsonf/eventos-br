@@ -24,7 +24,7 @@
 
                     <ul class="wall-attrs clearfix list-inline list-unstyled">
                         <li class="wa-stats">
-                            <span><i class="zmdi zmdi-comments"></i> {{ event.comments.length }} </span>
+                            <span><i class="zmdi zmdi-comments"></i> {{ listEventCtrl.countComments }} </span>
                             <span class="active"><i class="zmdi zmdi-favorite"></i> {{ event.likes_events.length }}</span>
                         </li>
 
@@ -36,61 +36,7 @@
                     </ul>
                 </div>
 
-                <div class="wall-comment-list">
-
-                    <!-- Comment Listing -->
-                    <div class="wcl-list" ng-repeat="comment in event.comments">
-                        <div class="media">
-                            <a href="" class="pull-left">
-                                <img src="http://graph.facebook.com/{{ comment.user.facebook_id }}/picture?type=large" alt="" class="lv-img-sm">
-                            </a>
-
-                            <div class="pull-right p-0">
-                                <ul class="actions">
-                                    <li class="dropdown" uib-dropdown>
-                                        <a href="" uib-dropdown-toggle aria-haspopup="true" aria-expanded="false">
-                                            <i class="zmdi zmdi-more-vert"></i>
-                                        </a>
-
-                                        <ul class="dropdown-menu dropdown-menu-right">
-                                            <li>
-                                                <a href="">Report</a>
-                                            </li>
-                                            <li>
-                                                <a href="">Delete</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div class="media-body">
-                                <a href="" class="a-title">{{ comment.user.name }}</a> <small class="c-gray m-l-10">3 mins ago...</small>
-                                <p class="m-t-5 m-b-0">{{ comment.message }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Comment form -->
-                    <div class="wcl-form">
-                        <div class="wc-comment" data-ng-if="!mactrl.wallCommenting[1]" data-ng-click="mactrl.wallCommenting[1] = true">
-                            <div class="wcc-inner">
-                                Escreva um comentário
-                            </div>
-                        </div>
-
-                        <div class="wc-comment" data-ng-if="mactrl.wallCommenting[1]">
-                            <div class="wcc-inner">
-                                <textarea class="wcci-text" data-auto-size placeholder="Write Something..."></textarea>
-                            </div>
-
-                            <div class="m-t-15">
-                                <button class="btn btn-sm btn-primary">Postar</button>
-                                <button class="btn btn-sm btn-link" data-ng-click="mactrl.wallCommenting[1] = false">Cancelar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div ng-include="'views/comments/list-comment.html'"></div>
             </div>
         </div>
         <div class="col-md-4 hidden-sm">
@@ -161,66 +107,6 @@
                             <img src="assets/img/headers/square/3.png" alt="">
                         </a>
                     </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2>Comentários recentes <small>Commodo vel pharetra nisi. Donec velit libero</small></h2>
-                </div>
-                <div class="listview">
-                    <div class="lv-body">
-                        <a class="lv-item" href="">
-                            <div class="media">
-                                <div class="pull-left">
-                                    <img class="lv-img-sm" src="assets/img/profile-pics/1.jpg" alt="">
-                                </div>
-                                <div class="media-body">
-                                    <div class="lv-title">Gleilson Ferreira</div>
-                                    <small class="lv-small">Evento muito massa show de bola</small>
-                                </div>
-                            </div>
-                        </a>
-                        <a class="lv-item" href="">
-                            <div class="media">
-                                <div class="pull-left">
-                                    <img class="lv-img-sm" src="assets/img/profile-pics/2.jpg" alt="">
-                                </div>
-                                <div class="media-body">
-                                    <div class="lv-title">Mauricio Filho</div>
-                                    <small class="lv-small">Evento muito massa show de bola</small>
-                                </div>
-                            </div>
-                        </a>
-                        <a class="lv-item" href="">
-                            <div class="media">
-                                <div class="pull-left">
-                                    <img class="lv-img-sm" src="assets/img/profile-pics/3.jpg" alt="">
-                                </div>
-                                <div class="media-body">
-                                    <div class="lv-title">Gleilson Ferreira</div>
-                                    <small class="lv-small">Evento muito massa show de bola</small>
-                                </div>
-                            </div>
-                        </a>
-
-                        <a class="lv-item" href="" ng-repeat="w in rpctrl.rpResult.list">
-                            <div class="media">
-                                <div class="pull-left">
-                                    <img class="lv-img-sm" data-ng-src="assets/img/profile-pics/{{ w.img }}" alt="">
-                                </div>
-                                <div class="media-body">
-                                    <div class="lv-title">{{ w.user }}</div>
-                                    <small class="lv-small">{{ w.text }}</small>
-                                </div>
-                            </div>
-                        </a>
-
-                    </div>
-
-                    <div class="clearfix"></div>
-
-                    <a class="lv-footer" href="">View All</a>
                 </div>
             </div>
         </div>
