@@ -11,6 +11,14 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
         .otherwise('/events/list');
 
     $stateProvider
+        .state ('friends', {
+            url: '/friends',
+            templateUrl: 'views/friends/index.html'
+        })
+        .state ('friends.list', {
+            url: '/list',
+            templateUrl: 'views/friends/list-friends.html'
+        })
         .state ('events', {
             url: '/events',
             templateUrl: 'views/events/index.html'

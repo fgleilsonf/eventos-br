@@ -85319,7 +85319,7 @@ setTimeout(function () {
 
 module.exports = 'app';
 
-},{"./assets/fullcalendar.min":69,"./assets/jquery-ui.custom.min":70,"./config":73,"./directives":85,"./entities":94,"./home":98,"./modules":109,"./services":119,"./template":129,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":48,"bootstrap-notify/bootstrap-notify":49,"flot.tooltip/js/jquery.flot.tooltip":50,"flot/jquery.flot":51,"jquery":52,"malihu-custom-scrollbar-plugin":54,"sweetalert":68}],72:[function(require,module,exports){
+},{"./assets/fullcalendar.min":69,"./assets/jquery-ui.custom.min":70,"./config":73,"./directives":85,"./entities":95,"./home":99,"./modules":113,"./services":123,"./template":133,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":48,"bootstrap-notify/bootstrap-notify":49,"flot.tooltip/js/jquery.flot.tooltip":50,"flot/jquery.flot":51,"jquery":52,"malihu-custom-scrollbar-plugin":54,"sweetalert":68}],72:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85370,6 +85370,14 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
         .otherwise('/events/list');
 
     $stateProvider
+        .state ('friends', {
+            url: '/friends',
+            templateUrl: 'views/friends/index.html'
+        })
+        .state ('friends.list', {
+            url: '/list',
+            templateUrl: 'views/friends/list-friends.html'
+        })
         .state ('events', {
             url: '/events',
             templateUrl: 'views/events/index.html'
@@ -85425,7 +85433,7 @@ function TranslateConfig($translateProvider) {
     $translateProvider.preferredLanguage('pt-br');
 }
 
-},{"../../resources/i18n/en":130,"../../resources/i18n/pt-br":131,"./app":72}],76:[function(require,module,exports){
+},{"../../resources/i18n/en":134,"../../resources/i18n/pt-br":135,"./app":72}],76:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86167,16 +86175,39 @@ function Comment($resource) {
 }
 
 },{"angular":46}],94:[function(require,module,exports){
+'use strict';
+
+var angular = require('angular');
+
+angular
+    .module('webAdminApp')
+    .factory('Event', Event);
+
+function Event($resource) {
+    var url = 'http://localhost:8000/events/:id';
+    var params = { id: '@id'};
+
+    var options =  {
+        update: {
+            method: 'PUT'
+        }
+    };
+
+    return $resource(url, params, options);
+}
+
+},{"angular":46}],95:[function(require,module,exports){
+require('./event');
 require('./comment');
 
 module.exports = 'entities';
 
-},{"./comment":93}],95:[function(require,module,exports){
+},{"./comment":93,"./event":94}],96:[function(require,module,exports){
 require('./main');
 
 module.exports = 'controllers';
 
-},{"./main":96}],96:[function(require,module,exports){
+},{"./main":97}],97:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86193,20 +86224,20 @@ function MainController() {
 
 }
 
-},{"angular":46}],97:[function(require,module,exports){
+},{"angular":46}],98:[function(require,module,exports){
 module.exports = 'directives';
 
-},{}],98:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 require('./controllers');
 require('./directives');
 require('./resources');
 
 module.exports = 'home';
 
-},{"./controllers":95,"./directives":97,"./resources":99}],99:[function(require,module,exports){
+},{"./controllers":96,"./directives":98,"./resources":100}],100:[function(require,module,exports){
 module.exports = 'resources';
 
-},{}],100:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86242,17 +86273,17 @@ function AddCommentController($scope, Comment) {
     };
 }
 
-},{"angular":46}],101:[function(require,module,exports){
+},{"angular":46}],102:[function(require,module,exports){
 require('./add-comment-controller');
 
 module.exports = 'controllers';
 
-},{"./add-comment-controller":100}],102:[function(require,module,exports){
+},{"./add-comment-controller":101}],103:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'comments';
 
-},{"./controllers/index":101}],103:[function(require,module,exports){
+},{"./controllers/index":102}],104:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86261,7 +86292,7 @@ angular
     .module('webAdminApp')
     .controller('AddEventController', AddEventController);
 
-function AddEventController(Facebook, $scope, event, eventService, userService, utilsService, growlService) {
+function AddEventController(Facebook, $scope, Event, eventService, userService, utilsService, growlService) {
 
     var self = this;
 
@@ -86271,9 +86302,9 @@ function AddEventController(Facebook, $scope, event, eventService, userService, 
         });
     });
 
-    event.get({id: 10}, function(data) {
-        console.log('event', data);
-    });
+    // Event.get({id: 10}, function(data) {
+    //     console.log('event', data);
+    // });
 
     var vm = this;
 
@@ -86344,7 +86375,7 @@ function AddEventController(Facebook, $scope, event, eventService, userService, 
     };
 }
 
-},{"angular":46}],104:[function(require,module,exports){
+},{"angular":46}],105:[function(require,module,exports){
 var angular = require('angular');
 var $ = require('jquery');
 
@@ -86455,7 +86486,7 @@ angular
         }
     })
 
-},{"angular":46,"jquery":52}],105:[function(require,module,exports){
+},{"angular":46,"jquery":52}],106:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86487,15 +86518,15 @@ function CommentController($scope, Comment) {
     load_();
 }
 
-},{"angular":46}],106:[function(require,module,exports){
-require('./add-event-controller');
-require('./list-event-controller');
+},{"angular":46}],107:[function(require,module,exports){
+require('./add-events-controller');
+require('./list-events-controller');
 require('./calendar');
 require('./comment-controller');
 
 module.exports = 'controllers';
 
-},{"./add-event-controller":103,"./calendar":104,"./comment-controller":105,"./list-event-controller":107}],107:[function(require,module,exports){
+},{"./add-events-controller":104,"./calendar":105,"./comment-controller":106,"./list-events-controller":108}],108:[function(require,module,exports){
 'use strict';
 
 
@@ -86564,20 +86595,53 @@ function ListEventController($scope, eventService, Spotify) {
     loadEvents_();
 }
 
-},{"angular":46}],108:[function(require,module,exports){
+},{"angular":46}],109:[function(require,module,exports){
 require('./controllers/index');
 
-module.exports = 'home';
+module.exports = 'events';
 
-},{"./controllers/index":106}],109:[function(require,module,exports){
+},{"./controllers/index":107}],110:[function(require,module,exports){
+require('./list-friends-controller');
+
+module.exports = 'controllers';
+
+},{"./list-friends-controller":111}],111:[function(require,module,exports){
+'use strict';
+
+
+var angular = require('angular');
+
+angular
+    .module('webAdminApp')
+    .controller('ListFriedsController', ListFriedsController);
+
+function ListFriedsController(Facebook, userService) {
+    var self = this;
+
+    self.friends = [];
+
+    Facebook.getLoginStatus(function() {
+        userService.getFriends().then(function (response) {
+            self.friends = response.data;
+        });
+    });
+}
+
+},{"angular":46}],112:[function(require,module,exports){
+require('./controllers/index');
+
+module.exports = 'friends';
+
+},{"./controllers/index":110}],113:[function(require,module,exports){
 require('./comments/index');
-require('./profile/index');
 require('./events/index');
+require('./friends/index');
 require('./pages/index');
+require('./profile/index');
 
 module.exports = 'modules';
 
-},{"./comments/index":102,"./events/index":108,"./pages/index":112,"./profile/index":115}],110:[function(require,module,exports){
+},{"./comments/index":103,"./events/index":109,"./friends/index":112,"./pages/index":116,"./profile/index":119}],114:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86609,19 +86673,19 @@ function AboutCtrl() {
     }];
 }
 
-},{"angular":46}],111:[function(require,module,exports){
+},{"angular":46}],115:[function(require,module,exports){
 require('./about');
 
 module.exports = 'controllers';
 
-},{"./about":110}],112:[function(require,module,exports){
+},{"./about":114}],116:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'pages';
 
-},{"./controllers/index":111}],113:[function(require,module,exports){
-arguments[4][95][0].apply(exports,arguments)
-},{"./main":114,"dup":95}],114:[function(require,module,exports){
+},{"./controllers/index":115}],117:[function(require,module,exports){
+arguments[4][96][0].apply(exports,arguments)
+},{"./main":118,"dup":96}],118:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86681,12 +86745,12 @@ function ProfileCtrl($q, growlService, userService, Facebook) {
     }
 }
 
-},{"angular":46,"lightgallery/dist/js/lightgallery":53}],115:[function(require,module,exports){
+},{"angular":46,"lightgallery/dist/js/lightgallery":53}],119:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'profile';
 
-},{"./controllers/index":113}],116:[function(require,module,exports){
+},{"./controllers/index":117}],120:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86707,7 +86771,7 @@ function BestsellingService($resource) {
     }
 }
 
-},{"angular":46}],117:[function(require,module,exports){
+},{"angular":46}],121:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86729,7 +86793,7 @@ function EventService($http) {
     };
 }
 
-},{"angular":46}],118:[function(require,module,exports){
+},{"angular":46}],122:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86768,7 +86832,7 @@ function growlService() {
     return gs;
 }
 
-},{"angular":46,"jquery":52}],119:[function(require,module,exports){
+},{"angular":46,"jquery":52}],123:[function(require,module,exports){
 require('./growl-service');
 require('./best-selling-service');
 require('./message-service');
@@ -86780,7 +86844,7 @@ require('./utils-service');
 
 module.exports = 'services';
 
-},{"./best-selling-service":116,"./event-service":117,"./growl-service":118,"./message-service":120,"./scroll-service":121,"./table-service":122,"./user-service":123,"./utils-service":124}],120:[function(require,module,exports){
+},{"./best-selling-service":120,"./event-service":121,"./growl-service":122,"./message-service":124,"./scroll-service":125,"./table-service":126,"./user-service":127,"./utils-service":128}],124:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86801,7 +86865,7 @@ function MessageService($resource) {
     }
 }
 
-},{"angular":46}],121:[function(require,module,exports){
+},{"angular":46}],125:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86829,7 +86893,7 @@ function scrollService() {
     return ss;
 }
 
-},{"angular":46,"jquery":52}],122:[function(require,module,exports){
+},{"angular":46,"jquery":52}],126:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86983,7 +87047,7 @@ function tableService() {
         }
     ];
 }
-},{"angular":46}],123:[function(require,module,exports){
+},{"angular":46}],127:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87017,7 +87081,7 @@ function UserService(Facebook) {
     };
 }
 
-},{"angular":46}],124:[function(require,module,exports){
+},{"angular":46}],128:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87035,7 +87099,7 @@ function UtilsService() {
   };
 }
 
-},{"angular":46}],125:[function(require,module,exports){
+},{"angular":46}],129:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87052,7 +87116,7 @@ function BestSellingController(bestSellingService) {
     this.bsResult = bestSellingService.getBestselling(this.img, this.name, this.range);
 }
 
-},{"angular":46}],126:[function(require,module,exports){
+},{"angular":46}],130:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87163,14 +87227,14 @@ function HeaderController($timeout, messageService){
     }
 };
 
-},{"angular":46,"jquery":52}],127:[function(require,module,exports){
+},{"angular":46,"jquery":52}],131:[function(require,module,exports){
 require('./layout');
 require('./header');
 require('./best-selling');
 
 module.exports = 'controllers';
 
-},{"./best-selling":125,"./header":126,"./layout":128}],128:[function(require,module,exports){
+},{"./best-selling":129,"./header":130,"./layout":132}],132:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87284,15 +87348,15 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
     };
 };
 
-},{"angular":46}],129:[function(require,module,exports){
+},{"angular":46}],133:[function(require,module,exports){
 require('./controllers');
 
 module.exports = 'template';
 
-},{"./controllers":127}],130:[function(require,module,exports){
+},{"./controllers":131}],134:[function(require,module,exports){
 module.exports={
 }
 
-},{}],131:[function(require,module,exports){
-arguments[4][130][0].apply(exports,arguments)
-},{"dup":130}]},{},[71]);
+},{}],135:[function(require,module,exports){
+arguments[4][134][0].apply(exports,arguments)
+},{"dup":134}]},{},[71]);

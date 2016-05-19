@@ -6,7 +6,7 @@ angular
     .module('webAdminApp')
     .controller('AddEventController', AddEventController);
 
-function AddEventController(Facebook, $scope, event, eventService, userService, utilsService, growlService) {
+function AddEventController(Facebook, $scope, Event, eventService, userService, utilsService, growlService) {
 
     var self = this;
 
@@ -16,9 +16,9 @@ function AddEventController(Facebook, $scope, event, eventService, userService, 
         });
     });
 
-    event.get({id: 10}, function(data) {
-        console.log('event', data);
-    });
+    // Event.get({id: 10}, function(data) {
+    //     console.log('event', data);
+    // });
 
     var vm = this;
 

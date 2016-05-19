@@ -1,5 +1,5 @@
-require('./add-event-controller');
-require('./list-event-controller');
+require('./add-events-controller');
+require('./list-events-controller');
 require('./calendar');
 require('./comment-controller');
 

@@ -1,3 +1,3 @@
 require('./controllers/index');
 
-module.exports = 'events';
+module.exports = 'friends';
