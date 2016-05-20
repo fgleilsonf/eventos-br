@@ -85193,6 +85193,7 @@ require('flot.tooltip/js/jquery.flot.tooltip');
 require('malihu-custom-scrollbar-plugin')($);
 require('bootstrap-notify/bootstrap-notify');
 require('bootstrap-datetimepicker');
+// require('ng-img-crop-full-extended/compile/unminified/ng-img-crop.js') && 'ngImgCrop',
 
 require('./assets/fullcalendar.min');
 require('./assets/jquery-ui.custom.min');
@@ -85210,7 +85211,7 @@ require('./entities');
 
 module.exports = 'app';
 
-},{"./assets/fullcalendar.min":69,"./assets/jquery-ui.custom.min":70,"./config":73,"./directives":85,"./entities":96,"./home":101,"./modules":115,"./services":125,"./template":136,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":48,"bootstrap-notify/bootstrap-notify":49,"flot.tooltip/js/jquery.flot.tooltip":50,"flot/jquery.flot":51,"jquery":52,"malihu-custom-scrollbar-plugin":54,"sweetalert":68}],72:[function(require,module,exports){
+},{"./assets/fullcalendar.min":69,"./assets/jquery-ui.custom.min":70,"./config":73,"./directives":85,"./entities":96,"./home":101,"./modules":118,"./services":128,"./template":141,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":48,"bootstrap-notify/bootstrap-notify":49,"flot.tooltip/js/jquery.flot.tooltip":50,"flot/jquery.flot":51,"jquery":52,"malihu-custom-scrollbar-plugin":54,"sweetalert":68}],72:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85275,11 +85276,19 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
         })
         .state ('events.add', {
             url: '/new',
-            templateUrl: 'views/events/new-event/add.html'
+            templateUrl: 'views/events/add.html'
         })
-        .state ('events.add.info', {
+        .state('events.detail', {
+            url: '/detail/:eventId/',
+            templateUrl: 'views/events/detail/index.html'
+        })
+        .state ('events.detail.info', {
             url: '/info',
-            templateUrl: 'views/events/new-event/info.html'
+            templateUrl: 'views/events/detail/info.html'
+        })
+        .state ('events.detail.videos', {
+            url: '/videos',
+            templateUrl: 'views/events/detail/videos.html'
         })
         .state ('events.agenda', {
             url: '/agenda',
@@ -85328,7 +85337,7 @@ function TranslateConfig($translateProvider) {
     $translateProvider.preferredLanguage('pt-br');
 }
 
-},{"../../resources/i18n/en":137,"../../resources/i18n/pt-br":138,"./app":72}],76:[function(require,module,exports){
+},{"../../resources/i18n/en":142,"../../resources/i18n/pt-br":143,"./app":72}],76:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86330,88 +86339,71 @@ angular
     .module('webAdminApp')
     .controller('AddEventController', AddEventController);
 
-function AddEventController(Facebook, $scope, Event, eventService, userService, utilsService, growlService) {
+function AddEventController($scope, Event) {
 
     var self = this;
 
-    Facebook.getLoginStatus(function() {
-        userService.getFriends().then(function (response) {
-            self.friends = response.data;
-        });
-    });
-
-    // Event.get({id: 10}, function(data) {
-    //     console.log('event', data);
-    // });
-
-    userService.getFriends().then(function(data) {
-        console.log('data', data);
-    });
-
-    self.event = {
-        videos: []
-    };
-
-    self.isYoutubeUrl = function() {
-        if (!self.urlYoutube) {
-            return false;
-        }
-
-        return utilsService.isYoutubeUrl(self.urlYoutube)
-    };
-
-    self.addVideo = function() {
-        var url = self.urlYoutube;
-        var videoid = url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/);
-
-        if(videoid != null) {
-            self.urlYoutube = '';
-            self.event.videos.push( {id: videoid[1] });
-        } else {
-            growlService.growl('Url inválida', 'inverse');
-        }
-    };
+    self.event = {};
 
     self.save = function() {
+        var event = new Event(self.event);
+        event.user_id = 1;
 
-        console.log('self.event', self.event);
-
-        // eventService.add(self.event);
-        //
-        // console.log('self.event', self.event);
+        event.$save(function () {
+            $scope.$close(event);
+        });
     };
 
-    $scope.today = function () {
-        $scope.dt = new Date();
-    };
-    $scope.today();
-
-    $scope.toggleMin = function () {
-        $scope.minDate = $scope.minDate ? null : new Date();
-    };
-    $scope.toggleMin();
-
-    $scope.open = function ($event, opened) {
-        $event.preventDefault();
-        $event.stopPropagation();
-
-        $scope[opened] = true;
-    };
-
-    $scope.dateOptions = {
-        formatYear: 'yy',
-        startingDay: 1
-    };
-
-    $scope.formats = ['dd-MMMM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'shortDate'];
-    $scope.format = $scope.formats[0];
-
-    $scope.options = {
-        height: 300
+    self.close = function() {
+        $scope.$close();
     };
 }
 
 },{"angular":46}],107:[function(require,module,exports){
+'use strict';
+
+var angular = require('angular');
+
+angular
+    .module('webAdminApp')
+    .controller('AddVideoEventController', AddVideoEventController);
+
+function AddVideoEventController($scope, Media, $stateParams) {
+
+    var self = this;
+
+    self.video = {
+        url: '',
+        event_id: $stateParams.eventId,
+        type_media: 2
+    };
+
+    self.isYoutubeUrl = function() {
+        var v = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/; // jshint ignore:line
+        return (self.video.url.match(v)) ? RegExp.$1 : false;
+    };
+
+    var load_ = function () {
+        Media.query({event_id: 6}, function (videos) {
+            self.videos = videos;
+        });
+    };
+
+    load_();
+
+    self.save = function() {
+        var media = new Media(self.video);
+        media.user_id = 1;
+
+        media.$save(load_);
+    };
+
+    self.close = function() {
+        $scope.$close();
+    };
+}
+
+},{"angular":46}],108:[function(require,module,exports){
 var angular = require('angular');
 var $ = require('jquery');
 
@@ -86522,7 +86514,7 @@ angular
         }
     })
 
-},{"angular":46,"jquery":52}],108:[function(require,module,exports){
+},{"angular":46,"jquery":52}],109:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86554,17 +86546,218 @@ function CommentController($scope, Comment) {
     load_();
 }
 
-},{"angular":46}],109:[function(require,module,exports){
+},{"angular":46}],110:[function(require,module,exports){
+'use strict';
+
+var angular = require('angular');
+
+angular
+    .module('webAdminApp')
+    .controller('CropImageController', CropImageController);
+
+function CropImageController($scope, $timeout, $stateParams) {
+
+  $scope.enabledSave = true;
+  $scope.image = '';
+  $scope.resultBlob = '';
+
+  var handleFileSelect = function(evt) {
+    $scope.isLoadImage = true;
+
+    var file = evt.currentTarget.files[0];
+    var reader = new FileReader();
+    reader.onload = function (evt) {
+      $scope.$apply(function($scope) {
+        $scope.enabledSave = false;
+        $scope.image = evt.target.result;
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  $scope.uploadCover = function() {
+    Upload.upload({
+      url: server.formatCampaignAddImagesUrl(session.getAccessToken(), $stateParams.campaignId),
+      file: $scope.resultBlob
+    }).progress(function() {
+      $scope.$emit(toastConstants.PROGRESS, 'Adicionando imagem');
+    }).success(function (data, status) {
+      if (status === 200) {
+        syncService.sync().then(function () {
+          $scope.$emit(toastConstants.INFO, 'Imagem adicionada com sucesso');
+          $scope.$close();
+        });
+      } else {
+        $scope.$emit(toastConstants.ERROR, 'Falha ao adicionar imagem');
+      }
+    }).catch(function () {
+      $scope.$emit(toastConstants.ERROR, 'Falha ao adicionar imagem');
+    });
+  };
+
+  $scope.onLoadError = function() {
+    $scope.$emit(toastConstants.WARNING, 'There was an error loading the image');
+  };
+
+  $scope.close = function() {
+    $scope.$close();
+  };
+
+  $timeout(function() {
+    angular.element('#fileImage').on('change', handleFileSelect);
+  }, 250);
+}
+
+
+},{"angular":46}],111:[function(require,module,exports){
+'use strict';
+
+var angular = require('angular');
+
+angular
+    .module('webAdminApp')
+    .controller('DetailEventController', DetailEventController);
+
+function DetailEventController($scope, $stateParams, Facebook, Event, userService, utilsService, growlService,
+                               modalService) {
+
+    var self = this;
+
+    self.cropImage = function () {
+        var modalOptions = {
+            animation: true,
+            backdrop: 'static',
+            templateUrl: 'views/events/detail/crop-image.html',
+            controller: 'CropImageController',
+            size: 'lg'
+        };
+
+        modalService.showModal(modalOptions).then(function () {
+
+        });
+    };
+
+    var loadEvent_ = function () {
+        var eventId = $stateParams.eventId;
+
+        Event.get({id: eventId}, function (event) {
+            self.event = event;
+        });
+    };
+
+    loadEvent_();
+
+    self.event = {
+        media_default_url: 'assets/img/default-image-event.jpg',
+        invites: [],
+        videos: []
+    };
+
+    var loadFriends_ = function () {
+        Facebook.getLoginStatus(function() {
+            userService.getFriends().then(function (response) {
+                self.friends = response.data;
+            });
+        });
+    };
+
+    loadFriends_();
+
+    self.isYoutubeUrl = function() {
+        if (!self.urlYoutube) {
+            return false;
+        }
+
+        return utilsService.isYoutubeUrl(self.urlYoutube)
+    };
+
+    self.addVideo = function() {
+        var url = self.urlYoutube;
+        var videoid = url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/);
+
+        if(videoid != null) {
+            self.urlYoutube = '';
+            self.event.videos.push( {id: videoid[1] });
+        } else {
+            growlService.growl('Url inválida', 'inverse');
+        }
+    };
+
+    self.save = function() {
+
+        console.log('self.event', self.event);
+
+        // eventService.add(self.event);
+        //
+        // console.log('self.event', self.event);
+    };
+
+    $scope.today = function () {
+        $scope.dt = new Date();
+    };
+    $scope.today();
+
+    $scope.toggleMin = function () {
+        $scope.minDate = $scope.minDate ? null : new Date();
+    };
+    $scope.toggleMin();
+
+    $scope.open = function ($event, opened) {
+        $event.preventDefault();
+        $event.stopPropagation();
+
+        $scope[opened] = true;
+    };
+
+    $scope.dateOptions = {
+        formatYear: 'yy',
+        startingDay: 1
+    };
+
+    $scope.formats = ['dd-MMMM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'shortDate'];
+    $scope.format = $scope.formats[0];
+
+    $scope.options = {
+        height: 300
+    };
+}
+
+},{"angular":46}],112:[function(require,module,exports){
 require('./add-events-controller');
 require('./list-events-controller');
 require('./calendar');
 require('./comment-controller');
+require('./detail-events-controller');
+require('./crop-image-controller');
+require('./add-video-event-controller');
 
 module.exports = 'controllers';
 
-},{"./add-events-controller":106,"./calendar":107,"./comment-controller":108,"./list-events-controller":110}],110:[function(require,module,exports){
-'use strict';
 
+// self.login = function () {
+//     Spotify.login().then(function(data) {
+//
+//         // console.log('data', Spotify);
+//
+//         // Spotify.setAuthToken(data);
+//         Spotify.getTracksAudioFeatures('5wZUvwWGKaZ6NG8yckZcTM').then(function (data) {
+//             console.log(data);
+//         });
+//     });
+//
+//     //Spotify
+//     //    .getFeaturedPlaylists({ locale: "nl_NL", country: "NL" })
+//     //    .then(function (data) {
+//     //        console.log(data);
+//     //    });
+//
+//     //Spotify.getAlbum('2xtRHrXduvq6S7rrzmS0dK').then(function (data) {
+//     //    console.log(data);
+//     //});
+// };
+
+},{"./add-events-controller":106,"./add-video-event-controller":107,"./calendar":108,"./comment-controller":109,"./crop-image-controller":110,"./detail-events-controller":111,"./list-events-controller":113}],113:[function(require,module,exports){
+'use strict';
 
 var angular = require('angular');
 
@@ -86572,58 +86765,46 @@ angular
     .module('webAdminApp')
     .controller('ListEventController', ListEventController);
 
-function ListEventController($scope, eventService, Spotify) {
+function ListEventController($scope, modalService, routesService, Event) {
     var self = this;
 
     self.events = [];
     self.countComments = 0;
 
-    self.login = function () {
-        Spotify.login().then(function(data) {
-
-            // console.log('data', Spotify);
-
-            // Spotify.setAuthToken(data);
-            Spotify.getTracksAudioFeatures('5wZUvwWGKaZ6NG8yckZcTM').then(function (data) {
-                console.log(data);
-            });
-        });
-
-        //Spotify
-        //    .getFeaturedPlaylists({ locale: "nl_NL", country: "NL" })
-        //    .then(function (data) {
-        //        console.log(data);
-        //    });
+    self.editEvent = function (event) {
+        routesService.go('^.detail.info', {eventId: event.id});
     };
-    //Spotify.getAlbum('2xtRHrXduvq6S7rrzmS0dK').then(function (data) {
-    //    console.log(data);
-    //});
+
+    self.deleteEvent = function (event) {
+        var modalOptions = {
+            bodyText: 'Deseja realmente deletar o evento: <strong>'+ event.title + '</strong> ?'
+        };
+
+        modalService.showModal({}, modalOptions).then(function() {
+            event.$remove();
+        });
+    };
+
+    self.openModalAddEvent = function () {
+        var modalOptions = {
+            animation: true,
+            backdrop: 'static',
+            templateUrl: 'views/events/modal-add-event.html',
+            controller: 'AddEventController',
+            controllerAs: 'addEventCtrl',
+            size: 'lg'
+        };
+
+        modalService.showModal(modalOptions).then(function (event) {
+            routesService.go('^.detail.info', {eventId : event.id});
+        });
+    };
 
     var loadEvents_ = function() {
-       eventService.get().success(function(response) {
-           self.events = response;
-
-           console.log('self.events', self.events);
-       });
+        Event.query({user_id: 1}, function (events) {
+            self.events = events;
+        });
     };
-
-    self.myInterval = 0;
-
-    self.slides = [
-        {
-            img: 'c-1.jpg',
-            title: 'First Slide Label',
-            text: 'Some sample text goes here...'
-        },
-        {
-            img: 'c-2.jpg',
-            title: 'Second Slide Label',
-            text: 'Some sample text goes here...'
-        },
-        {
-            img: 'c-3.jpg'
-        }
-    ];
 
     var onLoadListComments_ = function (event, countComments) {
         self.countComments = countComments;
@@ -86634,17 +86815,17 @@ function ListEventController($scope, eventService, Spotify) {
     loadEvents_();
 }
 
-},{"angular":46}],111:[function(require,module,exports){
+},{"angular":46}],114:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'events';
 
-},{"./controllers/index":109}],112:[function(require,module,exports){
+},{"./controllers/index":112}],115:[function(require,module,exports){
 require('./list-friends-controller');
 
 module.exports = 'controllers';
 
-},{"./list-friends-controller":113}],113:[function(require,module,exports){
+},{"./list-friends-controller":116}],116:[function(require,module,exports){
 'use strict';
 
 
@@ -86666,12 +86847,12 @@ function ListFriedsController(Facebook, userService) {
     });
 }
 
-},{"angular":46}],114:[function(require,module,exports){
+},{"angular":46}],117:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'friends';
 
-},{"./controllers/index":112}],115:[function(require,module,exports){
+},{"./controllers/index":115}],118:[function(require,module,exports){
 require('./comments/index');
 require('./events/index');
 require('./friends/index');
@@ -86680,7 +86861,7 @@ require('./profile/index');
 
 module.exports = 'modules';
 
-},{"./comments/index":105,"./events/index":111,"./friends/index":114,"./pages/index":118,"./profile/index":121}],116:[function(require,module,exports){
+},{"./comments/index":105,"./events/index":114,"./friends/index":117,"./pages/index":121,"./profile/index":124}],119:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86712,19 +86893,19 @@ function AboutCtrl() {
     }];
 }
 
-},{"angular":46}],117:[function(require,module,exports){
+},{"angular":46}],120:[function(require,module,exports){
 require('./about');
 
 module.exports = 'controllers';
 
-},{"./about":116}],118:[function(require,module,exports){
+},{"./about":119}],121:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'pages';
 
-},{"./controllers/index":117}],119:[function(require,module,exports){
+},{"./controllers/index":120}],122:[function(require,module,exports){
 arguments[4][98][0].apply(exports,arguments)
-},{"./main":120,"dup":98}],120:[function(require,module,exports){
+},{"./main":123,"dup":98}],123:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86803,12 +86984,12 @@ function ProfileCtrl($q, Media, eventService, growlService, userService, Faceboo
     }
 }
 
-},{"angular":46,"lightgallery/dist/js/lightgallery":53}],121:[function(require,module,exports){
+},{"angular":46,"lightgallery/dist/js/lightgallery":53}],124:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'profile';
 
-},{"./controllers/index":119}],122:[function(require,module,exports){
+},{"./controllers/index":122}],125:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86829,7 +87010,7 @@ function BestsellingService($resource) {
     }
 }
 
-},{"angular":46}],123:[function(require,module,exports){
+},{"angular":46}],126:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86851,7 +87032,7 @@ function EventService($http) {
     };
 }
 
-},{"angular":46}],124:[function(require,module,exports){
+},{"angular":46}],127:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86890,20 +87071,22 @@ function growlService() {
     return gs;
 }
 
-},{"angular":46,"jquery":52}],125:[function(require,module,exports){
-require('./growl-service');
+},{"angular":46,"jquery":52}],128:[function(require,module,exports){
 require('./best-selling-service');
-require('./message-service');
-require('./table-service');
-require('./scroll-service');
-require('./user-service');
 require('./event-service');
+require('./growl-service');
+require('./message-service');
+require('./modal-service');
+require('./scroll-service');
+require('./routes-service');
+require('./table-service');
+require('./user-service');
 require('./utils-service');
 require('./youtube-service');
 
 module.exports = 'services';
 
-},{"./best-selling-service":122,"./event-service":123,"./growl-service":124,"./message-service":126,"./scroll-service":127,"./table-service":128,"./user-service":129,"./utils-service":130,"./youtube-service":131}],126:[function(require,module,exports){
+},{"./best-selling-service":125,"./event-service":126,"./growl-service":127,"./message-service":129,"./modal-service":130,"./routes-service":131,"./scroll-service":132,"./table-service":133,"./user-service":134,"./utils-service":135,"./youtube-service":136}],129:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86924,7 +87107,136 @@ function MessageService($resource) {
     }
 }
 
-},{"angular":46}],127:[function(require,module,exports){
+},{"angular":46}],130:[function(require,module,exports){
+'use strict';
+
+var angular = require('angular');
+
+angular
+    .module('webAdminApp')
+    .service('modalService', ModalService);
+
+function ModalService($uibModal) {
+  var self = this;
+
+  var modalDefaults = {
+    backdrop: true,
+    keyboard: true,
+    modalFade: true,
+    templateUrl: 'templates/confirm-dialog.html'
+  };
+
+  var modalOptions = {
+    closeButtonText: 'Cancel',
+    actionButtonText: 'OK',
+    headerText: 'Atenção',
+    bodyText: 'Deseja realmente confirmar a ação ?'
+  };
+
+  self.showModal = function (customModalDefaults, customModalOptions) {
+    customModalDefaults = customModalDefaults || {};
+    customModalDefaults.backdrop = customModalDefaults.backdrop || 'static';
+
+    return self.show(customModalDefaults, customModalOptions);
+  };
+
+  self.show = function (customModalDefaults, customModalOptions) {
+    var tempModalDefaults = {};
+    var tempModalOptions = {};
+
+    angular.extend(tempModalDefaults, modalDefaults, customModalDefaults);
+    angular.extend(tempModalOptions, modalOptions, customModalOptions);
+
+    if (!tempModalDefaults.controller) {
+      var modalController_ =  function ($scope, $uibModalInstance) {
+        $scope.modalOptions = tempModalOptions;
+
+        $scope.modalOptions.ok = function (result) {
+          $uibModalInstance.close(result);
+        };
+
+        $scope.modalOptions.close = function () {
+          $uibModalInstance.dismiss('cancel');
+        };
+      };
+
+      tempModalDefaults.controller = ['$scope', '$uibModalInstance', modalController_];
+    }
+
+    return $uibModal.open(tempModalDefaults).result;
+  };
+}
+
+},{"angular":46}],131:[function(require,module,exports){
+'use strict';
+
+var angular = require('angular');
+
+angular
+    .module('webAdminApp')
+    .service('routesService', RoutesService);
+
+function RoutesService($state, $stateParams) {
+
+  /**
+   * Redireciona a tela passando os mesmos parâmetros do estado atual.
+   * @param route
+   */
+  this.goWithSameParameters = function (route){
+    $state.go(route, $stateParams);
+  };
+
+  /**
+   * Adiciona um parâmetro no estado atual.
+   * @param options
+   */
+  this.putParameter = function (options) {
+    $state.go($state.current, angular.extend({}, $stateParams, options));
+  };
+
+  /**
+   * Redireciona a tela passando o objeto informado.
+   * @param route
+   * @param object
+   */
+  this.go = function (route, object) {
+    $state.go(route, object);
+  };
+
+  /**
+   * Informa se a rota informada é a atual.
+   * @param route
+   * @returns {boolean}
+   */
+  this.isActive = function (route){
+    return $state.is(route);
+  };
+
+  /**
+   * Recarrega o estado atual.
+   */
+  this.reloadState = function () {
+    $state.go($state.current, {}, { reload: true });
+  };
+
+  /**
+   * Atualiza o estado atual com o objeto informado.
+   * @param object
+   */
+  this.updateState = function (object) {
+    $state.go($state.current, object);
+  };
+
+  /**
+   * Retorna a instância de $stateParams.
+   * @returns {$stateParams}
+   */
+  this.params = function () {
+    return $stateParams;
+  };
+}
+
+},{"angular":46}],132:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86953,7 +87265,7 @@ function scrollService() {
     return ss;
 }
 
-},{"angular":46,"jquery":52}],128:[function(require,module,exports){
+},{"angular":46,"jquery":52}],133:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87107,7 +87419,7 @@ function tableService() {
         }
     ];
 }
-},{"angular":46}],129:[function(require,module,exports){
+},{"angular":46}],134:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87141,7 +87453,7 @@ function UserService(Facebook) {
     };
 }
 
-},{"angular":46}],130:[function(require,module,exports){
+},{"angular":46}],135:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87159,7 +87471,7 @@ function UtilsService() {
   };
 }
 
-},{"angular":46}],131:[function(require,module,exports){
+},{"angular":46}],136:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87181,7 +87493,7 @@ function YoutubeService() {
     };
 }
 
-},{"angular":46}],132:[function(require,module,exports){
+},{"angular":46}],137:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87198,7 +87510,7 @@ function BestSellingController(bestSellingService) {
     this.bsResult = bestSellingService.getBestselling(this.img, this.name, this.range);
 }
 
-},{"angular":46}],133:[function(require,module,exports){
+},{"angular":46}],138:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87309,14 +87621,14 @@ function HeaderController($timeout, messageService){
     }
 };
 
-},{"angular":46,"jquery":52}],134:[function(require,module,exports){
+},{"angular":46,"jquery":52}],139:[function(require,module,exports){
 require('./layout');
 require('./header');
 require('./best-selling');
 
 module.exports = 'controllers';
 
-},{"./best-selling":132,"./header":133,"./layout":135}],135:[function(require,module,exports){
+},{"./best-selling":137,"./header":138,"./layout":140}],140:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87430,15 +87742,15 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
     };
 };
 
-},{"angular":46}],136:[function(require,module,exports){
+},{"angular":46}],141:[function(require,module,exports){
 require('./controllers');
 
 module.exports = 'template';
 
-},{"./controllers":134}],137:[function(require,module,exports){
+},{"./controllers":139}],142:[function(require,module,exports){
 module.exports={
 }
 
-},{}],138:[function(require,module,exports){
-arguments[4][137][0].apply(exports,arguments)
-},{"dup":137}]},{},[71]);
+},{}],143:[function(require,module,exports){
+arguments[4][142][0].apply(exports,arguments)
+},{"dup":142}]},{},[71]);

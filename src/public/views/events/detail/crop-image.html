@@ -1,0 +1,29 @@
+<div class="modal-header">
+    <h4 class="modal-title" translate>Adicionar imagem para a campanha</h4>
+</div>
+<div class="modal-body">
+    <div class="fileUpload btn">
+        <span>{{ 'Select an image' | translate }}</span>
+        <input type="file" id="fileImage" accept="image/*"
+               title="{{ 'Select an image' | translate }}" class="upload" />
+    </div>
+    <div class="cropArea">
+        <img-crop image="image"
+                  area-type="rectangle"
+                  result-image-quality="1"
+                  result-image-size='{w: 1024,h: 500}'
+                  chargement="'Loading' | translate"
+                  aspect-ratio="1024/500"
+                  on-load-error="onLoadError()"
+                  result-blob="resultBlob">
+        </img-crop>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" ng-click="close()" translate>close</button>
+    <button type="button" class="btn btn-success" ng-click="uploadCover();"
+            ng-disabled="enabledSave"
+            ng-class="{'btn-primary': !enabledSave, 'btn-default': enabledSave}"
+            class="btn"
+            translate>Add</button>
+</div>

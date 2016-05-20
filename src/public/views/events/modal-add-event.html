@@ -1,0 +1,20 @@
+<div class="modal-header">
+    <h4 class="modal-title">
+        Adicionar evento <i ng-click="addEventCtrl.close();" class="zmdi zmdi-close pull-right cursor-pointer"></i>
+    </h4>
+</div>
+<div class="modal-body">
+    <dl class="dl-horizontal">
+        <div class="fg-line">
+            <input ng-model="addEventCtrl.event.title" type="text" class="form-control"  placeholder="Titulo do evento" />
+        </div>
+    </dl>
+    <dl class="dl-horizontal">
+        <div summernote ng-model="addEventCtrl.event.message" height="250"></div>
+    </dl>
+</div>
+<div class="modal-footer">
+    <button type="button" ng-click="addEventCtrl.save();" class="btn btn-success">
+        Criar evento
+    </button>
+</div>

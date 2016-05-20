@@ -18,6 +18,7 @@ require('flot.tooltip/js/jquery.flot.tooltip');
 require('malihu-custom-scrollbar-plugin')($);
 require('bootstrap-notify/bootstrap-notify');
 require('bootstrap-datetimepicker');
+// require('ng-img-crop-full-extended/compile/unminified/ng-img-crop.js') && 'ngImgCrop',
 
 require('./assets/fullcalendar.min');
 require('./assets/jquery-ui.custom.min');

@@ -68,6 +68,7 @@
     "angular-facebook": "Ciul/angular-facebook",
     "angular-chosen": "leocaseiro/angular-chosen",
     "angular-summernote": "summernote/angular-summernote",
-    "jquery-ui": "jquery/jquery-ui"
+    "jquery-ui": "jquery/jquery-ui",
+    "ng-img-crop-full-extended": "CrackerakiUA/ngImgCropFullExtended"
   }
 }

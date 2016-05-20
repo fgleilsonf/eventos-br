@@ -1,32 +1,12 @@
 <div class="block-header">
     <h2>Amigos<small>Lista de amigos conectados ao EVENTOS-BR</small></h2>
-
-    <ul class="actions m-t-20 hidden-xs">
-        <li class="dropdown" uib-dropdown>
-            <a href="" uib-dropdown-toggle>
-                <i class="zmdi zmdi-more-vert"></i>
-            </a>
-
-            <ul class="dropdown-menu dropdown-menu-right">
-                <li>
-                    <a href="">Privacy Settings</a>
-                </li>
-                <li>
-                    <a href="">Account Settings</a>
-                </li>
-                <li>
-                    <a href="">Other Settings</a>
-                </li>
-            </ul>
-        </li>
-    </ul>
 </div>
 <div class="card" ng-controller="ListFriedsController as listFriendsCtrl">
     <div class="lv-header-alt clearfix m-b-5">
         <h2 class="lvh-label hidden-xs">{{ listFriendsCtrl.friends.length }} Amigo(s)</h2>
 
         <div class="lvh-search" data-ng-if="mactrl.listviewSearchStat" data-ng-click="mactrl.listviewSearchStat">
-            <input type="text" placeholder="Pesquisar..." class="lvhs-input">
+            <input type="text" ng-model="searchText" placeholder="Pesquisar..." class="lvhs-input">
 
             <i class="lvh-search-close" data-ng-click="mactrl.listviewSearchStat = false">&times;</i>
         </div>
@@ -37,50 +17,6 @@
                     <i class="zmdi zmdi-search"></i>
                 </a>
             </li>
-            <li>
-                <a href="">
-                    <i class="zmdi zmdi-time"></i>
-                </a>
-            </li>
-            <li class="dropdown" uib-dropdown>
-                <a href="" uib-dropdown-toggle aria-expanded="false" aria-haspopup="true">
-                    <i class="zmdi zmdi-sort"></i>
-                </a>
-
-                <ul class="dropdown-menu dropdown-menu-right">
-                    <li>
-                        <a href="">Last Modified</a>
-                    </li>
-                    <li>
-                        <a href="">Last Edited</a>
-                    </li>
-                    <li>
-                        <a href="">Name</a>
-                    </li>
-                    <li>
-                        <a href="">Date</a>
-                    </li>
-                </ul>
-            </li>
-            <li>
-                <a href="">
-                    <i class="zmdi zmdi-info"></i>
-                </a>
-            </li>
-            <li class="dropdown" uib-dropdown>
-                <a href="" uib-dropdown-toggle aria-expanded="false" aria-haspopup="true">
-                    <i class="zmdi zmdi-more-vert"></i>
-                </a>
-
-                <ul class="dropdown-menu dropdown-menu-right">
-                    <li>
-                        <a href="">Refresh</a>
-                    </li>
-                    <li>
-                        <a href="">Settings</a>
-                    </li>
-                </ul>
-            </li>
         </ul>
     </div>
 
@@ -88,7 +24,7 @@
     <div class="card-body card-padding">
 
         <div class="contacts clearfix row">
-            <div class="col-md-2 col-sm-4 col-xs-6" ng-repeat="friend in listFriendsCtrl.friends">
+            <div class="col-md-2 col-sm-4 col-xs-6" ng-repeat="friend in listFriendsCtrl.friends | filter:searchText">
                 <div class="c-item">
                     <a href="" class="ci-avatar">
                         <img src="http://graph.facebook.com/{{ friend.id }}/picture?type=large" alt="">

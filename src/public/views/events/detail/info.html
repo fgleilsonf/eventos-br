@@ -1,29 +1,19 @@
 <div class="pmb-block">
-    <div class="pmbb-header">
-        <h2><i class="zmdi zmdi-person m-r-5"></i> Informações básica</h2>
-    </div>
     <div class="pmbb-body p-l-30">
         <dl class="dl-horizontal">
-            <dt class="p-t-10">Titulo</dt>
-            <dd>
-                <div class="fg-line">
-                    <input ng-model="addEventCtrl.title" type="text" class="form-control"  placeholder="Titulo do evento" />
-                </div>
-            </dd>
+            <div class="fg-line">
+                <input ng-model="detailEventCtrl.event.title" type="text" class="form-control"  placeholder="Titulo do evento" />
+            </div>
         </dl>
         <dl class="dl-horizontal">
-            <dt class="p-t-10">Descrição</dt>
-            <dd>
-                <div summernote ng-model="addEventCtrl.event.message" height="250">
-                    <span style="font-weight: bold;">Texto de </span>
-                </div>
-            </dd>
+            <div summernote ng-model="detailEventCtrl.event.message" height="250">
+            </div>
         </dl>
         <dl class="dl-horizontal">
             <dt class="p-t-10">Inicio</dt>
             <dd>
                 <div class="fg-line">
-                    <input type="text" ng-model="addEventCtrl.event.start_date" name="start_date" id="start_date"
+                    <input type="text" ng-model="detailEventCtrl.event.start_date" name="start_date" id="start_date"
                            class="form-control date-time-picker" placeholder="Inicio">
                 </div>
             </dd>

@@ -1,19 +1,30 @@
-<div class="container" ng-controller="AddEventController as addEventCtrl">
+<div class="container" ng-controller="DetailEventController as detailEventCtrl">
     <div class="block-header">
-        <h2>Adicionar evento <small>Informações do evento</small></h2>
+        <h2>{{ detailEventCtrl.event.title }} <small>Informações do evento</small></h2>
     </div>
 
-    <div class="card" id="profile-main" ng-controller="ProfileCtrl as profileCtrl">
-        <div class="pm-overview c-overflow">
+    <button name="btnSave" id="btnSave"
+            class="btn btn-float bgm-green m-btn waves-effect waves-circle"
+            ng-click="detailEventCtrl.save()"
+            uib-tooltip="{{ 'Salvar evento' | translate }}">
+        <i class="zmdi zmdi-check"></i>
+    </button>
+
+    <div class="card" id="profile-main">
+        <div class="pm-overview c-overflow" axis="y">
             <div class="pmo-pic">
                 <div class="p-relative">
                     <a href="">
-                        <img class="img-responsive" ng-src="{{ mactrl.user.profile_image }}" alt="">
+                        <img class="img-responsive" ng-src="{{ detailEventCtrl.event.media_default_url }}" alt="">
+                    </a>
+
+                    <a href="" class="pmop-edit" ng-click="detailEventCtrl.cropImage();">
+                        <i class="zmdi zmdi-camera"></i> <span class="hidden-xs">{{ 'Alterar' | translate }}</span>
                     </a>
                 </div>
                 <div class="pmo-stat">
-                    <h2 class="m-0 c-white">{{ profileCtrl.friends.length }}</h2>
-                    Total de amigos
+                    <h2 class="m-0 c-white">{{ detailEventCtrl.event.invites.length }}</h2>
+                    Total de Convidados
                 </div>
             </div>
 
@@ -35,22 +46,10 @@
                     </li>
                 </ul>
             </div>
-
-            <div class="pmo-block pmo-items hidden-xs">
-                <h2>Amigos</h2>
-
-                <div class="pmob-body">
-                    <div class="row">
-                        <a href="" class="col-xs-2" ng-repeat="friend in profileCtrl.friends">
-                            <img class="img-circle" src="http://graph.facebook.com/{{ friend.id }}/picture?type=large" alt="">
-                        </a>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="pm-body clearfix">
-            <ul class="tab-nav tn-justified" ng-include="'views/events/new-event/menu.html'"></ul>
+            <ul class="tab-nav tn-justified" ng-include="'views/events/detail/menu.html'"></ul>
 
             <div ui-view></div>
         </div>

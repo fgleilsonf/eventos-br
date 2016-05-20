@@ -1,0 +1,15 @@
+<div class="modal-header">
+    <h4 class="modal-title" translate>{{ modalOptions.headerText }}</h4>
+</div>
+<div class="modal-body">
+    <p class="c-black" translate>{{ modalOptions.bodyText }}</p>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" ng-click="modalOptions.close();">
+        Cancelar
+    </button>
+    <button type="button" class="btn btn-primary"
+            ng-click="modalOptions.ok();" translate>
+        Confirmar
+    </button>
+</div>

@@ -27,7 +27,7 @@
 
                 <div class="pmo-stat">
                     <h2 class="m-0 c-white">{{ profileCtrl.friends.length }}</h2>
-                    Total de amigos conectados
+                    Total de amigos
                 </div>
             </div>
 
@@ -55,7 +55,7 @@
 
                 <div class="pmob-body">
                     <div class="row">
-                        <a href="" class="col-xs-2" ng-repeat="friend in profileCtrl.friends">
+                        <a href="" class="col-xs-2" ng-repeat="friend in profileCtrl.friends | limitTo">
                             <img class="img-circle" src="http://graph.facebook.com/{{ friend.id }}/picture?type=large" alt="">
                         </a>
                     </div>

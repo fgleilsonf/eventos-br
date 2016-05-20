@@ -14945,6 +14945,7 @@ div.mejs-speed-button {
   border: 0;
 }
 
+img-crop{width:100%;height:100%;display:block;position:relative;overflow:hidden}img-crop canvas{display:block;position:absolute;top:50%;left:50%;outline:0;-webkit-tap-highlight-color:rgba(255,255,255,0)}img-crop .loading{width:100%;height:100%;font-size:16px;font-weight:700;display:-webkit-box;display:-ms-flexbox;display:flex;display:-webkit-flex;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-align-items:center;-webkit-box-pack:center;-ms-flex-pack:center;justify-content:center;-webkit-justify-content:center;color:#fff;background-color:rgba(0,0,0,.75);position:absolute}
 /*!
  * FullCalendar v2.4.0 Stylesheet
  * Docs & License: http://fullcalendar.io/
@@ -35559,4 +35560,7 @@ select.chosen {
 }
 .italic {
   font-style: italic;
+}
+.cursor-pointer {
+  cursor: pointer;
 }

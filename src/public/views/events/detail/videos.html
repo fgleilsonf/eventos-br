@@ -1,0 +1,34 @@
+<div class="pmb-block clearfix photos" ng-controller="AddVideoEventController as videoCtrl">
+    <div class="p-header">
+        <ul class="p-menu">
+            <li class="active">
+                <a href=""><i class="zmdi zmdi-play-circle"></i> Vídeos</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-8 col-md-8">
+            <div class="form-group">
+                <div class="fg-line">
+                    <input type="text" class="form-control input-sm" ng-model="videoCtrl.video.url"
+                           placeholder="Url do vídeo">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4 col-md-4">
+            <button class="btn btn-primary" ng-disabled="!videoCtrl.isYoutubeUrl();"
+                    ng-click="videoCtrl.save();">
+                <i class="zmdi zmdi-check"></i>
+                Adicionar
+            </button>
+        </div>
+    </div>
+
+    <div class="m-l-5 row">
+        <div ng-repeat="media in videoCtrl.videos  | filter: { type_media: 2 } "
+             class="embed-responsive embed-responsive-4by3 m-r-10 col-md-3 col-sm-4 col-xs-6" >
+            <div youtube data-height="'155px'" path="media.url"></div>
+        </div>
+    </div>
+</div>

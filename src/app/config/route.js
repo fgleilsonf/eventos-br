@@ -25,11 +25,19 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
         })
         .state ('events.add', {
             url: '/new',
-            templateUrl: 'views/events/new-event/add.html'
+            templateUrl: 'views/events/add.html'
         })
-        .state ('events.add.info', {
+        .state('events.detail', {
+            url: '/detail/:eventId/',
+            templateUrl: 'views/events/detail/index.html'
+        })
+        .state ('events.detail.info', {
             url: '/info',
-            templateUrl: 'views/events/new-event/info.html'
+            templateUrl: 'views/events/detail/info.html'
+        })
+        .state ('events.detail.videos', {
+            url: '/videos',
+            templateUrl: 'views/events/detail/videos.html'
         })
         .state ('events.agenda', {
             url: '/agenda',

@@ -1,7 +1,7 @@
 <div class="container" ng-controller="ListEventController as listEventCtrl">
-    
-    <a class="btn btn-float btn-danger m-btn" ui-sref="events.add.info"><i class="zmdi zmdi-plus"></i></a>
-
+    <a class="btn btn-float btn-danger m-btn" ng-click="listEventCtrl.openModalAddEvent();">
+        <i class="zmdi zmdi-plus"></i>
+    </a>
     <div class="row" ng-repeat="event in listEventCtrl.events">
         <div class="col-md-8">
             <div class="card">
@@ -14,11 +14,29 @@
                             <h2>{{ event.title }} <small>Criado por: {{ event.user.name }}</small></h2>
                         </div>
                     </div>
+                    <div class="pull-right p-0">
+                        <ul class="actions">
+                            <li>
+                                <a href="" ng-click="listEventCtrl.deleteEvent(event);">
+                                    <i class="zmdi zmdi-delete c-black"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="" ng-click="listEventCtrl.editEvent(event);">
+                                    <i class="zmdi zmdi-edit c-black"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="card-body card-padding">
                     <p>{{ event.message }}</p>
 
-                    <div class="wall-img-preview lightbox clearfix">
+                    <div class="embed-responsive embed-responsive-4by3 m-b-10" ng-show="event.media.type_media == 2">
+                        <div youtube path="event.media.url"></div>
+                    </div>
+
+                    <div class="wall-img-preview lightbox clearfix" ng-show="event.media.type_media == 1">
                         <div class="wip-item" data-src="assets/img/headers/4.png" style="background-image: url(assets/img/headers/4.png);">
                             <div class="lightbox-item"></div>
                         </div>

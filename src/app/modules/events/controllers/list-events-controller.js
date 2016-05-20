@@ -1,64 +1,51 @@
 'use strict';
 
-
 var angular = require('angular');
 
 angular
     .module('webAdminApp')
     .controller('ListEventController', ListEventController);
 
-function ListEventController($scope, eventService, Spotify) {
+function ListEventController($scope, modalService, routesService, Event) {
     var self = this;
 
     self.events = [];
     self.countComments = 0;
 
-    self.login = function () {
-        Spotify.login().then(function(data) {
-
-            // console.log('data', Spotify);
-
-            // Spotify.setAuthToken(data);
-            Spotify.getTracksAudioFeatures('5wZUvwWGKaZ6NG8yckZcTM').then(function (data) {
-                console.log(data);
-            });
-        });
-
-        //Spotify
-        //    .getFeaturedPlaylists({ locale: "nl_NL", country: "NL" })
-        //    .then(function (data) {
-        //        console.log(data);
-        //    });
+    self.editEvent = function (event) {
+        routesService.go('^.detail.info', {eventId: event.id});
     };
-    //Spotify.getAlbum('2xtRHrXduvq6S7rrzmS0dK').then(function (data) {
-    //    console.log(data);
-    //});
+
+    self.deleteEvent = function (event) {
+        var modalOptions = {
+            bodyText: 'Deseja realmente deletar o evento: <strong>'+ event.title + '</strong> ?'
+        };
+
+        modalService.showModal({}, modalOptions).then(function() {
+            event.$remove();
+        });
+    };
+
+    self.openModalAddEvent = function () {
+        var modalOptions = {
+            animation: true,
+            backdrop: 'static',
+            templateUrl: 'views/events/modal-add-event.html',
+            controller: 'AddEventController',
+            controllerAs: 'addEventCtrl',
+            size: 'lg'
+        };
+
+        modalService.showModal(modalOptions).then(function (event) {
+            routesService.go('^.detail.info', {eventId : event.id});
+        });
+    };
 
     var loadEvents_ = function() {
-       eventService.get().success(function(response) {
-           self.events = response;
-
-           console.log('self.events', self.events);
-       });
+        Event.query({user_id: 1}, function (events) {
+            self.events = events;
+        });
     };
-
-    self.myInterval = 0;
-
-    self.slides = [
-        {
-            img: 'c-1.jpg',
-            title: 'First Slide Label',
-            text: 'Some sample text goes here...'
-        },
-        {
-            img: 'c-2.jpg',
-            title: 'Second Slide Label',
-            text: 'Some sample text goes here...'
-        },
-        {
-            img: 'c-3.jpg'
-        }
-    ];
 
     var onLoadListComments_ = function (event, countComments) {
         self.countComments = countComments;

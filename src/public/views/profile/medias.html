@@ -23,7 +23,7 @@
 
     <div class="m-l-5 row" ng-show="profileCtrl.showMedia === 2">
         <div ng-repeat="media in profileCtrl.medias  | filter: { type_media: 2 } "
-             class="embed-responsive embed-responsive-4by3 col-md-3 col-sm-4 col-xs-6" >
+             class="embed-responsive embed-responsive-4by3 m-r-10 col-md-3 col-sm-4 col-xs-6" >
             <div youtube data-height="'155px'" path="media.url"></div>
         </div>
     </div>
