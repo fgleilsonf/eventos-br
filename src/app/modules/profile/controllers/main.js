@@ -8,9 +8,28 @@ angular
     .module('webAdminApp')
     .controller('ProfileCtrl', ProfileCtrl);
 
-function ProfileCtrl($q, growlService, userService, Facebook) {
+function ProfileCtrl($q, Media, eventService, growlService, userService, Facebook) {
 
     var self = this;
+    self.showMedia = 1;
+
+    var loadEvents_ = function() {
+        eventService.get().success(function(response) {
+            self.events = response;
+        });
+    };
+
+    var loadMedias_ = function() {
+        Media.query({event_id: 6}, function (medias) {
+            self.medias = medias;
+
+            console.log('self.medias', self.medias);
+
+        });
+    };
+
+    loadEvents_();
+    loadMedias_();
 
     Facebook.getLoginStatus(function() {
         userService.getFriends().then(function (response) {

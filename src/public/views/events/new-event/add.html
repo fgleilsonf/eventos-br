@@ -1,33 +1,19 @@
-<div class="container">
+<div class="container" ng-controller="AddEventController as addEventCtrl">
     <div class="block-header">
-        <h2>{{ mactrl.user.name }} <small>Informações do usuário</small></h2>
+        <h2>Adicionar evento <small>Informações do evento</small></h2>
     </div>
 
     <div class="card" id="profile-main" ng-controller="ProfileCtrl as profileCtrl">
-        <div class="pm-overview c-overflow" axis="y">
+        <div class="pm-overview c-overflow">
             <div class="pmo-pic">
                 <div class="p-relative">
                     <a href="">
                         <img class="img-responsive" ng-src="{{ mactrl.user.profile_image }}" alt="">
                     </a>
-
-                    <div class="dropdown pmop-message" uib-dropdown>
-                        <button uib-dropdown-toggle class="btn bgm-white btn-float">
-                            <i class="zmdi zmdi-comment-text-alt"></i>
-                        </button>
-
-                        <div class="dropdown-menu stop-propagate">
-                            <textarea placeholder="Write something..."></textarea>
-
-                            <button class="btn bgm-green btn-float"><i class="zmdi zmdi-mail-send"></i></button>
-                        </div>
-                    </div>
                 </div>
-
-
                 <div class="pmo-stat">
                     <h2 class="m-0 c-white">{{ profileCtrl.friends.length }}</h2>
-                    Total de amigos conectados
+                    Total de amigos
                 </div>
             </div>
 
@@ -64,7 +50,7 @@
         </div>
 
         <div class="pm-body clearfix">
-            <ul class="tab-nav tn-justified" ng-include="'views/profile/menu.html'"></ul>
+            <ul class="tab-nav tn-justified" ng-include="'views/events/new-event/menu.html'"></ul>
 
             <div ui-view></div>
         </div>

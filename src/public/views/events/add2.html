@@ -1,3 +1,6 @@
+
+
+
 <div ng-controller="AddEventController as addEventCtrl">
     <a class="btn btn-float btn-success m-btn" ng-click="addEventCtrl.save()">
         <i class="zmdi zmdi-check"></i>
@@ -43,27 +46,7 @@
                     <h2>Localização <small>Informe o local do evento</small></h2>
                 </div>
                 <div class="card-body card-padding">
-
-                    <div class="form-group fg-float m-b-30">
-                        <div class="fg-line">
-                            <input type="text" class="form-control input-sm" name="location" id="location">
-                            <label class="fg-label">Endereço</label>
-                        </div>
-                    </div>
-                    <!--<button type="button" id="btnEndereco" name="btnEndereco" class="btn btn-primary">Mostrar no mapa</button>-->
-
-                    <div id="mapa" style="height: 400px; width: 500px">
-
-                        <form method="post" action="" id="">
-                            <fieldset>
-                    </div>
-
-                    <!--<button type="submit" class="btn btn-primary">Mostrar no mapa</button>-->
-
-                    <input type="hidden" id="txtLatitude" name="txtLatitude" />
-                    <input type="hidden" id="txtLongitude" name="txtLongitude" />
-                    </fieldset>
-                    </form>
+                    <maps></maps>
                 </div>
             </div>
         </div>

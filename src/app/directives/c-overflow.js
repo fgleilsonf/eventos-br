@@ -10,11 +10,11 @@ angular
 function cOverflow(scrollService) {
     return {
         restrict: 'C',
-        link: function(scope, element) {
-
+        link: function(scope, element, attributes) {
+            var axis = attributes.axis || 'xy';
             if (!$('html').hasClass('ismobile')) {
-                scrollService.malihuScroll(element, 'minimal-dark', 'y');
+                scrollService.malihuScroll(element, 'minimal-dark', 'y', axis);
             }
         }
-    }
+    };
 }

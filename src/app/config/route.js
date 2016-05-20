@@ -25,7 +25,11 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
         })
         .state ('events.add', {
             url: '/new',
-            templateUrl: 'views/events/add.html'
+            templateUrl: 'views/events/new-event/add.html'
+        })
+        .state ('events.add.info', {
+            url: '/info',
+            templateUrl: 'views/events/new-event/info.html'
         })
         .state ('events.agenda', {
             url: '/agenda',
@@ -53,7 +57,7 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
         })
         .state ('profile.photos', {
             url: '/profile-photos',
-            templateUrl: 'views/profile/photos.html'
+            templateUrl: 'views/profile/medias.html'
         })
         .state ('profile.connections', {
             url: '/profile-connections',

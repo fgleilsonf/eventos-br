@@ -9,6 +9,7 @@ require('./lightbox');
 require('./media-element');
 require('./calendar');
 require('./youtube-directive');
+require('./maps-directive');
 
 require('./form');
 

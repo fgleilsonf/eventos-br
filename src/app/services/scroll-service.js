@@ -9,18 +9,19 @@ angular
 
 function scrollService() {
     var ss = {};
-    ss.malihuScroll = function scrollBar(selector, theme, mousewheelaxis) {
+
+    ss.malihuScroll = function scrollBar(selector, theme, mousewheelaxis, axis) {
         $(selector).mCustomScrollbar({
             theme: theme,
             scrollInertia: 100,
-            axis:'yx',
+            axis: axis,
             mouseWheel: {
                 enable: true,
                 axis: mousewheelaxis,
                 preventDefault: true
             }
         });
-    }
+    };
 
     return ss;
 }

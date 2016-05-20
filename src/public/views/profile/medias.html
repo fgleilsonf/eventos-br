@@ -1,0 +1,43 @@
+<div class="pmb-block clearfix photos">
+    <div class="p-header">
+        <ul class="p-menu">
+            <li ng-class="{'active': profileCtrl.showMedia !== 1}" ng-click="profileCtrl.showMedia = 1">
+                <a href=""><i class="zmdi zmdi-image"></i> Fotos</a>
+            </li>
+            <li ng-class="{'active': profileCtrl.showMedia !== 2}" ng-click="profileCtrl.showMedia = 2">
+                <a href=""><i class="zmdi zmdi-play-circle"></i> Vídeos</a>
+            </li>
+            <li ng-class="{'active': profileCtrl.showMedia !== 3}" ng-click="profileCtrl.showMedia = 3">
+                <a href=""><i class="zmdi zmdi-collection-music"></i> Músicas</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="lightbox row" ng-show="profileCtrl.showMedia === 1">
+        <div ng-repeat="media in profileCtrl.medias  | filter: { type_media: 1 } " class="col-md-3 col-sm-4 col-xs-6">
+            <div class="lightbox-item p-item">
+                <img src="uploads/{{ media.url }}" alt="" />
+            </div>
+        </div>
+    </div>
+
+    <div class="m-l-5 row" ng-show="profileCtrl.showMedia === 2">
+        <div ng-repeat="media in profileCtrl.medias  | filter: { type_media: 2 } "
+             class="embed-responsive embed-responsive-4by3 col-md-3 col-sm-4 col-xs-6" >
+            <div youtube data-height="'155px'" path="media.url"></div>
+        </div>
+    </div>
+
+    <div class="m-l-5 row" ng-show="profileCtrl.showMedia === 3">
+        <p class="c-red lead">
+            <i class="zmdi zmdi-collection-music"></i>
+            Sem músicas para exibir
+        </p>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="load-more m-t-30" ng-show="false">
+        <a href=""><i class="zmdi zmdi-refresh-alt"></i> Carregar mais...</a>
+    </div>
+</div>

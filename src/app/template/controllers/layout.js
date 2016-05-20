@@ -8,7 +8,7 @@ angular
 
 function LayoutController($timeout, $state, $scope, growlService, Facebook, userService) {
     //Welcome Message
-    growlService.growl('Bem vindo ao Eventos BR', 'inverse');
+    // growlService.growl('Bem vindo ao Eventos BR', 'inverse');
 
     var self = this;
 
@@ -32,7 +32,7 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
                 Facebook.login(function() {
                     self.getUser();
                 }, {
-                    scope: 'publish_actions, user_friends, user_relationships',
+                    scope: 'user_friends, user_relationships',
                     return_scopes: true
                 });
             }
@@ -40,9 +40,9 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
     };
 
     // Detact Mobile Browser
-    if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-        angular.element('html').addClass('ismobile');
-    }
+    // if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+    //     angular.element('html').addClass('ismobile');
+    // }
 
     // By default Sidbars are hidden in boxed layout and in wide layout only the right sidebar is hidden.
     this.sidebarToggle = {
@@ -54,19 +54,19 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
     this.layoutType = localStorage.getItem('ma-layout-status');
 
     // For Mainmenu Active Class
-    this.$state = $state;
+    // this.$state = $state;
 
     //Close sidebar on click
-    this.sidebarStat = function(event) {
-
-        console.log('this.sidebarStat: event', event);
-
-        if (!angular.element(event.target).parent().hasClass('active')) {
-            this.sidebarToggle.left = false;
-        }
-
-        console.log('this.sidebarToggle.left', this.sidebarToggle.left);
-    };
+    // this.sidebarStat = function(event) {
+    //
+    //     console.log('this.sidebarStat: event', event);
+    //
+    //     if (!angular.element(event.target).parent().hasClass('active')) {
+    //         this.sidebarToggle.left = false;
+    //     }
+    //
+    //     console.log('this.sidebarToggle.left', this.sidebarToggle.left);
+    // };
 
     //Listview Search (Check listview pages)
     this.listviewSearchStat = false;

@@ -15,7 +15,10 @@ function ListEventController($scope, eventService, Spotify) {
 
     self.login = function () {
         Spotify.login().then(function(data) {
-            Spotify.setAuthToken(data);
+
+            // console.log('data', Spotify);
+
+            // Spotify.setAuthToken(data);
             Spotify.getTracksAudioFeatures('5wZUvwWGKaZ6NG8yckZcTM').then(function (data) {
                 console.log(data);
             });

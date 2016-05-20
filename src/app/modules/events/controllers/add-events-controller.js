@@ -20,43 +20,41 @@ function AddEventController(Facebook, $scope, Event, eventService, userService, 
     //     console.log('event', data);
     // });
 
-    var vm = this;
-
     userService.getFriends().then(function(data) {
         console.log('data', data);
     });
 
-    vm.event = {
+    self.event = {
         videos: []
     };
 
-    vm.isYoutubeUrl = function() {
-        if (!vm.urlYoutube) {
+    self.isYoutubeUrl = function() {
+        if (!self.urlYoutube) {
             return false;
         }
 
-        return utilsService.isYoutubeUrl(vm.urlYoutube)
+        return utilsService.isYoutubeUrl(self.urlYoutube)
     };
 
-    vm.addVideo = function() {
-        var url = vm.urlYoutube;
+    self.addVideo = function() {
+        var url = self.urlYoutube;
         var videoid = url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/);
 
         if(videoid != null) {
-            vm.urlYoutube = '';
-            vm.event.videos.push( {id: videoid[1] });
+            self.urlYoutube = '';
+            self.event.videos.push( {id: videoid[1] });
         } else {
             growlService.growl('Url inválida', 'inverse');
         }
     };
 
-    vm.save = function() {
+    self.save = function() {
 
-        console.log('vm.event', vm.event);
+        console.log('self.event', self.event);
 
-        // eventService.add(vm.event);
+        // eventService.add(self.event);
         //
-        // console.log('vm.event', vm.event);
+        // console.log('self.event', self.event);
     };
 
     $scope.today = function () {
