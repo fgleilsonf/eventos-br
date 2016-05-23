@@ -35,6 +35,10 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
             url: '/info',
             templateUrl: 'views/events/detail/info.html'
         })
+        .state ('events.detail.invites', {
+            url: '/invites',
+            templateUrl: 'views/events/detail/invites.html'
+        })
         .state ('events.detail.videos', {
             url: '/videos',
             templateUrl: 'views/events/detail/videos.html'

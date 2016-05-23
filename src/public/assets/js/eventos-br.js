@@ -85211,7 +85211,7 @@ require('./entities');
 
 module.exports = 'app';
 
-},{"./assets/fullcalendar.min":69,"./assets/jquery-ui.custom.min":70,"./config":73,"./directives":85,"./entities":96,"./home":101,"./modules":118,"./services":128,"./template":141,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":48,"bootstrap-notify/bootstrap-notify":49,"flot.tooltip/js/jquery.flot.tooltip":50,"flot/jquery.flot":51,"jquery":52,"malihu-custom-scrollbar-plugin":54,"sweetalert":68}],72:[function(require,module,exports){
+},{"./assets/fullcalendar.min":69,"./assets/jquery-ui.custom.min":70,"./config":73,"./directives":85,"./entities":96,"./home":101,"./modules":119,"./services":129,"./template":142,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":48,"bootstrap-notify/bootstrap-notify":49,"flot.tooltip/js/jquery.flot.tooltip":50,"flot/jquery.flot":51,"jquery":52,"malihu-custom-scrollbar-plugin":54,"sweetalert":68}],72:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -85286,6 +85286,10 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
             url: '/info',
             templateUrl: 'views/events/detail/info.html'
         })
+        .state ('events.detail.invites', {
+            url: '/invites',
+            templateUrl: 'views/events/detail/invites.html'
+        })
         .state ('events.detail.videos', {
             url: '/videos',
             templateUrl: 'views/events/detail/videos.html'
@@ -85337,7 +85341,7 @@ function TranslateConfig($translateProvider) {
     $translateProvider.preferredLanguage('pt-br');
 }
 
-},{"../../resources/i18n/en":142,"../../resources/i18n/pt-br":143,"./app":72}],76:[function(require,module,exports){
+},{"../../resources/i18n/en":143,"../../resources/i18n/pt-br":144,"./app":72}],76:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86730,6 +86734,7 @@ require('./comment-controller');
 require('./detail-events-controller');
 require('./crop-image-controller');
 require('./add-video-event-controller');
+require('./invites-event-controller');
 
 module.exports = 'controllers';
 
@@ -86756,7 +86761,28 @@ module.exports = 'controllers';
 //     //});
 // };
 
-},{"./add-events-controller":106,"./add-video-event-controller":107,"./calendar":108,"./comment-controller":109,"./crop-image-controller":110,"./detail-events-controller":111,"./list-events-controller":113}],113:[function(require,module,exports){
+},{"./add-events-controller":106,"./add-video-event-controller":107,"./calendar":108,"./comment-controller":109,"./crop-image-controller":110,"./detail-events-controller":111,"./invites-event-controller":113,"./list-events-controller":114}],113:[function(require,module,exports){
+'use strict';
+
+var angular = require('angular');
+
+angular
+    .module('webAdminApp')
+    .controller('InvitesEventController', InvitesEventController);
+
+function InvitesEventController(Facebook, userService) {
+
+    var self = this;
+    self.friends = [];
+
+    Facebook.getLoginStatus(function() {
+        userService.getFriends().then(function (response) {
+            self.friends = response.data;
+        });
+    });
+}
+
+},{"angular":46}],114:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86815,17 +86841,17 @@ function ListEventController($scope, modalService, routesService, Event) {
     loadEvents_();
 }
 
-},{"angular":46}],114:[function(require,module,exports){
+},{"angular":46}],115:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'events';
 
-},{"./controllers/index":112}],115:[function(require,module,exports){
+},{"./controllers/index":112}],116:[function(require,module,exports){
 require('./list-friends-controller');
 
 module.exports = 'controllers';
 
-},{"./list-friends-controller":116}],116:[function(require,module,exports){
+},{"./list-friends-controller":117}],117:[function(require,module,exports){
 'use strict';
 
 
@@ -86847,12 +86873,12 @@ function ListFriedsController(Facebook, userService) {
     });
 }
 
-},{"angular":46}],117:[function(require,module,exports){
+},{"angular":46}],118:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'friends';
 
-},{"./controllers/index":115}],118:[function(require,module,exports){
+},{"./controllers/index":116}],119:[function(require,module,exports){
 require('./comments/index');
 require('./events/index');
 require('./friends/index');
@@ -86861,7 +86887,7 @@ require('./profile/index');
 
 module.exports = 'modules';
 
-},{"./comments/index":105,"./events/index":114,"./friends/index":117,"./pages/index":121,"./profile/index":124}],119:[function(require,module,exports){
+},{"./comments/index":105,"./events/index":115,"./friends/index":118,"./pages/index":122,"./profile/index":125}],120:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86893,19 +86919,19 @@ function AboutCtrl() {
     }];
 }
 
-},{"angular":46}],120:[function(require,module,exports){
+},{"angular":46}],121:[function(require,module,exports){
 require('./about');
 
 module.exports = 'controllers';
 
-},{"./about":119}],121:[function(require,module,exports){
+},{"./about":120}],122:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'pages';
 
-},{"./controllers/index":120}],122:[function(require,module,exports){
+},{"./controllers/index":121}],123:[function(require,module,exports){
 arguments[4][98][0].apply(exports,arguments)
-},{"./main":123,"dup":98}],123:[function(require,module,exports){
+},{"./main":124,"dup":98}],124:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -86984,12 +87010,12 @@ function ProfileCtrl($q, Media, eventService, growlService, userService, Faceboo
     }
 }
 
-},{"angular":46,"lightgallery/dist/js/lightgallery":53}],124:[function(require,module,exports){
+},{"angular":46,"lightgallery/dist/js/lightgallery":53}],125:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'profile';
 
-},{"./controllers/index":122}],125:[function(require,module,exports){
+},{"./controllers/index":123}],126:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87010,7 +87036,7 @@ function BestsellingService($resource) {
     }
 }
 
-},{"angular":46}],126:[function(require,module,exports){
+},{"angular":46}],127:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87032,7 +87058,7 @@ function EventService($http) {
     };
 }
 
-},{"angular":46}],127:[function(require,module,exports){
+},{"angular":46}],128:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87071,7 +87097,7 @@ function growlService() {
     return gs;
 }
 
-},{"angular":46,"jquery":52}],128:[function(require,module,exports){
+},{"angular":46,"jquery":52}],129:[function(require,module,exports){
 require('./best-selling-service');
 require('./event-service');
 require('./growl-service');
@@ -87086,7 +87112,7 @@ require('./youtube-service');
 
 module.exports = 'services';
 
-},{"./best-selling-service":125,"./event-service":126,"./growl-service":127,"./message-service":129,"./modal-service":130,"./routes-service":131,"./scroll-service":132,"./table-service":133,"./user-service":134,"./utils-service":135,"./youtube-service":136}],129:[function(require,module,exports){
+},{"./best-selling-service":126,"./event-service":127,"./growl-service":128,"./message-service":130,"./modal-service":131,"./routes-service":132,"./scroll-service":133,"./table-service":134,"./user-service":135,"./utils-service":136,"./youtube-service":137}],130:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87107,7 +87133,7 @@ function MessageService($resource) {
     }
 }
 
-},{"angular":46}],130:[function(require,module,exports){
+},{"angular":46}],131:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87167,7 +87193,7 @@ function ModalService($uibModal) {
   };
 }
 
-},{"angular":46}],131:[function(require,module,exports){
+},{"angular":46}],132:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87236,7 +87262,7 @@ function RoutesService($state, $stateParams) {
   };
 }
 
-},{"angular":46}],132:[function(require,module,exports){
+},{"angular":46}],133:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87265,7 +87291,7 @@ function scrollService() {
     return ss;
 }
 
-},{"angular":46,"jquery":52}],133:[function(require,module,exports){
+},{"angular":46,"jquery":52}],134:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87419,7 +87445,7 @@ function tableService() {
         }
     ];
 }
-},{"angular":46}],134:[function(require,module,exports){
+},{"angular":46}],135:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87453,7 +87479,7 @@ function UserService(Facebook) {
     };
 }
 
-},{"angular":46}],135:[function(require,module,exports){
+},{"angular":46}],136:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87471,7 +87497,7 @@ function UtilsService() {
   };
 }
 
-},{"angular":46}],136:[function(require,module,exports){
+},{"angular":46}],137:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87493,7 +87519,7 @@ function YoutubeService() {
     };
 }
 
-},{"angular":46}],137:[function(require,module,exports){
+},{"angular":46}],138:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87510,7 +87536,7 @@ function BestSellingController(bestSellingService) {
     this.bsResult = bestSellingService.getBestselling(this.img, this.name, this.range);
 }
 
-},{"angular":46}],138:[function(require,module,exports){
+},{"angular":46}],139:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87621,14 +87647,14 @@ function HeaderController($timeout, messageService){
     }
 };
 
-},{"angular":46,"jquery":52}],139:[function(require,module,exports){
+},{"angular":46,"jquery":52}],140:[function(require,module,exports){
 require('./layout');
 require('./header');
 require('./best-selling');
 
 module.exports = 'controllers';
 
-},{"./best-selling":137,"./header":138,"./layout":140}],140:[function(require,module,exports){
+},{"./best-selling":138,"./header":139,"./layout":141}],141:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -87742,15 +87768,15 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
     };
 };
 
-},{"angular":46}],141:[function(require,module,exports){
+},{"angular":46}],142:[function(require,module,exports){
 require('./controllers');
 
 module.exports = 'template';
 
-},{"./controllers":139}],142:[function(require,module,exports){
+},{"./controllers":140}],143:[function(require,module,exports){
 module.exports={
 }
 
-},{}],143:[function(require,module,exports){
-arguments[4][142][0].apply(exports,arguments)
-},{"dup":142}]},{},[71]);
+},{}],144:[function(require,module,exports){
+arguments[4][143][0].apply(exports,arguments)
+},{"dup":143}]},{},[71]);

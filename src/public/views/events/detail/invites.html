@@ -1,0 +1,31 @@
+<div class="pmb-block" ng-controller="InvitesEventController as inviteCtrl">
+    <div class="p-header">
+        <ul class="p-menu">
+            <li><a href=""><i class="zmdi zmdi-accounts hidden-xs"></i> Conectados</a></li>
+            <li class="pm-search">
+                <div class="pms-inner">
+                    <i class="zmdi zmdi-search"></i>
+                    <input type="text" ng-model="searchText" placeholder="Pesquisar...">
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="contacts c-profile clearfix row">
+        <div class="col-md-3 col-sm-6 col-xs-6" ng-repeat="friend in inviteCtrl.friends | orderBy : '-name' | filter:searchText">
+            <div class="c-item">
+                <a href="" class="ci-avatar">
+                    <img src="http://graph.facebook.com/{{ friend.id }}/picture?type=large" alt="">
+                </a>
+
+                <div class="c-info">
+                    <strong>{{ friend.name }}</strong>
+                </div>
+
+                <div class="c-footer">
+                    <button class="waves-effect"><i class="zmdi zmdi-person-add"></i> Convidar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

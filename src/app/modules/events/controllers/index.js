@@ -5,6 +5,7 @@ require('./comment-controller');
 require('./detail-events-controller');
 require('./crop-image-controller');
 require('./add-video-event-controller');
+require('./invites-event-controller');
 
 module.exports = 'controllers';
 

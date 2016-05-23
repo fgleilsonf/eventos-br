@@ -1,11 +1,13 @@
 <div class="modal-header">
-    <h4 class="modal-title" translate>Adicionar imagem para a campanha</h4>
+    <h4 class="modal-title">
+        Adicionar imagem<i ng-click="close();" class="zmdi zmdi-close pull-right cursor-pointer"></i>
+    </h4>
 </div>
 <div class="modal-body">
     <div class="fileUpload btn">
-        <span>{{ 'Select an image' | translate }}</span>
+        <span>{{ 'Selecione uma imagem' | translate }}</span>
         <input type="file" id="fileImage" accept="image/*"
-               title="{{ 'Select an image' | translate }}" class="upload" />
+               title="{{ 'Selecione uma imagem' | translate }}" class="upload" />
     </div>
     <div class="cropArea">
         <img-crop image="image"
@@ -20,10 +22,5 @@
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-danger" ng-click="close()" translate>close</button>
-    <button type="button" class="btn btn-success" ng-click="uploadCover();"
-            ng-disabled="enabledSave"
-            ng-class="{'btn-primary': !enabledSave, 'btn-default': enabledSave}"
-            class="btn"
-            translate>Add</button>
+    <button type="button" class="btn btn-success" ng-click="uploadCover();" class="btn btn-success">Adicionar</button>
 </div>
