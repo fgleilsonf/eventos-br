@@ -7,13 +7,16 @@ angular
     .directive('youtube', Youtube);
 
 function Youtube($sce, youtubeService) {
+
+  console.log('sdfsdfsdfsd');
+
   return {
     restrict: 'EA',
     templateUrl: '/templates/youtube.html',
     scope: {
-      code: '=',
-      path: '=',
-      height: '='
+      code: '=?',
+      path: '=?',
+      height: '=?'
     },
     link: function (scope) {
       scope.height = scope.height || '100%';

@@ -13,7 +13,7 @@ function AddVideoEventController($scope, Media, $stateParams) {
     self.video = {
         url: '',
         event_id: $stateParams.eventId,
-        type_media: 2
+        type: 2
     };
 
     self.isYoutubeUrl = function() {
@@ -22,7 +22,9 @@ function AddVideoEventController($scope, Media, $stateParams) {
     };
 
     var load_ = function () {
-        Media.query({event_id: 6}, function (videos) {
+        Media.query({event_id: $stateParams.eventId}, function (videos) {
+            console.log('videos', videos);
+
             self.videos = videos;
         });
     };

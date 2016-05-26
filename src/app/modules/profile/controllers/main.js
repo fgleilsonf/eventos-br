@@ -21,7 +21,7 @@ function ProfileCtrl($q, Media, eventService, growlService, userService, Faceboo
     };
 
     var loadMedias_ = function() {
-        Media.query({event_id: 6}, function (medias) {
+        Media.query({}, function (medias) {
             var medias = medias;
 
             self.images = _.filter(medias, {type: 1});

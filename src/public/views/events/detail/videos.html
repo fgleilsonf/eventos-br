@@ -26,9 +26,9 @@
     </div>
 
     <div class="m-l-5 row">
-        <div ng-repeat="media in videoCtrl.videos  | filter: { type_media: 2 } "
+        <div ng-repeat="video in videoCtrl.videos  | filter: { type: 2 } "
              class="embed-responsive embed-responsive-4by3 m-r-10 col-md-3 col-sm-4 col-xs-6" >
-            <div youtube data-height="'155px'" path="media.url"></div>
+             <youtube data-height="'155px'" data-path="video.url"></youtube>
         </div>
     </div>
 </div>

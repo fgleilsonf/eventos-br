@@ -96558,7 +96558,7 @@ require('./entities');
 
 module.exports = 'app';
 
-},{"./assets/fullcalendar.min":69,"./assets/input-mask":70,"./config":73,"./directives":86,"./entities":97,"./home":103,"./modules":121,"./services":131,"./template":144,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":47,"bootstrap-notify/bootstrap-notify":48,"flot.tooltip/js/jquery.flot.tooltip":49,"flot/jquery.flot":50,"jquery":51,"malihu-custom-scrollbar-plugin":54,"sweetalert":68}],72:[function(require,module,exports){
+},{"./assets/fullcalendar.min":69,"./assets/input-mask":70,"./config":73,"./directives":85,"./entities":96,"./home":102,"./modules":120,"./services":130,"./template":143,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":47,"bootstrap-notify/bootstrap-notify":48,"flot.tooltip/js/jquery.flot.tooltip":49,"flot/jquery.flot":50,"jquery":51,"malihu-custom-scrollbar-plugin":54,"sweetalert":68}],72:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -96689,7 +96689,7 @@ function TranslateConfig($translateProvider) {
     $translateProvider.preferredLanguage('pt-br');
 }
 
-},{"../../resources/i18n/en":145,"../../resources/i18n/pt-br":146,"./app":72}],76:[function(require,module,exports){
+},{"../../resources/i18n/en":144,"../../resources/i18n/pt-br":145,"./app":72}],76:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97059,26 +97059,6 @@ function btn() {
 'use strict';
 
 var angular = require('angular');
-
-angular
-    .module('webAdminApp')
-    .directive('dateTimePicker', dateTimePicker);
-
-function dateTimePicker() {
-    return {
-        restrict: 'C',
-        require: '?ngModel',
-        link: function(scope, element) {
-            element.datetimepicker();
-        }
-    }
-}
-
-
-},{"angular":45}],83:[function(require,module,exports){
-'use strict';
-
-var angular = require('angular');
 var $ = require('jquery');
 
 
@@ -97202,16 +97182,15 @@ function fgLine() {
     //     }
     // })
 
-},{"angular":45,"jquery":51}],84:[function(require,module,exports){
+},{"angular":45,"jquery":51}],83:[function(require,module,exports){
 require('./fg-line');
 require('./auto-size');
 require('./btn');
-require('./date-time-picker');
 require('./input-mask');
 
 module.exports = 'form';
 
-},{"./auto-size":80,"./btn":81,"./date-time-picker":82,"./fg-line":83,"./input-mask":85}],85:[function(require,module,exports){
+},{"./auto-size":80,"./btn":81,"./fg-line":82,"./input-mask":84}],84:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97231,7 +97210,7 @@ function inputMask() {
         }
     }
 }
-},{"angular":45}],86:[function(require,module,exports){
+},{"angular":45}],85:[function(require,module,exports){
 require('./a-prevent');
 require('./change-layout');
 require('./print');
@@ -97249,7 +97228,7 @@ require('./form');
 
 module.exports = 'directives';
 
-},{"./a-prevent":76,"./c-overflow":77,"./calendar":78,"./change-layout":79,"./form":84,"./lightbox":87,"./maps-directive":88,"./media-element":89,"./print":90,"./stop-propagate":91,"./toggle-sidebar":92,"./toggle-submenu":93,"./youtube-directive":94}],87:[function(require,module,exports){
+},{"./a-prevent":76,"./c-overflow":77,"./calendar":78,"./change-layout":79,"./form":83,"./lightbox":86,"./maps-directive":87,"./media-element":88,"./print":89,"./stop-propagate":90,"./toggle-sidebar":91,"./toggle-submenu":92,"./youtube-directive":93}],86:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97269,7 +97248,7 @@ function lightbox() {
     }
 }
 
-},{"angular":45}],88:[function(require,module,exports){
+},{"angular":45}],87:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97381,7 +97360,7 @@ function maps() {
     }
 }
 
-},{"angular":45,"jquery":51}],89:[function(require,module,exports){
+},{"angular":45,"jquery":51}],88:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97399,7 +97378,7 @@ function mediaElement() {
     }
 }
 
-},{"angular":45}],90:[function(require,module,exports){
+},{"angular":45}],89:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97419,7 +97398,7 @@ function print() {
     }
 }
 
-},{"angular":45}],91:[function(require,module,exports){
+},{"angular":45}],90:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97439,7 +97418,7 @@ function stopPropagate() {
     }
 }
 
-},{"angular":45}],92:[function(require,module,exports){
+},{"angular":45}],91:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97490,7 +97469,7 @@ function toggleSidebar() {
     }
 }
 
-},{"angular":45}],93:[function(require,module,exports){
+},{"angular":45}],92:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97511,7 +97490,7 @@ function toggleSubmenu() {
     }
 }
 
-},{"angular":45}],94:[function(require,module,exports){
+},{"angular":45}],93:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97521,13 +97500,16 @@ angular
     .directive('youtube', Youtube);
 
 function Youtube($sce, youtubeService) {
+
+  console.log('sdfsdfsdfsd');
+
   return {
     restrict: 'EA',
     templateUrl: '/templates/youtube.html',
     scope: {
-      code: '=',
-      path: '=',
-      height: '='
+      code: '=?',
+      path: '=?',
+      height: '=?'
     },
     link: function (scope) {
       scope.height = scope.height || '100%';
@@ -97547,7 +97529,7 @@ function Youtube($sce, youtubeService) {
   };
 }
 
-},{"angular":45}],95:[function(require,module,exports){
+},{"angular":45}],94:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97569,7 +97551,7 @@ function Comment($resource) {
     return $resource(url, params, options);
 }
 
-},{"angular":45}],96:[function(require,module,exports){
+},{"angular":45}],95:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97591,7 +97573,7 @@ function Event($resource) {
     return $resource(url, params, options);
 }
 
-},{"angular":45}],97:[function(require,module,exports){
+},{"angular":45}],96:[function(require,module,exports){
 require('./comment');
 require('./event');
 require('./media');
@@ -97599,7 +97581,7 @@ require('./user');
 
 module.exports = 'entities';
 
-},{"./comment":95,"./event":96,"./media":98,"./user":99}],98:[function(require,module,exports){
+},{"./comment":94,"./event":95,"./media":97,"./user":98}],97:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97621,7 +97603,7 @@ function Media($resource) {
     return $resource(url, params, options);
 }
 
-},{"angular":45}],99:[function(require,module,exports){
+},{"angular":45}],98:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97643,12 +97625,12 @@ function User($resource) {
     return $resource(url, params, options);
 }
 
-},{"angular":45}],100:[function(require,module,exports){
+},{"angular":45}],99:[function(require,module,exports){
 require('./main');
 
 module.exports = 'controllers';
 
-},{"./main":101}],101:[function(require,module,exports){
+},{"./main":100}],100:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97665,20 +97647,20 @@ function MainController() {
 
 }
 
-},{"angular":45}],102:[function(require,module,exports){
+},{"angular":45}],101:[function(require,module,exports){
 module.exports = 'directives';
 
-},{}],103:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 require('./controllers');
 require('./directives');
 require('./resources');
 
 module.exports = 'home';
 
-},{"./controllers":100,"./directives":102,"./resources":104}],104:[function(require,module,exports){
+},{"./controllers":99,"./directives":101,"./resources":103}],103:[function(require,module,exports){
 module.exports = 'resources';
 
-},{}],105:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97714,17 +97696,17 @@ function AddCommentController($scope, Comment) {
     };
 }
 
-},{"angular":45}],106:[function(require,module,exports){
+},{"angular":45}],105:[function(require,module,exports){
 require('./add-comment-controller');
 
 module.exports = 'controllers';
 
-},{"./add-comment-controller":105}],107:[function(require,module,exports){
+},{"./add-comment-controller":104}],106:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'comments';
 
-},{"./controllers/index":106}],108:[function(require,module,exports){
+},{"./controllers/index":105}],107:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97753,7 +97735,7 @@ function AddEventController($scope, Event) {
     };
 }
 
-},{"angular":45}],109:[function(require,module,exports){
+},{"angular":45}],108:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97769,7 +97751,7 @@ function AddVideoEventController($scope, Media, $stateParams) {
     self.video = {
         url: '',
         event_id: $stateParams.eventId,
-        type_media: 2
+        type: 2
     };
 
     self.isYoutubeUrl = function() {
@@ -97778,7 +97760,9 @@ function AddVideoEventController($scope, Media, $stateParams) {
     };
 
     var load_ = function () {
-        Media.query({event_id: 6}, function (videos) {
+        Media.query({event_id: $stateParams.eventId}, function (videos) {
+            console.log('videos', videos);
+
             self.videos = videos;
         });
     };
@@ -97797,7 +97781,7 @@ function AddVideoEventController($scope, Media, $stateParams) {
     };
 }
 
-},{"angular":45}],110:[function(require,module,exports){
+},{"angular":45}],109:[function(require,module,exports){
 var angular = require('angular');
 var $ = require('jquery');
 
@@ -97908,7 +97892,7 @@ angular
         }
     })
 
-},{"angular":45,"jquery":51}],111:[function(require,module,exports){
+},{"angular":45,"jquery":51}],110:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97940,7 +97924,7 @@ function CommentController($scope, Comment) {
     load_();
 }
 
-},{"angular":45}],112:[function(require,module,exports){
+},{"angular":45}],111:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98003,7 +97987,7 @@ function CropImageController($scope, $timeout, $stateParams) {
 }
 
 
-},{"angular":45}],113:[function(require,module,exports){
+},{"angular":45}],112:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98093,7 +98077,7 @@ function DetailEventController($scope, $stateParams, Facebook, Event, userServic
     };
 }
 
-},{"angular":45}],114:[function(require,module,exports){
+},{"angular":45}],113:[function(require,module,exports){
 require('./add-events-controller');
 require('./list-events-controller');
 require('./calendar');
@@ -98128,7 +98112,7 @@ module.exports = 'controllers';
 //     //});
 // };
 
-},{"./add-events-controller":108,"./add-video-event-controller":109,"./calendar":110,"./comment-controller":111,"./crop-image-controller":112,"./detail-events-controller":113,"./invites-event-controller":115,"./list-events-controller":116}],115:[function(require,module,exports){
+},{"./add-events-controller":107,"./add-video-event-controller":108,"./calendar":109,"./comment-controller":110,"./crop-image-controller":111,"./detail-events-controller":112,"./invites-event-controller":114,"./list-events-controller":115}],114:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98149,7 +98133,7 @@ function InvitesEventController(Facebook, userService) {
     });
 }
 
-},{"angular":45}],116:[function(require,module,exports){
+},{"angular":45}],115:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98210,17 +98194,17 @@ function ListEventController($scope, modalService, routesService, Event) {
     loadEvents_();
 }
 
-},{"angular":45}],117:[function(require,module,exports){
+},{"angular":45}],116:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'events';
 
-},{"./controllers/index":114}],118:[function(require,module,exports){
+},{"./controllers/index":113}],117:[function(require,module,exports){
 require('./list-friends-controller');
 
 module.exports = 'controllers';
 
-},{"./list-friends-controller":119}],119:[function(require,module,exports){
+},{"./list-friends-controller":118}],118:[function(require,module,exports){
 'use strict';
 
 
@@ -98242,12 +98226,12 @@ function ListFriedsController(Facebook, userService) {
     });
 }
 
-},{"angular":45}],120:[function(require,module,exports){
+},{"angular":45}],119:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'friends';
 
-},{"./controllers/index":118}],121:[function(require,module,exports){
+},{"./controllers/index":117}],120:[function(require,module,exports){
 require('./comments/index');
 require('./events/index');
 require('./friends/index');
@@ -98256,7 +98240,7 @@ require('./profile/index');
 
 module.exports = 'modules';
 
-},{"./comments/index":107,"./events/index":117,"./friends/index":120,"./pages/index":124,"./profile/index":127}],122:[function(require,module,exports){
+},{"./comments/index":106,"./events/index":116,"./friends/index":119,"./pages/index":123,"./profile/index":126}],121:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98288,19 +98272,19 @@ function AboutCtrl() {
     }];
 }
 
-},{"angular":45}],123:[function(require,module,exports){
+},{"angular":45}],122:[function(require,module,exports){
 require('./about');
 
 module.exports = 'controllers';
 
-},{"./about":122}],124:[function(require,module,exports){
+},{"./about":121}],123:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'pages';
 
-},{"./controllers/index":123}],125:[function(require,module,exports){
-arguments[4][100][0].apply(exports,arguments)
-},{"./main":126,"dup":100}],126:[function(require,module,exports){
+},{"./controllers/index":122}],124:[function(require,module,exports){
+arguments[4][99][0].apply(exports,arguments)
+},{"./main":125,"dup":99}],125:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98324,7 +98308,7 @@ function ProfileCtrl($q, Media, eventService, growlService, userService, Faceboo
     };
 
     var loadMedias_ = function() {
-        Media.query({event_id: 6}, function (medias) {
+        Media.query({}, function (medias) {
             var medias = medias;
 
             self.images = _.filter(medias, {type: 1});
@@ -98380,12 +98364,12 @@ function ProfileCtrl($q, Media, eventService, growlService, userService, Faceboo
     }
 }
 
-},{"angular":45,"lightgallery/dist/js/lightgallery":52,"lodash":53}],127:[function(require,module,exports){
+},{"angular":45,"lightgallery/dist/js/lightgallery":52,"lodash":53}],126:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'profile';
 
-},{"./controllers/index":125}],128:[function(require,module,exports){
+},{"./controllers/index":124}],127:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98406,7 +98390,7 @@ function BestsellingService($resource) {
     }
 }
 
-},{"angular":45}],129:[function(require,module,exports){
+},{"angular":45}],128:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98428,7 +98412,7 @@ function EventService($http) {
     };
 }
 
-},{"angular":45}],130:[function(require,module,exports){
+},{"angular":45}],129:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98467,7 +98451,7 @@ function growlService() {
     return gs;
 }
 
-},{"angular":45,"jquery":51}],131:[function(require,module,exports){
+},{"angular":45,"jquery":51}],130:[function(require,module,exports){
 require('./best-selling-service');
 require('./event-service');
 require('./growl-service');
@@ -98482,7 +98466,7 @@ require('./youtube-service');
 
 module.exports = 'services';
 
-},{"./best-selling-service":128,"./event-service":129,"./growl-service":130,"./message-service":132,"./modal-service":133,"./routes-service":134,"./scroll-service":135,"./table-service":136,"./user-service":137,"./utils-service":138,"./youtube-service":139}],132:[function(require,module,exports){
+},{"./best-selling-service":127,"./event-service":128,"./growl-service":129,"./message-service":131,"./modal-service":132,"./routes-service":133,"./scroll-service":134,"./table-service":135,"./user-service":136,"./utils-service":137,"./youtube-service":138}],131:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98503,7 +98487,7 @@ function MessageService($resource) {
     }
 }
 
-},{"angular":45}],133:[function(require,module,exports){
+},{"angular":45}],132:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98563,7 +98547,7 @@ function ModalService($uibModal) {
   };
 }
 
-},{"angular":45}],134:[function(require,module,exports){
+},{"angular":45}],133:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98632,7 +98616,7 @@ function RoutesService($state, $stateParams) {
   };
 }
 
-},{"angular":45}],135:[function(require,module,exports){
+},{"angular":45}],134:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98661,7 +98645,7 @@ function scrollService() {
     return ss;
 }
 
-},{"angular":45,"jquery":51}],136:[function(require,module,exports){
+},{"angular":45,"jquery":51}],135:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98815,7 +98799,7 @@ function tableService() {
         }
     ];
 }
-},{"angular":45}],137:[function(require,module,exports){
+},{"angular":45}],136:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98849,7 +98833,7 @@ function UserService(Facebook) {
     };
 }
 
-},{"angular":45}],138:[function(require,module,exports){
+},{"angular":45}],137:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98867,7 +98851,7 @@ function UtilsService() {
   };
 }
 
-},{"angular":45}],139:[function(require,module,exports){
+},{"angular":45}],138:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98889,7 +98873,7 @@ function YoutubeService() {
     };
 }
 
-},{"angular":45}],140:[function(require,module,exports){
+},{"angular":45}],139:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98906,7 +98890,7 @@ function BestSellingController(bestSellingService) {
     this.bsResult = bestSellingService.getBestselling(this.img, this.name, this.range);
 }
 
-},{"angular":45}],141:[function(require,module,exports){
+},{"angular":45}],140:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -99017,14 +99001,14 @@ function HeaderController($timeout, messageService){
     }
 };
 
-},{"angular":45,"jquery":51}],142:[function(require,module,exports){
+},{"angular":45,"jquery":51}],141:[function(require,module,exports){
 require('./layout');
 require('./header');
 require('./best-selling');
 
 module.exports = 'controllers';
 
-},{"./best-selling":140,"./header":141,"./layout":143}],143:[function(require,module,exports){
+},{"./best-selling":139,"./header":140,"./layout":142}],142:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -99139,15 +99123,15 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
     };
 };
 
-},{"angular":45}],144:[function(require,module,exports){
+},{"angular":45}],143:[function(require,module,exports){
 require('./controllers');
 
 module.exports = 'template';
 
-},{"./controllers":142}],145:[function(require,module,exports){
+},{"./controllers":141}],144:[function(require,module,exports){
 module.exports={
 }
 
-},{}],146:[function(require,module,exports){
-arguments[4][145][0].apply(exports,arguments)
-},{"dup":145}]},{},[71]);
+},{}],145:[function(require,module,exports){
+arguments[4][144][0].apply(exports,arguments)
+},{"dup":144}]},{},[71]);
