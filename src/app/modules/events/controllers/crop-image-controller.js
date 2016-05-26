@@ -6,11 +6,12 @@ angular
     .module('webAdminApp')
     .controller('CropImageController', CropImageController);
 
-function CropImageController($scope, $timeout, $stateParams) {
+function CropImageController($scope, $timeout, $stateParams, Upload, growlService) {
 
   $scope.enabledSave = true;
   $scope.image = '';
   $scope.resultBlob = '';
+  $scope.resultImage = '';
 
   var handleFileSelect = function(evt) {
     $scope.isLoadImage = true;
@@ -28,26 +29,30 @@ function CropImageController($scope, $timeout, $stateParams) {
 
   $scope.uploadCover = function() {
     Upload.upload({
-      url: server.formatCampaignAddImagesUrl(session.getAccessToken(), $stateParams.campaignId),
-      file: $scope.resultBlob
+        method: 'POST',
+        url: 'http://localhost:8000/medias/upload',
+        file: $scope.resultBlob,
+        data: {
+            id: $stateParams.eventId,
+            user_id: 1,
+            type: 1
+        }
     }).progress(function() {
-      $scope.$emit(toastConstants.PROGRESS, 'Adicionando imagem');
     }).success(function (data, status) {
+        console.log('data', data);
       if (status === 200) {
-        syncService.sync().then(function () {
-          $scope.$emit(toastConstants.INFO, 'Imagem adicionada com sucesso');
+          growlService.growl('Imagem adicionada com sucesso', 'inverse');
           $scope.$close();
-        });
       } else {
-        $scope.$emit(toastConstants.ERROR, 'Falha ao adicionar imagem');
+          growlService.growl('Erro ao realizar upload', 'inverse');
       }
     }).catch(function () {
-      $scope.$emit(toastConstants.ERROR, 'Falha ao adicionar imagem');
+        growlService.growl('Erro ao realizar upload', 'inverse');
     });
   };
 
   $scope.onLoadError = function() {
-    $scope.$emit(toastConstants.WARNING, 'There was an error loading the image');
+    console.log('sdfsdfds');
   };
 
   $scope.close = function() {

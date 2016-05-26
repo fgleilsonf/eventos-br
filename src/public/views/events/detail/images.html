@@ -1,0 +1,28 @@
+<div class="pmb-block clearfix photos" ng-controller="AddImageEventController as imageCtrl">
+    <div class="p-header">
+        <ul class="p-menu">
+            <li class="active">
+                <a><i class="zmdi zmdi-collection-image"></i> Imagens</a>
+            </li>
+        </ul>
+    </div>
+
+    <button class="btn btn-success m-b-10" ng-click="imageCtrl.cropImage();">
+        <i class="zmdi zmdi-plus"></i> Adicionar
+    </button>
+
+    <p class="c-red lead" ng-if="!imageCtrl.images.length">Não há imagens adicionadas</p>
+
+    <!--<ul class="p-grid">-->
+        <!--<li ng-repeat="w in imageCtrl.photoOptions track by w.value" ng-click="imageCtrl.photoGrid(w.value)"-->
+            <!--ng-class="{ 'active' : imageCtrl.photoColumnSize === w.value }">{{ w.column }}</li>-->
+    <!--</ul>-->
+
+    <div ng-if="imageCtrl.images.length" class="lightbox row">
+        <div ng-repeat="image in imageCtrl.images" class="{{ imageCtrl.photoColumn }} col-sm-4 col-xs-6">
+            <div class="lightbox-item p-item m-b-10">
+                <img ng-src="{{ 'uploads/' + image.url }}" alt="" height="150px" />
+            </div>
+        </div>
+    </div>
+</div>

@@ -10,6 +10,10 @@ if (window.swal === undefined) {
     window.swal = require('sweetalert');
 }
 
+if (window.ColorThief === undefined) {
+    window.ColorThief = require('ng-img-crop-full-extended/source/js/color-thief.min.js');
+}
+
 //require('mediaelement');
 require('flot/jquery.flot');
 require('CurvedLines/curvedLines');

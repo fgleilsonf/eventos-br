@@ -5167,9 +5167,13 @@ module.exports = 'ngAnimate';
 })(window, angular);
 
 },{}],5:[function(require,module,exports){
+'use strict';
+
 module.exports = require('./src/angular-input-masks.br');
 
 },{"./src/angular-input-masks.br":9}],6:[function(require,module,exports){
+'use strict';
+
 var moduleName = require('./src/angular-input-masks.js');
 
 module.exports = moduleName;
@@ -6013,19 +6017,26 @@ IErules.AP = [{
 }));
 
 },{}],9:[function(require,module,exports){
+'use strict';
+
 module.exports = angular.module('ui.utils.masks', [
 	require('./global/global-masks'),
 	require('./br/br-masks')
 ]).name;
 
-},{"./br/br-masks":12,"./global/global-masks":21}],10:[function(require,module,exports){
+},{"./br/br-masks":12,"./global/global-masks":24}],10:[function(require,module,exports){
+'use strict';
+
 module.exports = angular.module('ui.utils.masks', [
 	require('./global/global-masks'),
 	require('./br/br-masks'),
-	require('./us/us-masks')
+	require('./us/us-masks'),
+	require('./ch/ch-masks')
 ]).name;
 
-},{"./br/br-masks":12,"./global/global-masks":21,"./us/us-masks":31}],11:[function(require,module,exports){
+},{"./br/br-masks":12,"./ch/ch-masks":21,"./global/global-masks":24,"./us/us-masks":34}],11:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var maskFactory = require('mask-factory');
 
@@ -6049,7 +6060,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"mask-factory":28,"string-mask":8}],12:[function(require,module,exports){
+},{"mask-factory":31,"string-mask":8}],12:[function(require,module,exports){
+'use strict';
+
 var m = angular.module('ui.utils.masks.br', [
 	require('../helpers'),
 ])
@@ -6060,11 +6073,36 @@ var m = angular.module('ui.utils.masks.br', [
 .directive('uiBrCpfcnpjMask', require('./cpf-cnpj/cpf-cnpj'))
 .directive('uiBrIeMask', require('./inscricao-estadual/ie'))
 .directive('uiNfeAccessKeyMask', require('./nfe/nfe'))
+.directive('uiBrCarPlateMask', require('./car-plate/car-plate'))
 .directive('uiBrPhoneNumber', require('./phone/br-phone'));
 
 module.exports = m.name;
 
-},{"../helpers":27,"./boleto-bancario/boleto-bancario":11,"./cep/cep":13,"./cnpj/cnpj":14,"./cpf-cnpj/cpf-cnpj":15,"./cpf/cpf":16,"./inscricao-estadual/ie":17,"./nfe/nfe":18,"./phone/br-phone":19}],13:[function(require,module,exports){
+},{"../helpers":30,"./boleto-bancario/boleto-bancario":11,"./car-plate/car-plate":13,"./cep/cep":14,"./cnpj/cnpj":15,"./cpf-cnpj/cpf-cnpj":16,"./cpf/cpf":17,"./inscricao-estadual/ie":18,"./nfe/nfe":19,"./phone/br-phone":20}],13:[function(require,module,exports){
+'use strict';
+
+var StringMask = require('string-mask');
+var maskFactory = require('mask-factory');
+
+var carPlateMask = new StringMask('UUU-0000');
+
+module.exports = maskFactory({
+	clearValue: function(rawValue) {
+		return rawValue.replace(/[^a-zA-Z0-9]/g, '').slice(0, 7);
+	},
+	format: function(cleanValue) {
+		return (carPlateMask.apply(cleanValue) || '').replace(/[^a-zA-Z0-9]$/, '');
+	},
+	validations: {
+		carPlate: function(value) {
+			return value.length === 7;
+		}
+	}
+});
+
+},{"mask-factory":31,"string-mask":8}],14:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var maskFactory = require('mask-factory');
 
@@ -6072,7 +6110,7 @@ var cepMask = new StringMask('00000-000');
 
 module.exports = maskFactory({
 	clearValue: function(rawValue) {
-		return rawValue.replace(/[^0-9]/g, '').slice(0, 8);
+		return rawValue.toString().replace(/[^0-9]/g, '').slice(0, 8);
 	},
 	format: function(cleanValue) {
 		return (cepMask.apply(cleanValue) || '').replace(/[^0-9]$/, '');
@@ -6084,7 +6122,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"mask-factory":28,"string-mask":8}],14:[function(require,module,exports){
+},{"mask-factory":31,"string-mask":8}],15:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var BrV = require('br-validations');
 var maskFactory = require('mask-factory');
@@ -6105,7 +6145,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"br-validations":7,"mask-factory":28,"string-mask":8}],15:[function(require,module,exports){
+},{"br-validations":7,"mask-factory":31,"string-mask":8}],16:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var BrV = require('br-validations');
 var maskFactory = require('mask-factory');
@@ -6138,7 +6180,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"br-validations":7,"mask-factory":28,"string-mask":8}],16:[function(require,module,exports){
+},{"br-validations":7,"mask-factory":31,"string-mask":8}],17:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var BrV = require('br-validations');
 var maskFactory = require('mask-factory');
@@ -6159,7 +6203,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"br-validations":7,"mask-factory":28,"string-mask":8}],17:[function(require,module,exports){
+},{"br-validations":7,"mask-factory":31,"string-mask":8}],18:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var BrV = require('br-validations');
 
@@ -6170,7 +6216,7 @@ function BrIeMaskDirective($parse) {
 		'AM': [{mask: new StringMask('00.000.000-0')}],
 		'AP': [{mask: new StringMask('000000000')}],
 		'BA': [{chars: 8, mask: new StringMask('000000-00')},
-			   {mask: new StringMask('0000000-00')}],
+			{mask: new StringMask('0000000-00')}],
 		'CE': [{mask: new StringMask('00000000-0')}],
 		'DF': [{mask: new StringMask('00000000000-00')}],
 		'ES': [{mask: new StringMask('00000000-0')}],
@@ -6182,23 +6228,23 @@ function BrIeMaskDirective($parse) {
 		'PA': [{mask: new StringMask('00-000000-0')}],
 		'PB': [{mask: new StringMask('00000000-0')}],
 		'PE': [{chars: 9, mask: new StringMask('0000000-00')},
-			   {mask: new StringMask('00.0.000.0000000-0')}],
+			{mask: new StringMask('00.0.000.0000000-0')}],
 		'PI': [{mask: new StringMask('000000000')}],
 		'PR': [{mask: new StringMask('000.00000-00')}],
 		'RJ': [{mask: new StringMask('00.000.00-0')}],
 		'RN': [{chars: 9, mask: new StringMask('00.000.000-0')},
-			   {mask: new StringMask('00.0.000.000-0')}],
+			{mask: new StringMask('00.0.000.000-0')}],
 		'RO': [{mask: new StringMask('0000000000000-0')}],
 		'RR': [{mask: new StringMask('00000000-0')}],
 		'RS': [{mask: new StringMask('000/0000000')}],
 		'SC': [{mask: new StringMask('000.000.000')}],
 		'SE': [{mask: new StringMask('00000000-0')}],
 		'SP': [{mask: new StringMask('000.000.000.000')},
-			   {mask: new StringMask('-00000000.0/000')}],
+			{mask: new StringMask('-00000000.0/000')}],
 		'TO': [{mask: new StringMask('00000000000')}]
 	};
 
-	function clearValue (value) {
+	function clearValue(value) {
 		if (!value) {
 			return value;
 		}
@@ -6208,7 +6254,7 @@ function BrIeMaskDirective($parse) {
 
 	function getMask(uf, value) {
 		if (!uf || !ieMasks[uf]) {
-			return undefined;
+			return;
 		}
 
 		if (uf === 'SP' && /^P/i.test(value)) {
@@ -6217,7 +6263,7 @@ function BrIeMaskDirective($parse) {
 
 		var masks = ieMasks[uf];
 		var i = 0;
-		while(masks[i].chars && masks[i].chars < clearValue(value).length && i < masks.length - 1) {
+		while (masks[i].chars && masks[i].chars < clearValue(value).length && i < masks.length - 1) {
 			i++;
 		}
 
@@ -6227,7 +6273,7 @@ function BrIeMaskDirective($parse) {
 	function applyIEMask(value, uf) {
 		var mask = getMask(uf, value);
 
-		if(!mask) {
+		if (!mask) {
 			return value;
 		}
 
@@ -6296,7 +6342,9 @@ BrIeMaskDirective.$inject = ['$parse'];
 
 module.exports = BrIeMaskDirective;
 
-},{"br-validations":7,"string-mask":8}],18:[function(require,module,exports){
+},{"br-validations":7,"string-mask":8}],19:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var maskFactory = require('mask-factory');
 
@@ -6317,7 +6365,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"mask-factory":28,"string-mask":8}],19:[function(require,module,exports){
+},{"mask-factory":31,"string-mask":8}],20:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var maskFactory = require('mask-factory');
 
@@ -6326,7 +6376,8 @@ var maskFactory = require('mask-factory');
  * see http://portal.embratel.com.br/embratel/9-digito/
  */
 var phoneMask8D = new StringMask('(00) 0000-0000'),
-	phoneMask9D = new StringMask('(00) 00000-0000');
+	phoneMask9D = new StringMask('(00) 00000-0000'),
+	phoneMask0800 = new StringMask('0000-000-0000');
 
 module.exports = maskFactory({
 	clearValue: function(rawValue) {
@@ -6334,10 +6385,11 @@ module.exports = maskFactory({
 	},
 	format: function(cleanValue) {
 		var formatedValue;
-
-		if(cleanValue.length < 11){
+		if (cleanValue.indexOf('0800') === 0) {
+			formatedValue = phoneMask0800.apply(cleanValue);
+		} else if (cleanValue.length < 11) {
 			formatedValue = phoneMask8D.apply(cleanValue) || '';
-		}else{
+		} else {
 			formatedValue = phoneMask9D.apply(cleanValue);
 		}
 
@@ -6356,9 +6408,53 @@ module.exports = maskFactory({
 	}
 });
 
-},{"mask-factory":28,"string-mask":8}],20:[function(require,module,exports){
+},{"mask-factory":31,"string-mask":8}],21:[function(require,module,exports){
+'use strict';
+
+var m = angular.module('ui.utils.masks.ch', [
+	require('../helpers'),
+])
+.directive('uiChPhoneNumber', require('./phone/ch-phone'));
+
+module.exports = m.name;
+
+},{"../helpers":30,"./phone/ch-phone":22}],22:[function(require,module,exports){
+'use strict';
+
+var StringMask = require('string-mask');
+var maskFactory = require('mask-factory');
+
+var phoneMask = new StringMask('+00 00 000 00 00');
+
+module.exports = maskFactory({
+	clearValue: function(rawValue) {
+		return rawValue.toString().replace(/[^0-9]/g, '').slice(0, 11);
+	},
+	format: function(cleanValue) {
+		var formatedValue;
+
+		formatedValue = phoneMask.apply(cleanValue) || '';
+
+		return formatedValue.trim().replace(/[^0-9]$/, '');
+	},
+	validations: {
+		chPhoneNumber: function(value) {
+			var valueLength = value && value.toString().length;
+			return valueLength === 11;
+		}
+	}
+});
+
+},{"mask-factory":31,"string-mask":8}],23:[function(require,module,exports){
+'use strict';
+
 var moment = require('moment');
 var StringMask = require('string-mask');
+
+function isISODateString(date) {
+	return /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}([-+][0-9]{2}:[0-9]{2}|Z)$/
+		.test(date.toString());
+}
 
 function DateMaskDirective($locale) {
 	var dateFormatMapByLocale = {
@@ -6379,7 +6475,7 @@ function DateMaskDirective($locale) {
 				}
 
 				var cleanValue = value;
-				if (typeof value === 'object') {
+				if (typeof value === 'object' || isISODateString(value)) {
 					cleanValue = moment(value).format(dateFormat);
 				}
 
@@ -6420,7 +6516,9 @@ DateMaskDirective.$inject = ['$locale'];
 
 module.exports = DateMaskDirective;
 
-},{"moment":56,"string-mask":8}],21:[function(require,module,exports){
+},{"moment":59,"string-mask":8}],24:[function(require,module,exports){
+'use strict';
+
 var m = angular.module('ui.utils.masks.global', [
 	require('../helpers'),
 ])
@@ -6433,7 +6531,9 @@ var m = angular.module('ui.utils.masks.global', [
 
 module.exports = m.name;
 
-},{"../helpers":27,"./date/date":20,"./money/money":22,"./number/number":23,"./percentage/percentage":24,"./scientific-notation/scientific-notation":25,"./time/time":26}],22:[function(require,module,exports){
+},{"../helpers":30,"./date/date":23,"./money/money":25,"./number/number":26,"./percentage/percentage":27,"./scientific-notation/scientific-notation":28,"./time/time":29}],25:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var validators = require('validators');
 
@@ -6441,26 +6541,26 @@ function MoneyMaskDirective($locale, $parse, PreFormatters) {
 	return {
 		restrict: 'A',
 		require: 'ngModel',
-		link: function (scope, element, attrs, ctrl) {
+		link: function(scope, element, attrs, ctrl) {
 			var decimalDelimiter = $locale.NUMBER_FORMATS.DECIMAL_SEP,
 				thousandsDelimiter = $locale.NUMBER_FORMATS.GROUP_SEP,
 				currencySym = $locale.NUMBER_FORMATS.CURRENCY_SYM,
 				decimals = $parse(attrs.uiMoneyMask)(scope);
 
 			function maskFactory(decimals) {
-					var decimalsPattern = decimals > 0 ? decimalDelimiter + new Array(decimals + 1).join('0') : '';
-					var maskPattern = currencySym + ' #' + thousandsDelimiter + '##0' + decimalsPattern;
-					return new StringMask(maskPattern, {reverse: true});
+				var decimalsPattern = decimals > 0 ? decimalDelimiter + new Array(decimals + 1).join('0') : '';
+				var maskPattern = currencySym + ' #' + thousandsDelimiter + '##0' + decimalsPattern;
+				return new StringMask(maskPattern, {reverse: true});
 			}
 
-			if (angular.isDefined(attrs.uiHideGroupSep)){
+			if (angular.isDefined(attrs.uiHideGroupSep)) {
 				thousandsDelimiter = '';
 			}
 
-			if(isNaN(decimals)) {
+			if (isNaN(decimals)) {
 				decimals = 2;
 			}
-
+			decimals = parseInt(decimals);
 			var moneyMask = maskFactory(decimals);
 
 			function formatter(value) {
@@ -6482,7 +6582,7 @@ function MoneyMaskDirective($locale, $parse, PreFormatters) {
 				var formatedValue = moneyMask.apply(actualNumber);
 
 				if (angular.isDefined(attrs.uiNegativeNumber)) {
-						var isNegative = (value[0] === '-'),
+					var isNegative = (value[0] === '-'),
 						needsToInvertSign = (value.slice(-1) === '-');
 
 					//only apply the minus sign if it is negative or(exclusive)
@@ -6507,6 +6607,7 @@ function MoneyMaskDirective($locale, $parse, PreFormatters) {
 			if (attrs.uiMoneyMask) {
 				scope.$watch(attrs.uiMoneyMask, function(_decimals) {
 					decimals = isNaN(_decimals) ? 2 : _decimals;
+					decimals = parseInt(decimals);
 					moneyMask = maskFactory(decimals);
 
 					parser(ctrl.$viewValue);
@@ -6528,7 +6629,7 @@ function MoneyMaskDirective($locale, $parse, PreFormatters) {
 
 			if (attrs.max) {
 				var maxVal;
-				
+
 				ctrl.$validators.max = function(modelValue) {
 					return validators.maxNumber(ctrl, modelValue, maxVal);
 				};
@@ -6545,23 +6646,25 @@ MoneyMaskDirective.$inject = ['$locale', '$parse', 'PreFormatters'];
 
 module.exports = MoneyMaskDirective;
 
-},{"string-mask":8,"validators":29}],23:[function(require,module,exports){
+},{"string-mask":8,"validators":32}],26:[function(require,module,exports){
+'use strict';
+
 var validators = require('validators');
 
 function NumberMaskDirective($locale, $parse, PreFormatters, NumberMasks) {
 	return {
 		restrict: 'A',
 		require: 'ngModel',
-		link: function (scope, element, attrs, ctrl) {
+		link: function(scope, element, attrs, ctrl) {
 			var decimalDelimiter = $locale.NUMBER_FORMATS.DECIMAL_SEP,
 				thousandsDelimiter = $locale.NUMBER_FORMATS.GROUP_SEP,
 				decimals = $parse(attrs.uiNumberMask)(scope);
 
-			if (angular.isDefined(attrs.uiHideGroupSep)){
+			if (angular.isDefined(attrs.uiHideGroupSep)) {
 				thousandsDelimiter = '';
 			}
 
-			if(isNaN(decimals)) {
+			if (isNaN(decimals)) {
 				decimals = 2;
 			}
 
@@ -6569,8 +6672,8 @@ function NumberMaskDirective($locale, $parse, PreFormatters, NumberMasks) {
 				modelMask = NumberMasks.modelMask(decimals);
 
 			function parser(value) {
-				if(ctrl.$isEmpty(value)) {
-					return value;
+				if (ctrl.$isEmpty(value)) {
+					return null;
 				}
 
 				var valueToFormat = PreFormatters.clearDelimitersAndLeadingZeros(value) || '0';
@@ -6652,7 +6755,9 @@ NumberMaskDirective.$inject = ['$locale', '$parse', 'PreFormatters', 'NumberMask
 
 module.exports = NumberMaskDirective;
 
-},{"validators":29}],24:[function(require,module,exports){
+},{"validators":32}],27:[function(require,module,exports){
+'use strict';
+
 var validators = require('validators');
 
 function PercentageMaskDirective($locale, $parse, PreFormatters, NumberMasks) {
@@ -6663,17 +6768,22 @@ function PercentageMaskDirective($locale, $parse, PreFormatters, NumberMasks) {
 	return {
 		restrict: 'A',
 		require: 'ngModel',
-		link: function (scope, element, attrs, ctrl) {
+		link: function(scope, element, attrs, ctrl) {
 			var decimalDelimiter = $locale.NUMBER_FORMATS.DECIMAL_SEP,
 				thousandsDelimiter = $locale.NUMBER_FORMATS.GROUP_SEP,
-				decimals = parseInt(attrs.uiPercentageMask);
+				decimals = parseInt(attrs.uiPercentageMask),
+				backspacePressed = false;
+
+			element.bind('keydown keypress', function(event) {
+				backspacePressed = event.which === 8;
+			});
 
 			var modelValue = {
 				multiplier : 100,
 				decimalMask: 2
 			};
 
-			if (angular.isDefined(attrs.uiHideGroupSep)){
+			if (angular.isDefined(attrs.uiHideGroupSep)) {
 				thousandsDelimiter = '';
 			}
 
@@ -6682,7 +6792,7 @@ function PercentageMaskDirective($locale, $parse, PreFormatters, NumberMasks) {
 				modelValue.decimalMask = 0;
 			}
 
-			if(isNaN(decimals)) {
+			if (isNaN(decimals)) {
 				decimals = 2;
 			}
 
@@ -6701,12 +6811,15 @@ function PercentageMaskDirective($locale, $parse, PreFormatters, NumberMasks) {
 
 			function parse(value) {
 				if (ctrl.$isEmpty(value)) {
-					return value;
+					return null;
 				}
 
 				var valueToFormat = PreFormatters.clearDelimitersAndLeadingZeros(value) || '0';
 				if (value.length > 1 && value.indexOf('%') === -1) {
 					valueToFormat = valueToFormat.slice(0,valueToFormat.length-1);
+				}
+				if (backspacePressed && value.length === 1 && value !== '%') {
+					valueToFormat = '0';
 				}
 				var formatedValue = viewMask.apply(valueToFormat) + ' %';
 				var actualNumber = parseFloat(modelMask.apply(valueToFormat));
@@ -6771,7 +6884,9 @@ PercentageMaskDirective.$inject = ['$locale', '$parse', 'PreFormatters', 'Number
 
 module.exports = PercentageMaskDirective;
 
-},{"validators":29}],25:[function(require,module,exports){
+},{"validators":32}],28:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 
 function ScientificNotationMaskDirective($locale, $parse) {
@@ -6805,7 +6920,7 @@ function ScientificNotationMaskDirective($locale, $parse) {
 
 			var significandMask = significandMaskBuilder(decimals);
 
-			function splitNumber (value) {
+			function splitNumber(value) {
 				var stringValue = value.toString(),
 					splittedNumber = stringValue.match(/(-?[0-9]*)[\.]?([0-9]*)?[Ee]?([\+-]?[0-9]*)?/);
 
@@ -6816,7 +6931,7 @@ function ScientificNotationMaskDirective($locale, $parse) {
 				};
 			}
 
-			function formatter (value) {
+			function formatter(value) {
 				if (ctrl.$isEmpty(value)) {
 					return value;
 				}
@@ -6862,8 +6977,8 @@ function ScientificNotationMaskDirective($locale, $parse) {
 				return formattedValue;
 			}
 
-			function parser (value) {
-				if(ctrl.$isEmpty(value)) {
+			function parser(value) {
+				if (ctrl.$isEmpty(value)) {
 					return value;
 				}
 
@@ -6881,7 +6996,7 @@ function ScientificNotationMaskDirective($locale, $parse) {
 			ctrl.$formatters.push(formatter);
 			ctrl.$parsers.push(parser);
 
-			ctrl.$validators.max = function validator (value) {
+			ctrl.$validators.max = function validator(value) {
 				return ctrl.$isEmpty(value) || value < Number.MAX_VALUE;
 			};
 		}
@@ -6891,7 +7006,9 @@ ScientificNotationMaskDirective.$inject = ['$locale', '$parse'];
 
 module.exports = ScientificNotationMaskDirective;
 
-},{"string-mask":8}],26:[function(require,module,exports){
+},{"string-mask":8}],29:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 
 module.exports = function TimeMaskDirective() {
@@ -6936,7 +7053,7 @@ module.exports = function TimeMaskDirective() {
 				return modelValue;
 			});
 
-			ctrl.$validators.time = function (modelValue) {
+			ctrl.$validators.time = function(modelValue) {
 				if (ctrl.$isEmpty(modelValue)) {
 					return true;
 				}
@@ -6956,21 +7073,26 @@ module.exports = function TimeMaskDirective() {
 	};
 };
 
-},{"string-mask":8}],27:[function(require,module,exports){
+},{"string-mask":8}],30:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 
 var m = angular.module('ui.utils.masks.helpers', []);
 
 module.exports = m.name;
 
-m.factory('PreFormatters', [function(){
+m.factory('PreFormatters', [function() {
 	function clearDelimitersAndLeadingZeros(value) {
+		if (value === '0') {
+			return '0';
+		}
+
 		var cleanValue = value.replace(/^-/,'').replace(/^0*/, '');
-		cleanValue = cleanValue.replace(/[^0-9]/g, '');
-		return cleanValue;
+		return cleanValue.replace(/[^0-9]/g, '');
 	}
 
-	function prepareNumberToFormatter (value, decimals) {
+	function prepareNumberToFormatter(value, decimals) {
 		return clearDelimitersAndLeadingZeros((parseFloat(value)).toFixed(decimals));
 	}
 
@@ -6979,28 +7101,12 @@ m.factory('PreFormatters', [function(){
 		prepareNumberToFormatter: prepareNumberToFormatter
 	};
 }])
-.factory('NumberValidators', [function() {
+.factory('NumberMasks', [function() {
 	return {
-		maxNumber: function maxValidator(ctrl, value, limit) {
-			var max = parseFloat(limit);
-			var validity = ctrl.$isEmpty(value) || isNaN(max)|| value <= max;
-			ctrl.$setValidity('max', validity);
-			return value;
-		},
-		minNumber: function minValidator(ctrl, value, limit) {
-			var min = parseFloat(limit);
-			var validity = ctrl.$isEmpty(value) || isNaN(min) || value >= min;
-			ctrl.$setValidity('min', validity);
-			return value;
-		}
-	};
-}])
-.factory('NumberMasks', [function(){
-	return {
-		viewMask: function (decimals, decimalDelimiter, thousandsDelimiter) {
+		viewMask: function(decimals, decimalDelimiter, thousandsDelimiter) {
 			var mask = '#' + thousandsDelimiter + '##0';
 
-			if(decimals > 0) {
+			if (decimals > 0) {
 				mask += decimalDelimiter;
 				for (var i = 0; i < decimals; i++) {
 					mask += '0';
@@ -7011,10 +7117,10 @@ m.factory('PreFormatters', [function(){
 				reverse: true
 			});
 		},
-		modelMask: function (decimals) {
+		modelMask: function(decimals) {
 			var mask = '###0';
 
-			if(decimals > 0) {
+			if (decimals > 0) {
 				mask += '.';
 				for (var i = 0; i < decimals; i++) {
 					mask += '0';
@@ -7028,7 +7134,9 @@ m.factory('PreFormatters', [function(){
 	};
 }]);
 
-},{"string-mask":8}],28:[function(require,module,exports){
+},{"string-mask":8}],31:[function(require,module,exports){
+'use strict';
+
 module.exports = function maskFactory(maskDefinition) {
 	return function MaskDirective() {
 		return {
@@ -7075,11 +7183,13 @@ module.exports = function maskFactory(maskDefinition) {
 	};
 };
 
-},{}],29:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
+'use strict';
+
 module.exports = {
 	maxNumber: function(ctrl, value, limit) {
 		var max = parseFloat(limit, 10);
-		return ctrl.$isEmpty(value) || isNaN(max)|| value <= max;
+		return ctrl.$isEmpty(value) || isNaN(max) || value <= max;
 	},
 	minNumber: function(ctrl, value, limit) {
 		var min = parseFloat(limit, 10);
@@ -7087,7 +7197,9 @@ module.exports = {
 	}
 };
 
-},{}],30:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
+'use strict';
+
 var StringMask = require('string-mask');
 var maskFactory = require('mask-factory');
 
@@ -7101,9 +7213,9 @@ module.exports = maskFactory({
 	format: function(cleanValue) {
 		var formattedValue;
 
-		if(cleanValue.length < 11){
+		if (cleanValue.length < 11) {
 			formattedValue = phoneMaskUS.apply(cleanValue) || '';
-		}else{
+		} else {
 			formattedValue = phoneMaskINTL.apply(cleanValue);
 		}
 
@@ -7116,7 +7228,9 @@ module.exports = maskFactory({
 	}
 });
 
-},{"mask-factory":28,"string-mask":8}],31:[function(require,module,exports){
+},{"mask-factory":31,"string-mask":8}],34:[function(require,module,exports){
+'use strict';
+
 var m = angular.module('ui.utils.masks.us', [
 	require('../helpers')
 ])
@@ -7124,7 +7238,7 @@ var m = angular.module('ui.utils.masks.us', [
 
 module.exports = m.name;
 
-},{"../helpers":27,"./phone/us-phone":30}],32:[function(require,module,exports){
+},{"../helpers":30,"./phone/us-phone":33}],35:[function(require,module,exports){
 /*! 
  * angular-loading-bar v0.8.0
  * https://chieffancypants.github.io/angular-loading-bar
@@ -7455,11 +7569,11 @@ angular.module('cfp.loadingBar', [])
   });       // wtf javascript. srsly
 })();       //
 
-},{}],33:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 require('./build/loading-bar');
 module.exports = 'angular-loading-bar';
 
-},{"./build/loading-bar":32}],34:[function(require,module,exports){
+},{"./build/loading-bar":35}],37:[function(require,module,exports){
 /**
  * @license AngularJS v1.5.3
  * (c) 2010-2016 Google, Inc. http://angularjs.org
@@ -8229,11 +8343,11 @@ angular.module('ngResource', ['ng']).
 
 })(window, window.angular);
 
-},{}],35:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 require('./angular-resource');
 module.exports = 'ngResource';
 
-},{"./angular-resource":34}],36:[function(require,module,exports){
+},{"./angular-resource":37}],39:[function(require,module,exports){
 /**
  * @license AngularJS v1.4.7
  * (c) 2010-2015 Google, Inc. http://angularjs.org
@@ -8918,11 +9032,11 @@ angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
 
 })(window, window.angular);
 
-},{}],37:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 require('./angular-sanitize');
 module.exports = 'ngSanitize';
 
-},{"./angular-sanitize":36}],38:[function(require,module,exports){
+},{"./angular-sanitize":39}],41:[function(require,module,exports){
 (function (window, angular, undefined) {
   'use strict';
 
@@ -9471,7 +9585,7 @@ module.exports = 'ngSanitize';
 
 }(window, angular));
 
-},{}],39:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /*  angular-summernote v0.8.1 | (c) 2016 JeongHoon Byun | MIT license */
 /* global angular */
 angular.module('summernote', [])
@@ -9680,7 +9794,7 @@ angular.module('summernote', [])
     };
   }]);
 
-},{}],40:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /*!
  * angular-translate - v2.11.0 - 2016-03-20
  * 
@@ -13086,11 +13200,11 @@ return 'pascalprecht.translate';
 
 }));
 
-},{}],41:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 require('./ui-bootstrap-tpls');
 module.exports = 'ui.bootstrap';
 
-},{"./ui-bootstrap-tpls":42}],42:[function(require,module,exports){
+},{"./ui-bootstrap-tpls":45}],45:[function(require,module,exports){
 /*
  * angular-ui-bootstrap
  * http://angular-ui.github.io/bootstrap/
@@ -21594,7 +21708,7 @@ angular.module("template/typeahead/typeahead-popup.html", []).run(["$templateCac
     "");
 }]);
 !angular.$$csp() && angular.element(document).find('head').prepend('<style type="text/css">.ng-animate.item:not(.left):not(.right){-webkit-transition:0s ease-in-out left;transition:0s ease-in-out left}</style>');
-},{}],43:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 /**
  * State-based routing for AngularJS
  * @version v0.2.18
@@ -26134,7 +26248,7 @@ angular.module('ui.router.state')
   .filter('isState', $IsStateFilter)
   .filter('includedByState', $IncludedByStateFilter);
 })(window, window.angular);
-},{}],44:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 /**
  * @license AngularJS v1.4.9
  * (c) 2010-2015 Google, Inc. http://angularjs.org
@@ -55792,11 +55906,11 @@ $provide.value("$locale", {
 })(window, document);
 
 !window.angular.$$csp().noInlineStyle && window.angular.element(document.head).prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>');
-},{}],45:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 require('./angular');
 module.exports = angular;
 
-},{"./angular":44}],46:[function(require,module,exports){
+},{"./angular":47}],49:[function(require,module,exports){
 /*!
 	Autosize 3.0.15
 	license: MIT
@@ -56051,7 +56165,7 @@ module.exports = angular;
 
 	module.exports = autosize;
 });
-},{}],47:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 /*! version : 4.17.37
  =========================================================
  bootstrap-datetimejs
@@ -58605,7 +58719,7 @@ module.exports = angular;
     };
 }));
 
-},{"jquery":51,"moment":56}],48:[function(require,module,exports){
+},{"jquery":54,"moment":59}],51:[function(require,module,exports){
 /*
 * Project: Bootstrap Notify = v3.1.3
 * Description: Turns standard Bootstrap alerts into "Growl-like" notifications.
@@ -58960,7 +59074,7 @@ module.exports = angular;
 
 }));
 
-},{"jquery":51}],49:[function(require,module,exports){
+},{"jquery":54}],52:[function(require,module,exports){
 /*
  * jquery.flot.tooltip
  * 
@@ -59566,7 +59680,7 @@ module.exports = angular;
 
 })(jQuery);
 
-},{}],50:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 /* Javascript plotting library for jQuery, version 0.8 alpha.
 
 Copyright (c) 2007-2012 IOLA and Ole Laursen.
@@ -62280,7 +62394,7 @@ Licensed under the MIT license.
 
 })(jQuery);
 
-},{}],51:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -71492,7 +71606,7 @@ return jQuery;
 
 }));
 
-},{}],52:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 /*! lightgallery - v1.2.15 - 2016-03-10
 * http://sachinchoolur.github.io/lightGallery/
 * Copyright (c) 2016 Sachin N; Licensed Apache 2.0 */
@@ -72800,7 +72914,7 @@ return jQuery;
 
 })(jQuery, window, document);
 
-},{}],53:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -85155,7 +85269,7 @@ return jQuery;
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],54:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 /*
 == malihu jquery custom scrollbar plugin == 
 Version: 3.1.3 
@@ -87581,7 +87695,7 @@ and dependencies (minified).
 	});
 
 }))}));
-},{"jquery-mousewheel":55}],55:[function(require,module,exports){
+},{"jquery-mousewheel":58}],58:[function(require,module,exports){
 /*!
  * jQuery Mousewheel 3.1.13
  *
@@ -87804,7 +87918,7 @@ and dependencies (minified).
 
 }));
 
-},{}],56:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 (function (global){
 //! moment.js
 //! version : 2.8.4
@@ -90744,7 +90858,7706 @@ and dependencies (minified).
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],57:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
+/**!
+ * AngularJS file upload/drop directive and service with progress and abort
+ * FileAPI Flash shim for old browsers not supporting FormData
+ * @author  Danial  <danial.farid@gmail.com>
+ * @version 6.0.3
+ */
+
+(function () {
+  /** @namespace FileAPI.noContentTimeout */
+
+  function patchXHR(fnName, newFn) {
+    window.XMLHttpRequest.prototype[fnName] = newFn(window.XMLHttpRequest.prototype[fnName]);
+  }
+
+  function redefineProp(xhr, prop, fn) {
+    try {
+      Object.defineProperty(xhr, prop, {get: fn});
+    } catch (e) {/*ignore*/
+    }
+  }
+
+  if (!window.FileAPI) {
+    window.FileAPI = {};
+  }
+
+  FileAPI.shouldLoad = (window.XMLHttpRequest && !window.FormData) || FileAPI.forceLoad;
+  if (FileAPI.shouldLoad) {
+    var initializeUploadListener = function (xhr) {
+      if (!xhr.__listeners) {
+        if (!xhr.upload) xhr.upload = {};
+        xhr.__listeners = [];
+        var origAddEventListener = xhr.upload.addEventListener;
+        xhr.upload.addEventListener = function (t, fn) {
+          xhr.__listeners[t] = fn;
+          if (origAddEventListener) origAddEventListener.apply(this, arguments);
+        };
+      }
+    };
+
+    patchXHR('open', function (orig) {
+      return function (m, url, b) {
+        initializeUploadListener(this);
+        this.__url = url;
+        try {
+          orig.apply(this, [m, url, b]);
+        } catch (e) {
+          if (e.message.indexOf('Access is denied') > -1) {
+            this.__origError = e;
+            orig.apply(this, [m, '_fix_for_ie_crossdomain__', b]);
+          }
+        }
+      };
+    });
+
+    patchXHR('getResponseHeader', function (orig) {
+      return function (h) {
+        return this.__fileApiXHR && this.__fileApiXHR.getResponseHeader ? this.__fileApiXHR.getResponseHeader(h) : (orig == null ? null : orig.apply(this, [h]));
+      };
+    });
+
+    patchXHR('getAllResponseHeaders', function (orig) {
+      return function () {
+        return this.__fileApiXHR && this.__fileApiXHR.getAllResponseHeaders ? this.__fileApiXHR.getAllResponseHeaders() : (orig == null ? null : orig.apply(this));
+      };
+    });
+
+    patchXHR('abort', function (orig) {
+      return function () {
+        return this.__fileApiXHR && this.__fileApiXHR.abort ? this.__fileApiXHR.abort() : (orig == null ? null : orig.apply(this));
+      };
+    });
+
+    patchXHR('setRequestHeader', function (orig) {
+      return function (header, value) {
+        if (header === '__setXHR_') {
+          initializeUploadListener(this);
+          var val = value(this);
+          // fix for angular < 1.2.0
+          if (val instanceof Function) {
+            val(this);
+          }
+        } else {
+          this.__requestHeaders = this.__requestHeaders || {};
+          this.__requestHeaders[header] = value;
+          orig.apply(this, arguments);
+        }
+      };
+    });
+
+    patchXHR('send', function (orig) {
+      return function () {
+        var xhr = this;
+        if (arguments[0] && arguments[0].__isFileAPIShim) {
+          var formData = arguments[0];
+          var config = {
+            url: xhr.__url,
+            jsonp: false, //removes the callback form param
+            cache: true, //removes the ?fileapiXXX in the url
+            complete: function (err, fileApiXHR) {
+              xhr.__completed = true;
+              if (!err && xhr.__listeners.load)
+                xhr.__listeners.load({
+                  type: 'load',
+                  loaded: xhr.__loaded,
+                  total: xhr.__total,
+                  target: xhr,
+                  lengthComputable: true
+                });
+              if (!err && xhr.__listeners.loadend)
+                xhr.__listeners.loadend({
+                  type: 'loadend',
+                  loaded: xhr.__loaded,
+                  total: xhr.__total,
+                  target: xhr,
+                  lengthComputable: true
+                });
+              if (err === 'abort' && xhr.__listeners.abort)
+                xhr.__listeners.abort({
+                  type: 'abort',
+                  loaded: xhr.__loaded,
+                  total: xhr.__total,
+                  target: xhr,
+                  lengthComputable: true
+                });
+              if (fileApiXHR.status !== undefined) redefineProp(xhr, 'status', function () {
+                return (fileApiXHR.status === 0 && err && err !== 'abort') ? 500 : fileApiXHR.status;
+              });
+              if (fileApiXHR.statusText !== undefined) redefineProp(xhr, 'statusText', function () {
+                return fileApiXHR.statusText;
+              });
+              redefineProp(xhr, 'readyState', function () {
+                return 4;
+              });
+              if (fileApiXHR.response !== undefined) redefineProp(xhr, 'response', function () {
+                return fileApiXHR.response;
+              });
+              var resp = fileApiXHR.responseText || (err && fileApiXHR.status === 0 && err !== 'abort' ? err : undefined);
+              redefineProp(xhr, 'responseText', function () {
+                return resp;
+              });
+              redefineProp(xhr, 'response', function () {
+                return resp;
+              });
+              if (err) redefineProp(xhr, 'err', function () {
+                return err;
+              });
+              xhr.__fileApiXHR = fileApiXHR;
+              if (xhr.onreadystatechange) xhr.onreadystatechange();
+              if (xhr.onload) xhr.onload();
+            },
+            progress: function (e) {
+              e.target = xhr;
+              if (xhr.__listeners.progress) xhr.__listeners.progress(e);
+              xhr.__total = e.total;
+              xhr.__loaded = e.loaded;
+              if (e.total === e.loaded) {
+                // fix flash issue that doesn't call complete if there is no response text from the server
+                var _this = this;
+                setTimeout(function () {
+                  if (!xhr.__completed) {
+                    xhr.getAllResponseHeaders = function () {
+                    };
+                    _this.complete(null, {status: 204, statusText: 'No Content'});
+                  }
+                }, FileAPI.noContentTimeout || 10000);
+              }
+            },
+            headers: xhr.__requestHeaders
+          };
+          config.data = {};
+          config.files = {};
+          for (var i = 0; i < formData.data.length; i++) {
+            var item = formData.data[i];
+            if (item.val != null && item.val.name != null && item.val.size != null && item.val.type != null) {
+              config.files[item.key] = item.val;
+            } else {
+              config.data[item.key] = item.val;
+            }
+          }
+
+          setTimeout(function () {
+            if (!FileAPI.hasFlash) {
+              throw 'Adode Flash Player need to be installed. To check ahead use "FileAPI.hasFlash"';
+            }
+            xhr.__fileApiXHR = FileAPI.upload(config);
+          }, 1);
+        } else {
+          if (this.__origError) {
+            throw this.__origError;
+          }
+          orig.apply(xhr, arguments);
+        }
+      };
+    });
+    window.XMLHttpRequest.__isFileAPIShim = true;
+    window.FormData = FormData = function () {
+      return {
+        append: function (key, val, name) {
+          if (val.__isFileAPIBlobShim) {
+            val = val.data[0];
+          }
+          this.data.push({
+            key: key,
+            val: val,
+            name: name
+          });
+        },
+        data: [],
+        __isFileAPIShim: true
+      };
+    };
+
+    window.Blob = Blob = function (b) {
+      return {
+        data: b,
+        __isFileAPIBlobShim: true
+      };
+    };
+  }
+
+})();
+
+(function () {
+  /** @namespace FileAPI.forceLoad */
+  /** @namespace window.FileAPI.jsUrl */
+  /** @namespace window.FileAPI.jsPath */
+
+  function isInputTypeFile(elem) {
+    return elem[0].tagName.toLowerCase() === 'input' && elem.attr('type') && elem.attr('type').toLowerCase() === 'file';
+  }
+
+  function hasFlash() {
+    try {
+      var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+      if (fo) return true;
+    } catch (e) {
+      if (navigator.mimeTypes['application/x-shockwave-flash'] !== undefined) return true;
+    }
+    return false;
+  }
+
+  function getOffset(obj) {
+    var left = 0, top = 0;
+
+    if (window.jQuery) {
+      return jQuery(obj).offset();
+    }
+
+    if (obj.offsetParent) {
+      do {
+        left += (obj.offsetLeft - obj.scrollLeft);
+        top += (obj.offsetTop - obj.scrollTop);
+        obj = obj.offsetParent;
+      } while (obj);
+    }
+    return {
+      left: left,
+      top: top
+    };
+  }
+
+  if (FileAPI.shouldLoad) {
+
+    //load FileAPI
+    if (FileAPI.forceLoad) {
+      FileAPI.html5 = false;
+    }
+
+    if (!FileAPI.upload) {
+      var jsUrl, basePath, script = document.createElement('script'), allScripts = document.getElementsByTagName('script'), i, index, src;
+      if (window.FileAPI.jsUrl) {
+        jsUrl = window.FileAPI.jsUrl;
+      } else if (window.FileAPI.jsPath) {
+        basePath = window.FileAPI.jsPath;
+      } else {
+        for (i = 0; i < allScripts.length; i++) {
+          src = allScripts[i].src;
+          index = src.search(/\/ng\-file\-upload[\-a-zA-z0-9\.]*\.js/);
+          if (index > -1) {
+            basePath = src.substring(0, index + 1);
+            break;
+          }
+        }
+      }
+
+      if (FileAPI.staticPath == null) FileAPI.staticPath = basePath;
+      script.setAttribute('src', jsUrl || basePath + 'FileAPI.min.js');
+      document.getElementsByTagName('head')[0].appendChild(script);
+
+      FileAPI.hasFlash = hasFlash();
+    }
+
+    FileAPI.ngfFixIE = function (elem, createFileElemFn, bindAttr, changeFn) {
+      if (!hasFlash()) {
+        throw 'Adode Flash Player need to be installed. To check ahead use "FileAPI.hasFlash"';
+      }
+      var makeFlashInput = function () {
+        if (elem.attr('disabled')) {
+          elem.$$ngfRefElem.removeClass('js-fileapi-wrapper');
+        } else {
+          var fileElem = elem.$$ngfRefElem;
+          if (!fileElem) {
+            fileElem = elem.$$ngfRefElem = createFileElemFn();
+            fileElem.addClass('js-fileapi-wrapper');
+            if (!isInputTypeFile(elem)) {
+//						if (fileElem.parent().css('position') === '' || fileElem.parent().css('position') === 'static') {
+//							fileElem.parent().css('position', 'relative');
+//						}
+//						elem.parent()[0].insertBefore(fileElem[0], elem[0]);
+//						elem.css('overflow', 'hidden');
+            }
+            setTimeout(function () {
+              fileElem.bind('mouseenter', makeFlashInput);
+            }, 10);
+            fileElem.bind('change', function (evt) {
+              fileApiChangeFn.apply(this, [evt]);
+              changeFn.apply(this, [evt]);
+//						alert('change' +  evt);
+            });
+          } else {
+            bindAttr(elem.$$ngfRefElem);
+          }
+          if (!isInputTypeFile(elem)) {
+            fileElem.css('position', 'absolute')
+              .css('top', getOffset(elem[0]).top + 'px').css('left', getOffset(elem[0]).left + 'px')
+              .css('width', elem[0].offsetWidth + 'px').css('height', elem[0].offsetHeight + 'px')
+              .css('filter', 'alpha(opacity=0)').css('display', elem.css('display'))
+              .css('overflow', 'hidden').css('z-index', '900000')
+              .css('visibility', 'visible');
+          }
+        }
+      };
+
+      elem.bind('mouseenter', makeFlashInput);
+
+      var fileApiChangeFn = function (evt) {
+        var files = FileAPI.getFiles(evt);
+        //just a double check for #233
+        for (var i = 0; i < files.length; i++) {
+          if (files[i].size === undefined) files[i].size = 0;
+          if (files[i].name === undefined) files[i].name = 'file';
+          if (files[i].type === undefined) files[i].type = 'undefined';
+        }
+        if (!evt.target) {
+          evt.target = {};
+        }
+        evt.target.files = files;
+        // if evt.target.files is not writable use helper field
+        if (evt.target.files !== files) {
+          evt.__files_ = files;
+        }
+        (evt.__files_ || evt.target.files).item = function (i) {
+          return (evt.__files_ || evt.target.files)[i] || null;
+        };
+      };
+    };
+
+    FileAPI.disableFileInput = function (elem, disable) {
+      if (disable) {
+        elem.removeClass('js-fileapi-wrapper');
+      } else {
+        elem.addClass('js-fileapi-wrapper');
+      }
+    };
+  }
+})();
+
+if (!window.FileReader) {
+  window.FileReader = function () {
+    var _this = this, loadStarted = false;
+    this.listeners = {};
+    this.addEventListener = function (type, fn) {
+      _this.listeners[type] = _this.listeners[type] || [];
+      _this.listeners[type].push(fn);
+    };
+    this.removeEventListener = function (type, fn) {
+      if (_this.listeners[type]) _this.listeners[type].splice(_this.listeners[type].indexOf(fn), 1);
+    };
+    this.dispatchEvent = function (evt) {
+      var list = _this.listeners[evt.type];
+      if (list) {
+        for (var i = 0; i < list.length; i++) {
+          list[i].call(_this, evt);
+        }
+      }
+    };
+    this.onabort = this.onerror = this.onload = this.onloadstart = this.onloadend = this.onprogress = null;
+
+    var constructEvent = function (type, evt) {
+      var e = {type: type, target: _this, loaded: evt.loaded, total: evt.total, error: evt.error};
+      if (evt.result != null) e.target.result = evt.result;
+      return e;
+    };
+    var listener = function (evt) {
+      if (!loadStarted) {
+        loadStarted = true;
+        if (_this.onloadstart) _this.onloadstart(constructEvent('loadstart', evt));
+      }
+      var e;
+      if (evt.type === 'load') {
+        if (_this.onloadend) _this.onloadend(constructEvent('loadend', evt));
+        e = constructEvent('load', evt);
+        if (_this.onload) _this.onload(e);
+        _this.dispatchEvent(e);
+      } else if (evt.type === 'progress') {
+        e = constructEvent('progress', evt);
+        if (_this.onprogress) _this.onprogress(e);
+        _this.dispatchEvent(e);
+      } else {
+        e = constructEvent('error', evt);
+        if (_this.onerror) _this.onerror(e);
+        _this.dispatchEvent(e);
+      }
+    };
+    this.readAsArrayBuffer = function (file) {
+      FileAPI.readAsBinaryString(file, listener);
+    };
+    this.readAsBinaryString = function (file) {
+      FileAPI.readAsBinaryString(file, listener);
+    };
+    this.readAsDataURL = function (file) {
+      FileAPI.readAsDataURL(file, listener);
+    };
+    this.readAsText = function (file) {
+      FileAPI.readAsText(file, listener);
+    };
+  };
+}
+
+/**!
+ * AngularJS file upload/drop directive and service with progress and abort
+ * @author  Danial  <danial.farid@gmail.com>
+ * @version 6.0.3
+ */
+
+if (window.XMLHttpRequest && !(window.FileAPI && FileAPI.shouldLoad)) {
+  window.XMLHttpRequest.prototype.setRequestHeader = (function (orig) {
+    return function (header, value) {
+      if (header === '__setXHR_') {
+        var val = value(this);
+        // fix for angular < 1.2.0
+        if (val instanceof Function) {
+          val(this);
+        }
+      } else {
+        orig.apply(this, arguments);
+      }
+    };
+  })(window.XMLHttpRequest.prototype.setRequestHeader);
+}
+
+var ngFileUpload = angular.module('ngFileUpload', []);
+
+ngFileUpload.version = '6.0.3';
+ngFileUpload.defaults = {};
+
+ngFileUpload.service('Upload', ['$http', '$q', '$timeout', function ($http, $q, $timeout) {
+  function sendHttp(config) {
+    config.method = config.method || 'POST';
+    config.headers = config.headers || {};
+
+    var deferred = $q.defer();
+    var promise = deferred.promise;
+
+    config.headers.__setXHR_ = function () {
+      return function (xhr) {
+        if (!xhr) return;
+        config.__XHR = xhr;
+        if (config.xhrFn) config.xhrFn(xhr);
+        xhr.upload.addEventListener('progress', function (e) {
+          e.config = config;
+          if (deferred.notify) {
+            deferred.notify(e);
+          } else if (promise.progressFunc) {
+            $timeout(function () {
+              promise.progressFunc(e);
+            });
+          }
+        }, false);
+        //fix for firefox not firing upload progress end, also IE8-9
+        xhr.upload.addEventListener('load', function (e) {
+          if (e.lengthComputable) {
+            e.config = config;
+            if (deferred.notify) {
+              deferred.notify(e);
+            } else if (promise.progressFunc) {
+              $timeout(function () {
+                promise.progressFunc(e);
+              });
+            }
+          }
+        }, false);
+      };
+    };
+
+    $http(config).then(function (r) {
+      deferred.resolve(r);
+    }, function (e) {
+      deferred.reject(e);
+    }, function (n) {
+      deferred.notify(n);
+    });
+
+    promise.success = function (fn) {
+      promise.then(function (response) {
+        fn(response.data, response.status, response.headers, config);
+      });
+      return promise;
+    };
+
+    promise.error = function (fn) {
+      promise.then(null, function (response) {
+        fn(response.data, response.status, response.headers, config);
+      });
+      return promise;
+    };
+
+    promise.progress = function (fn) {
+      promise.progressFunc = fn;
+      promise.then(null, null, function (update) {
+        fn(update);
+      });
+      return promise;
+    };
+    promise.abort = function () {
+      if (config.__XHR) {
+        $timeout(function () {
+          config.__XHR.abort();
+        });
+      }
+      return promise;
+    };
+    promise.xhr = function (fn) {
+      config.xhrFn = (function (origXhrFn) {
+        return function () {
+          if (origXhrFn) origXhrFn.apply(promise, arguments);
+          fn.apply(promise, arguments);
+        };
+      })(config.xhrFn);
+      return promise;
+    };
+
+    return promise;
+  }
+
+  this.upload = function (config) {
+    function addFieldToFormData(formData, val, key) {
+      if (val !== undefined) {
+        if (angular.isDate(val)) {
+          val = val.toISOString();
+        }
+        if (angular.isString(val)) {
+          formData.append(key, val);
+        } else if (config.sendFieldsAs === 'form') {
+          if (angular.isObject(val)) {
+            for (var k in val) {
+              if (val.hasOwnProperty(k)) {
+                addFieldToFormData(formData, val[k], key + '[' + k + ']');
+              }
+            }
+          } else {
+            formData.append(key, val);
+          }
+        } else {
+          val = angular.isString(val) ? val : JSON.stringify(val);
+          if (config.sendFieldsAs === 'json-blob') {
+            formData.append(key, new Blob([val], {type: 'application/json'}));
+          } else {
+            formData.append(key, val);
+          }
+        }
+      }
+    }
+
+    config.headers = config.headers || {};
+    config.headers['Content-Type'] = undefined;
+    config.transformRequest = config.transformRequest ?
+      (angular.isArray(config.transformRequest) ?
+        config.transformRequest : [config.transformRequest]) : [];
+    config.transformRequest.push(function (data) {
+      var formData = new FormData();
+      var allFields = {};
+      var key;
+      for (key in config.fields) {
+        if (config.fields.hasOwnProperty(key)) {
+          allFields[key] = config.fields[key];
+        }
+      }
+      if (data) allFields.data = data;
+      for (key in allFields) {
+        if (allFields.hasOwnProperty(key)) {
+          var val = allFields[key];
+          if (config.formDataAppender) {
+            config.formDataAppender(formData, key, val);
+          } else {
+            addFieldToFormData(formData, val, key);
+          }
+        }
+      }
+
+      if (config.file != null) {
+        var fileFormName = config.fileFormDataName || 'file';
+
+        if (angular.isArray(config.file)) {
+          var isFileFormNameString = angular.isString(fileFormName);
+          for (var i = 0; i < config.file.length; i++) {
+            formData.append(isFileFormNameString ? fileFormName : fileFormName[i], config.file[i],
+              (config.fileName && config.fileName[i]) || config.file[i].name);
+          }
+        } else {
+          formData.append(fileFormName, config.file, config.fileName || config.file.name);
+        }
+      }
+      return formData;
+    });
+
+    return sendHttp(config);
+  };
+
+  this.http = function (config) {
+    config.transformRequest = config.transformRequest || function (data) {
+        if ((window.ArrayBuffer && data instanceof window.ArrayBuffer) || data instanceof Blob) {
+          return data;
+        }
+        return $http.defaults.transformRequest[0](arguments);
+      };
+    return sendHttp(config);
+  };
+
+  this.dataUrl = function (file, callback, disallowObjectUrl) {
+    if (window.FileReader && file &&
+      (!window.FileAPI || navigator.userAgent.indexOf('MSIE 8') === -1 || file.size < 20000) &&
+      (!window.FileAPI || navigator.userAgent.indexOf('MSIE 9') === -1 || file.size < 4000000)) {
+      $timeout(function () {
+        //prefer URL.createObjectURL for handling refrences to files of all sizes
+        //since it doesn´t build a large string in memory
+        var URL = window.URL || window.webkitURL;
+        if (URL && URL.createObjectURL && !disallowObjectUrl) {
+          callback(URL.createObjectURL(file));
+        } else {
+          var fileReader = new FileReader();
+          fileReader.readAsDataURL(file);
+          fileReader.onload = function (e) {
+            $timeout(function () {
+              callback(e.target.result);
+            });
+          };
+        }
+      });
+    } else {
+      callback(null);
+    }
+  };
+
+  this.setDefaults = function(defaults) {
+    ngFileUpload.defaults = defaults || {};
+  };
+}
+
+]);
+
+(function () {
+  ngFileUpload.getAttrWithDefaults = function(attr, name) {
+    return attr[name] != null ? attr[name] :
+      (ngFileUpload.defaults[name] == null ?
+        ngFileUpload.defaults[name] : ngFileUpload.defaults[name].toString());
+  };
+
+  var getAttr = ngFileUpload.getAttrWithDefaults;
+
+  ngFileUpload.directive('ngfSelect', ['$parse', '$timeout', '$compile',
+    function ($parse, $timeout, $compile) {
+      return {
+        restrict: 'AEC',
+        require: '?ngModel',
+        link: function (scope, elem, attr, ngModel) {
+          linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile);
+        }
+      };
+    }]);
+
+  function linkFileSelect(scope, elem, attr, ngModel, $parse, $timeout, $compile) {
+    /** @namespace attr.ngfSelect */
+    /** @namespace attr.ngfChange */
+    /** @namespace attr.ngModel */
+    /** @namespace attr.ngModelRejected */
+    /** @namespace attr.ngfModel */
+    /** @namespace attr.ngfMultiple */
+    /** @namespace attr.ngfCapture */
+    /** @namespace attr.ngfAccept */
+    /** @namespace attr.ngfMaxSize */
+    /** @namespace attr.ngfMinSize */
+    /** @namespace attr.ngfResetOnClick */
+    /** @namespace attr.ngfResetModelOnClick */
+    /** @namespace attr.ngfKeep */
+    /** @namespace attr.ngfKeepDistinct */
+
+    if (elem.attr('__ngf_gen__')) {
+      return;
+    }
+
+    scope.$on('$destroy', function () {
+      if (elem.$$ngfRefElem) elem.$$ngfRefElem.remove();
+    });
+
+    var disabled = false;
+    if (getAttr(attr, 'ngfSelect').search(/\W+$files\W+/) === -1) {
+      scope.$watch(getAttr(attr, 'ngfSelect'), function (val) {
+        disabled = val === false;
+      });
+    }
+    function isInputTypeFile() {
+      return elem[0].tagName.toLowerCase() === 'input' && attr.type && attr.type.toLowerCase() === 'file';
+    }
+
+    var isUpdating = false;
+
+    function changeFn(evt) {
+      if (!isUpdating) {
+        isUpdating = true;
+        try {
+          var fileList = evt.__files_ || (evt.target && evt.target.files);
+          var files = [], rejFiles = [];
+
+          for (var i = 0; i < fileList.length; i++) {
+            var file = fileList.item(i);
+            if (validate(scope, $parse, attr, file, evt)) {
+              files.push(file);
+            } else {
+              rejFiles.push(file);
+            }
+          }
+          updateModel($parse, $timeout, scope, ngModel, attr,
+            getAttr(attr, 'ngfChange') || getAttr(attr, 'ngfSelect'), files, rejFiles, evt);
+          if (files.length === 0) evt.target.value = files;
+//                if (evt.target && evt.target.getAttribute('__ngf_gen__')) {
+//                    angular.element(evt.target).remove();
+//                }
+        } finally {
+          isUpdating = false;
+        }
+      }
+    }
+
+    function bindAttrToFileInput(fileElem) {
+      if (getAttr(attr, 'ngfMultiple')) fileElem.attr('multiple', $parse(getAttr(attr, 'ngfMultiple'))(scope));
+      if (getAttr(attr, 'ngfCapture')) fileElem.attr('capture', $parse(getAttr(attr, 'ngfCapture'))(scope));
+      if (getAttr(attr, 'accept')) fileElem.attr('accept', getAttr(attr, 'accept'));
+      for (var i = 0; i < elem[0].attributes.length; i++) {
+        var attribute = elem[0].attributes[i];
+        if ((isInputTypeFile() && attribute.name !== 'type') ||
+          (attribute.name !== 'type' && attribute.name !== 'class' &&
+          attribute.name !== 'id' && attribute.name !== 'style')) {
+          if (attribute.value == null || attribute.value === '') {
+            if (attribute.name === 'required') attribute.value = 'required';
+            if (attribute.name === 'multiple') attribute.value = 'multiple';
+          }
+          fileElem.attr(attribute.name, attribute.value);
+        }
+      }
+    }
+
+    function createFileInput(evt, resetOnClick) {
+      if (!resetOnClick && (evt || isInputTypeFile())) return elem.$$ngfRefElem || elem;
+      if (elem.$$ngfProgramClick) return elem;
+
+      var fileElem = angular.element('<input type="file">');
+      bindAttrToFileInput(fileElem);
+
+      if (isInputTypeFile()) {
+        elem.replaceWith(fileElem);
+        elem = fileElem;
+        fileElem.attr('__ngf_gen__', true);
+        $compile(elem)(scope);
+      } else {
+        fileElem.css('visibility', 'hidden').css('position', 'absolute').css('overflow', 'hidden')
+          .css('width', '0px').css('height', '0px').css('border', 'none')
+          .css('margin', '0px').css('padding', '0px').attr('tabindex', '-1');
+        if (elem.$$ngfRefElem) {
+          elem.$$ngfRefElem.remove();
+        }
+        elem.$$ngfRefElem = fileElem;
+        document.body.appendChild(fileElem[0]);
+      }
+
+      return fileElem;
+    }
+
+    function resetModel(evt) {
+      updateModel($parse, $timeout, scope, ngModel, attr,
+        getAttr(attr, 'ngfChange') || getAttr(attr, 'ngfSelect'), [], [], evt, true);
+    }
+
+    var initialTouchStartY = 0;
+    function clickHandler(evt) {
+      if (elem.attr('disabled') || disabled) return false;
+
+      if (evt != null) {
+        var touches = evt.changedTouches || (evt.originalEvent && evt.originalEvent.changedTouches);
+        if (evt.type === 'touchstart') {
+          initialTouchStartY = touches ? touches[0].clientY : 0;
+          return true; // don't block event default
+        } else {
+          evt.stopPropagation();
+          evt.preventDefault();
+
+          // prevent scroll from triggering event
+          if (evt.type === 'touchend') {
+            var currentLocation = touches ? touches[0].clientY : 0;
+            if (Math.abs(currentLocation - initialTouchStartY) > 20) return false;
+          }
+        }
+      }
+
+      var resetOnClick = $parse(getAttr(attr, 'ngfResetOnClick'))(scope) !== false;
+      var fileElem = createFileInput(evt, resetOnClick);
+
+      function clickAndAssign(evt) {
+        if (evt && !elem.$$ngfProgramClick) {
+          elem.$$ngfProgramClick = true;
+          fileElem[0].click();
+          $timeout(function() {
+            delete elem.$$ngfProgramClick;
+          }, 500);
+        }
+        if ((isInputTypeFile() || !evt) && resetOnClick) {
+          elem.bind('click touchstart touchend', clickHandler);
+        }
+      }
+
+      if (fileElem) {
+        if (!evt || resetOnClick) fileElem.bind('change', changeFn);
+        if (evt && resetOnClick && $parse(getAttr(attr, 'ngfResetModelOnClick'))(scope) !== false) {
+          resetModel(evt);
+        }
+
+        // fix for android native browser < 4.4
+        if (shouldClickLater(navigator.userAgent)) {
+          setTimeout(function () {
+            clickAndAssign(evt);
+          }, 0);
+        } else {
+          clickAndAssign(evt);
+        }
+      }
+
+      return false;
+    }
+
+    if (window.FileAPI && window.FileAPI.ngfFixIE) {
+      window.FileAPI.ngfFixIE(elem, createFileInput, bindAttrToFileInput, changeFn);
+    } else {
+      clickHandler();
+      //if (!isInputTypeFile()) {
+      //  elem.bind('click touchend', clickHandler);
+      //}
+    }
+  }
+
+  function shouldClickLater(ua) {
+    // android below 4.4
+    var m = ua.match(/Android[^\d]*(\d+)\.(\d+)/);
+    if (m && m.length > 2) {
+      var v = ngFileUpload.defaults.androidFixMinorVersion || 4;
+      return parseInt(m[1]) < 4 || (parseInt(m[1]) === v && parseInt(m[2]) < v);
+    }
+
+    // safari on windows
+    return ua.indexOf('Chrome') === -1 && /.*Windows.*Safari.*/.test(ua);
+  }
+
+  ngFileUpload.validate = function (scope, $parse, attr, file, evt) {
+    if (file == null) {
+      return false;
+    }
+    function globStringToRegex(str) {
+      if (str.length > 2 && str[0] === '/' && str[str.length - 1] === '/') {
+        return str.substring(1, str.length - 1);
+      }
+      var split = str.split(','), result = '';
+      if (split.length > 1) {
+        for (var i = 0; i < split.length; i++) {
+          result += '(' + globStringToRegex(split[i]) + ')';
+          if (i < split.length - 1) {
+            result += '|';
+          }
+        }
+      } else {
+        if (str.indexOf('.') === 0) {
+          str = '*' + str;
+        }
+        result = '^' + str.replace(new RegExp('[.\\\\+*?\\[\\^\\]$(){}=!<>|:\\' + '-]', 'g'), '\\$&') + '$';
+        result = result.replace(/\\\*/g, '.*').replace(/\\\?/g, '.');
+      }
+      return result;
+    }
+
+    var accept = $parse(getAttr(attr, 'ngfAccept'))(scope, {$file: file, $event: evt});
+    var fileSizeMax = $parse(getAttr(attr, 'ngfMaxSize'))(scope, {$file: file, $event: evt}) || 9007199254740991;
+    var fileSizeMin = $parse(getAttr(attr, 'ngfMinSize'))(scope, {$file: file, $event: evt}) || -1;
+    if (accept != null && angular.isString(accept)) {
+      var regexp = new RegExp(globStringToRegex(accept), 'gi');
+      accept = (file.type != null && regexp.test(file.type.toLowerCase())) ||
+        (file.name != null && regexp.test(file.name.toLowerCase()));
+      if (!accept) {
+        file.$error = 'accept';
+        return false;
+      }
+    } else {
+      if (accept === false) {
+        file.$error = 'accept';
+        return false;
+      }
+    }
+    if (file.size == null) return true;
+    if (file.size > fileSizeMax) {
+      file.$error = 'maxSize';
+      return false;
+    }
+    if (file.size < fileSizeMin) {
+      file.$error = 'minSize';
+      return false;
+    }
+    return true;
+  };
+
+  ngFileUpload.updateModel = function ($parse, $timeout, scope, ngModel, attr, fileChange,
+                                       files, rejFiles, evt, noDelay) {
+    function update() {
+      var keep = $parse(getAttr(attr, 'ngfKeep'))(scope);
+      if (keep === true) {
+        var prevFiles = (ngModel.$modelValue || []).slice(0);
+        if (!files || !files.length) {
+          files = prevFiles;
+        } else if ($parse(getAttr(attr, 'ngfKeepDistinct'))(scope) === true) {
+          var len = prevFiles.length;
+          for (var i = 0; i < files.length; i++) {
+            for (var j = 0; j < len; j++) {
+              if (files[i].name === prevFiles[j].name) break;
+            }
+            if (j === len) {
+              prevFiles.push(files[i]);
+            }
+          }
+          files = prevFiles;
+        } else {
+          files = prevFiles.concat(files);
+        }
+      }
+      var file = files && files.length ? files[0] : null;
+      if (ngModel) {
+        var singleModel = !$parse(getAttr(attr, 'ngfMultiple'))(scope) && ! getAttr(attr, 'multiple') && !keep;
+        $parse(getAttr(attr, 'ngModel')).assign(scope, singleModel ? file : files);
+        $timeout(function () {
+          if (ngModel) {
+            ngModel.$setViewValue(singleModel ? file : (files != null && files.length === 0 ? null : files));
+          }
+        });
+      }
+      var ngfModel = getAttr(attr, 'ngfModel');
+      if (ngfModel) {
+        $parse(ngfModel).assign(scope, files);
+      }
+
+      if (getAttr(attr, 'ngModelRejected')) {
+        $parse(getAttr(attr, 'ngModelRejected')).assign(scope, rejFiles);
+      }
+      if (fileChange) {
+        $parse(fileChange)(scope, {
+          $files: files,
+          $file: file,
+          $rejectedFiles: rejFiles,
+          $event: evt
+        });
+      }
+    }
+
+    if (noDelay) {
+      update();
+    } else {
+      $timeout(function () {
+        update();
+      });
+    }
+  };
+
+  var validate = ngFileUpload.validate;
+  var updateModel = ngFileUpload.updateModel;
+
+})();
+
+(function () {
+  var validate = ngFileUpload.validate;
+  var updateModel = ngFileUpload.updateModel;
+  var getAttr = ngFileUpload.getAttrWithDefaults;
+
+  ngFileUpload.directive('ngfDrop', ['$parse', '$timeout', '$location', function ($parse, $timeout, $location) {
+    return {
+      restrict: 'AEC',
+      require: '?ngModel',
+      link: function (scope, elem, attr, ngModel) {
+        linkDrop(scope, elem, attr, ngModel, $parse, $timeout, $location);
+      }
+    };
+  }]);
+
+  ngFileUpload.directive('ngfNoFileDrop', function () {
+    return function (scope, elem) {
+      if (dropAvailable()) elem.css('display', 'none');
+    };
+  });
+
+  ngFileUpload.directive('ngfDropAvailable', ['$parse', '$timeout', function ($parse, $timeout) {
+    return function (scope, elem, attr) {
+      if (dropAvailable()) {
+        var fn = $parse(getAttr(attr, 'ngfDropAvailable'));
+        $timeout(function () {
+          fn(scope);
+          if (fn.assign) {
+            fn.assign(scope, true);
+          }
+        });
+      }
+    };
+  }]);
+
+  function linkDrop(scope, elem, attr, ngModel, $parse, $timeout, $location) {
+    var available = dropAvailable();
+    if (getAttr(attr, 'dropAvailable')) {
+      $timeout(function () {
+        if (scope[getAttr(attr, 'dropAvailable')]) {
+          scope[getAttr(attr, 'dropAvailable')].value = available;
+        } else {
+          scope[getAttr(attr, 'dropAvailable')] = available;
+        }
+      });
+    }
+    if (!available) {
+      if ($parse(getAttr(attr, 'ngfHideOnDropNotAvailable'))(scope) === true) {
+        elem.css('display', 'none');
+      }
+      return;
+    }
+
+    var disabled = false;
+    if (getAttr(attr, 'ngfDrop').search(/\W+$files\W+/) === -1) {
+      scope.$watch(getAttr(attr, 'ngfDrop'), function(val) {
+        disabled = val === false;
+      });
+    }
+
+    var leaveTimeout = null;
+    var stopPropagation = $parse(getAttr(attr, 'ngfStopPropagation'));
+    var dragOverDelay = 1;
+    var actualDragOverClass;
+
+    elem[0].addEventListener('dragover', function (evt) {
+      if (elem.attr('disabled') || disabled) return;
+      evt.preventDefault();
+      if (stopPropagation(scope)) evt.stopPropagation();
+      // handling dragover events from the Chrome download bar
+      if (navigator.userAgent.indexOf('Chrome') > -1) {
+        var b = evt.dataTransfer.effectAllowed;
+        evt.dataTransfer.dropEffect = ('move' === b || 'linkMove' === b) ? 'move' : 'copy';
+      }
+      $timeout.cancel(leaveTimeout);
+      if (!scope.actualDragOverClass) {
+        actualDragOverClass = calculateDragOverClass(scope, attr, evt);
+      }
+      elem.addClass(actualDragOverClass);
+    }, false);
+    elem[0].addEventListener('dragenter', function (evt) {
+      if (elem.attr('disabled') || disabled) return;
+      evt.preventDefault();
+      if (stopPropagation(scope)) evt.stopPropagation();
+    }, false);
+    elem[0].addEventListener('dragleave', function () {
+      if (elem.attr('disabled') || disabled) return;
+      leaveTimeout = $timeout(function () {
+        elem.removeClass(actualDragOverClass);
+        actualDragOverClass = null;
+      }, dragOverDelay || 1);
+    }, false);
+    elem[0].addEventListener('drop', function (evt) {
+      if (elem.attr('disabled') || disabled) return;
+      evt.preventDefault();
+      if (stopPropagation(scope)) evt.stopPropagation();
+      elem.removeClass(actualDragOverClass);
+      actualDragOverClass = null;
+      extractFiles(evt, function (files, rejFiles) {
+        updateModel($parse, $timeout, scope, ngModel, attr,
+          getAttr(attr, 'ngfChange') || getAttr(attr, 'ngfDrop'), files, rejFiles, evt);
+      }, $parse(getAttr(attr, 'ngfAllowDir'))(scope) !== false,
+        getAttr(attr, 'multiple') || $parse(getAttr(attr, 'ngfMultiple'))(scope));
+    }, false);
+    elem[0].addEventListener('paste', function (evt) {
+      if (elem.attr('disabled') || disabled) return;
+      evt.preventDefault();
+      if (stopPropagation(scope)) evt.stopPropagation();
+      extractFiles(evt, function (files, rejFiles) {
+        updateModel($parse, $timeout, scope, ngModel, attr,
+          getAttr(attr, 'ngfChange') || getAttr(attr, 'ngfDrop'), files, rejFiles, evt);
+      }, false, getAttr(attr, 'multiple') || $parse(getAttr(attr, 'ngfMultiple'))(scope));
+    }, false);
+
+    function calculateDragOverClass(scope, attr, evt) {
+      var accepted = true;
+      var items = evt.dataTransfer.items;
+      if (items != null) {
+        for (var i = 0; i < items.length && accepted; i++) {
+          accepted = accepted &&
+            (items[i].kind === 'file' || items[i].kind === '') &&
+            validate(scope, $parse, attr, items[i], evt);
+        }
+      }
+      var clazz = $parse(getAttr(attr, 'ngfDragOverClass'))(scope, {$event: evt});
+      if (clazz) {
+        if (clazz.delay) dragOverDelay = clazz.delay;
+        if (clazz.accept) clazz = accepted ? clazz.accept : clazz.reject;
+      }
+      return clazz || getAttr(attr, 'ngfDragOverClass') || 'dragover';
+    }
+
+    function extractFiles(evt, callback, allowDir, multiple) {
+      var files = [], rejFiles = [], processing = 0;
+
+      function addFile(file) {
+        if (validate(scope, $parse, attr, file, evt)) {
+          files.push(file);
+        } else {
+          rejFiles.push(file);
+        }
+      }
+
+      function traverseFileTree(files, entry, path) {
+        if (entry != null) {
+          if (entry.isDirectory) {
+            var filePath = (path || '') + entry.name;
+            addFile({name: entry.name, type: 'directory', path: filePath});
+            var dirReader = entry.createReader();
+            var entries = [];
+            processing++;
+            var readEntries = function () {
+              dirReader.readEntries(function (results) {
+                try {
+                  if (!results.length) {
+                    for (var i = 0; i < entries.length; i++) {
+                      traverseFileTree(files, entries[i], (path ? path : '') + entry.name + '/');
+                    }
+                    processing--;
+                  } else {
+                    entries = entries.concat(Array.prototype.slice.call(results || [], 0));
+                    readEntries();
+                  }
+                } catch (e) {
+                  processing--;
+                  console.error(e);
+                }
+              }, function () {
+                processing--;
+              });
+            };
+            readEntries();
+          } else {
+            processing++;
+            entry.file(function (file) {
+              try {
+                processing--;
+                file.path = (path ? path : '') + file.name;
+                addFile(file);
+              } catch (e) {
+                processing--;
+                console.error(e);
+              }
+            }, function () {
+              processing--;
+            });
+          }
+        }
+      }
+
+      if (evt.type === 'paste') {
+        var clipboard = evt.clipboardData || evt.originalEvent.clipboardData;
+        if (clipboard && clipboard.items) {
+          for (var k = 0; k < clipboard.items.length; k++) {
+            if (clipboard.items[k].type.indexOf('image') !== -1) {
+              addFile(clipboard.items[k].getAsFile());
+            }
+          }
+          callback(files, rejFiles);
+        }
+      } else {
+        var items = evt.dataTransfer.items;
+
+        if (items && items.length > 0 && $location.protocol() !== 'file') {
+          for (var i = 0; i < items.length; i++) {
+            if (items[i].webkitGetAsEntry && items[i].webkitGetAsEntry() && items[i].webkitGetAsEntry().isDirectory) {
+              var entry = items[i].webkitGetAsEntry();
+              if (entry.isDirectory && !allowDir) {
+                continue;
+              }
+              if (entry != null) {
+                traverseFileTree(files, entry);
+              }
+            } else {
+              var f = items[i].getAsFile();
+              if (f != null) addFile(f);
+            }
+            if (!multiple && files.length > 0) break;
+          }
+        } else {
+          var fileList = evt.dataTransfer.files;
+          if (fileList != null) {
+            for (var j = 0; j < fileList.length; j++) {
+              addFile(fileList.item(j));
+              if (!multiple && files.length > 0) {
+                break;
+              }
+            }
+          }
+        }
+        var delays = 0;
+        (function waitForProcess(delay) {
+          $timeout(function () {
+            if (!processing) {
+              if (!multiple && files.length > 1) {
+                i = 0;
+                while (files[i].type === 'directory') i++;
+                files = [files[i]];
+              }
+              callback(files, rejFiles);
+            } else {
+              if (delays++ * 10 < 20 * 1000) {
+                waitForProcess(10);
+              }
+            }
+          }, delay || 0);
+        })();
+      }
+    }
+  }
+
+  function dropAvailable() {
+    var div = document.createElement('div');
+    return ('draggable' in div) && ('ondrop' in div);
+  }
+
+})();
+
+(function () {
+
+  function fileToSrc(Upload, scope, $parse, attr, name, defaultName, callback) {
+      if (defaultName) {
+        callback($parse(defaultName)(scope));
+      }
+      scope.$watch(name, function (file) {
+        if (!angular.isString(file)) {
+          if (window.FileReader && ngFileUpload.validate(scope, $parse, attr, file, null)) {
+            Upload.dataUrl(file, function (url) {
+              if (callback) {
+                callback(url);
+              } else {
+                file.dataUrl = url || $parse(defaultName)(scope);
+              }
+            }, $parse(attr.ngfNoObjectUrl)(scope));
+          }
+        } else {
+          callback(file);
+        }
+      });
+  }
+
+  /** @namespace attr.ngfSrc */
+  /** @namespace attr.ngfDefaultSrc */
+  /** @namespace attr.ngfNoObjectUrl */
+  ngFileUpload.directive('ngfSrc', ['$parse', 'Upload', function ($parse, Upload) {
+    return {
+      restrict: 'AE',
+      link: function (scope, elem, attr) {
+        fileToSrc(Upload, scope, $parse, attr, attr.ngfSrc, attr.ngfDefaultSrc, function (url) {
+          elem.attr('src', url);
+        });
+      }
+    };
+  }]);
+
+  /** @namespace attr.ngfBackground */
+  /** @namespace attr.ngfDefaultBackground */
+  /** @namespace attr.ngfNoObjectUrl */
+  ngFileUpload.directive('ngfBackground', ['$parse', 'Upload', function ($parse, Upload) {
+    return {
+      restrict: 'AE',
+      link: function (scope, elem, attr) {
+        fileToSrc(Upload, scope, $parse, attr, attr.ngfBackground, attr.ngfDefaultBackground, function (url) {
+          elem.css('background-image', 'url(' + url + ')');
+        });
+      }
+    };
+  }]);
+
+  /** @namespace attr.ngfDataUrl */
+  /** @namespace attr.ngfDefaultDataUrl */
+  /** @namespace attr.ngfNoObjectUrl */
+  ngFileUpload.directive('ngfDataUrl', ['$parse', 'Upload', function ($parse, Upload) {
+    return {
+      restrict: 'AE',
+      link: function (scope, elem, attr) {
+
+        fileToSrc(Upload, scope, $parse, attr, attr.ngfDataUrl, attr.ngfDefaultDataUrl);
+      }
+    };
+  }]);
+})();
+
+},{}],61:[function(require,module,exports){
+/*!
+ * ngImgCropExtended v0.5.4
+ * https://github.com/CrackerakiUA/ngImgCropExtended/
+ *
+ * Copyright (c) 2016 undefined
+ * License: MIT
+ *
+ * Generated at Wednesday, May 25th, 2016, 9:43:27 PM
+ */
+(function() {
+var crop = angular.module('ngImgCrop', []);
+
+crop.factory('cropAreaCircle', ['cropArea', function(CropArea) {
+    var CropAreaCircle = function() {
+        CropArea.apply(this, arguments);
+
+        this._boxResizeBaseSize = 30;
+        this._boxResizeNormalRatio = 0.9;
+        this._boxResizeHoverRatio = 1.2;
+        this._iconMoveNormalRatio = 0.9;
+        this._iconMoveHoverRatio = 1.2;
+
+        this._boxResizeNormalSize = this._boxResizeBaseSize * this._boxResizeNormalRatio;
+        this._boxResizeHoverSize = this._boxResizeBaseSize * this._boxResizeHoverRatio;
+
+        this._posDragStartX = 0;
+        this._posDragStartY = 0;
+        this._posResizeStartX = 0;
+        this._posResizeStartY = 0;
+        this._posResizeStartSize = 0;
+
+        this._boxResizeIsHover = false;
+        this._areaIsHover = false;
+        this._boxResizeIsDragging = false;
+        this._areaIsDragging = false;
+    };
+
+    CropAreaCircle.prototype = new CropArea();
+
+    CropAreaCircle.prototype.getType = function() {
+        return 'circle';
+    }
+
+    CropAreaCircle.prototype._calcCirclePerimeterCoords = function(angleDegrees) {
+        var hSize = this._size.w / 2;
+        var angleRadians = angleDegrees * (Math.PI / 180),
+            circlePerimeterX = this.getCenterPoint().x + hSize * Math.cos(angleRadians),
+            circlePerimeterY = this.getCenterPoint().y + hSize * Math.sin(angleRadians);
+        return [circlePerimeterX, circlePerimeterY];
+    };
+
+    CropAreaCircle.prototype._calcResizeIconCenterCoords = function() {
+        return this._calcCirclePerimeterCoords(-45);
+    };
+
+    CropAreaCircle.prototype._isCoordWithinArea = function(coord) {
+        return Math.sqrt((coord[0] - this.getCenterPoint().x) * (coord[0] - this.getCenterPoint().x) + (coord[1] - this.getCenterPoint().y) * (coord[1] - this.getCenterPoint().y)) < this._size.w / 2;
+    };
+    CropAreaCircle.prototype._isCoordWithinBoxResize = function(coord) {
+        var resizeIconCenterCoords = this._calcResizeIconCenterCoords();
+        var hSize = this._boxResizeHoverSize / 2;
+        return (coord[0] > resizeIconCenterCoords[0] - hSize && coord[0] < resizeIconCenterCoords[0] + hSize &&
+            coord[1] > resizeIconCenterCoords[1] - hSize && coord[1] < resizeIconCenterCoords[1] + hSize);
+    };
+
+    CropAreaCircle.prototype._drawArea = function(ctx, centerCoords, size) {
+        ctx.arc(centerCoords.x, centerCoords.y, size.w / 2, 0, 2 * Math.PI);
+    };
+
+    CropAreaCircle.prototype.draw = function() {
+        CropArea.prototype.draw.apply(this, arguments);
+
+        // draw move icon
+        var center = this.getCenterPoint();
+        this._cropCanvas.drawIconMove([center.x, center.y], this._areaIsHover ? this._iconMoveHoverRatio : this._iconMoveNormalRatio);
+
+        // draw resize cubes
+        this._cropCanvas.drawIconResizeBoxNESW(this._calcResizeIconCenterCoords(), this._boxResizeBaseSize, this._boxResizeIsHover ? this._boxResizeHoverRatio : this._boxResizeNormalRatio);
+    };
+
+    CropAreaCircle.prototype.processMouseMove = function(mouseCurX, mouseCurY) {
+        var cursor = 'default';
+        var res = false;
+
+        this._boxResizeIsHover = false;
+        this._areaIsHover = false;
+
+        if (this._areaIsDragging) {
+            this.setCenterPointOnMove({
+                x: mouseCurX - this._posDragStartX,
+                y: mouseCurY - this._posDragStartY
+            });
+            this._areaIsHover = true;
+            cursor = 'move';
+            res = true;
+            this._events.trigger('area-move');
+        } else if (this._boxResizeIsDragging) {
+            cursor = 'nesw-resize';
+            var iFR, iFX, iFY;
+            iFX = mouseCurX - this._posResizeStartX;
+            iFY = this._posResizeStartY - mouseCurY;
+            if (iFX > iFY) {
+                iFR = this._posResizeStartSize.w + iFY * 2;
+            } else {
+                iFR = this._posResizeStartSize.w + iFX * 2;
+            }
+
+            var center = this.getCenterPoint(),
+                newNO = {},
+                newSE = {};
+
+            newNO.x = this.getCenterPoint().x - iFR * 0.5;
+            newSE.x = this.getCenterPoint().x + iFR * 0.5;
+
+            newNO.y = this.getCenterPoint().y - iFR * 0.5;
+            newSE.y = this.getCenterPoint().y + iFR * 0.5;
+
+            this.CircleOnMove(newNO, newSE);
+            this._boxResizeIsHover = true;
+            res = true;
+            this._events.trigger('area-resize');
+        } else if (this._isCoordWithinBoxResize([mouseCurX, mouseCurY])) {
+            cursor = 'nesw-resize';
+            this._areaIsHover = false;
+            this._boxResizeIsHover = true;
+            res = true;
+        } else if (this._isCoordWithinArea([mouseCurX, mouseCurY])) {
+            cursor = 'move';
+            this._areaIsHover = true;
+            res = true;
+        }
+
+        //this._dontDragOutside();
+        angular.element(this._ctx.canvas).css({
+            'cursor': cursor
+        });
+
+        return res;
+    };
+
+    CropAreaCircle.prototype.processMouseDown = function(mouseDownX, mouseDownY) {
+        if (this._isCoordWithinBoxResize([mouseDownX, mouseDownY])) {
+            this._areaIsDragging = false;
+            this._areaIsHover = false;
+            this._boxResizeIsDragging = true;
+            this._boxResizeIsHover = true;
+            this._posResizeStartX = mouseDownX;
+            this._posResizeStartY = mouseDownY;
+            this._posResizeStartSize = this._size;
+            this._events.trigger('area-resize-start');
+        } else if (this._isCoordWithinArea([mouseDownX, mouseDownY])) {
+            this._areaIsDragging = true;
+            this._areaIsHover = true;
+            this._boxResizeIsDragging = false;
+            this._boxResizeIsHover = false;
+            var center = this.getCenterPoint();
+            this._posDragStartX = mouseDownX - center.x;
+            this._posDragStartY = mouseDownY - center.y;
+            this._events.trigger('area-move-start');
+        }
+    };
+
+    CropAreaCircle.prototype.processMouseUp = function( /*mouseUpX, mouseUpY*/ ) {
+        if (this._areaIsDragging) {
+            this._areaIsDragging = false;
+            this._events.trigger('area-move-end');
+        }
+        if (this._boxResizeIsDragging) {
+            this._boxResizeIsDragging = false;
+            this._events.trigger('area-resize-end');
+        }
+        this._areaIsHover = false;
+        this._boxResizeIsHover = false;
+
+        this._posDragStartX = 0;
+        this._posDragStartY = 0;
+    };
+
+    return CropAreaCircle;
+}]);
+
+crop.factory('cropAreaRectangle', ['cropArea', function (CropArea) {
+    var CropAreaRectangle = function () {
+        CropArea.apply(this, arguments);
+
+        this._resizeCtrlBaseRadius = 15;
+        this._resizeCtrlNormalRatio = 0.75;
+        this._resizeCtrlHoverRatio = 1;
+        this._iconMoveNormalRatio = 0.9;
+        this._iconMoveHoverRatio = 1.2;
+
+        this._resizeCtrlNormalRadius = this._resizeCtrlBaseRadius * this._resizeCtrlNormalRatio;
+        this._resizeCtrlHoverRadius = this._resizeCtrlBaseRadius * this._resizeCtrlHoverRatio;
+
+        this._posDragStartX = 0;
+        this._posDragStartY = 0;
+        this._posResizeStartX = 0;
+        this._posResizeStartY = 0;
+        this._posResizeStartSize = {
+            w: 0,
+            h: 0
+        };
+
+        this._resizeCtrlIsHover = -1;
+        this._areaIsHover = false;
+        this._resizeCtrlIsDragging = -1;
+        this._areaIsDragging = false;
+    };
+
+    CropAreaRectangle.prototype = new CropArea();
+
+    // return a type string
+    CropAreaRectangle.prototype.getType = function () {
+        return 'rectangle';
+    };
+
+    CropAreaRectangle.prototype._calcRectangleCorners = function () {
+        var size = this.getSize();
+        var se = this.getSouthEastBound();
+        return [
+            [size.x, size.y], //northwest
+            [se.x, size.y], //northeast
+            [size.x, se.y], //southwest
+            [se.x, se.y] //southeast
+        ];
+    };
+
+    CropAreaRectangle.prototype._calcRectangleDimensions = function () {
+        var size = this.getSize();
+        var se = this.getSouthEastBound();
+        return {
+            left: size.x,
+            top: size.y,
+            right: se.x,
+            bottom: se.y
+        };
+    };
+
+    CropAreaRectangle.prototype._isCoordWithinArea = function (coord) {
+        var rectangleDimensions = this._calcRectangleDimensions();
+        return (coord[0] >= rectangleDimensions.left && coord[0] <= rectangleDimensions.right && coord[1] >= rectangleDimensions.top && coord[1] <= rectangleDimensions.bottom);
+    };
+
+    CropAreaRectangle.prototype._isCoordWithinResizeCtrl = function (coord) {
+        var resizeIconsCenterCoords = this._calcRectangleCorners();
+        var res = -1;
+        for (var i = 0, len = resizeIconsCenterCoords.length; i < len; i++) {
+            var resizeIconCenterCoords = resizeIconsCenterCoords[i];
+            if (coord[0] > resizeIconCenterCoords[0] - this._resizeCtrlHoverRadius && coord[0] < resizeIconCenterCoords[0] + this._resizeCtrlHoverRadius &&
+                coord[1] > resizeIconCenterCoords[1] - this._resizeCtrlHoverRadius && coord[1] < resizeIconCenterCoords[1] + this._resizeCtrlHoverRadius) {
+                res = i;
+                break;
+            }
+        }
+        return res;
+    };
+
+    CropAreaRectangle.prototype._drawArea = function (ctx, center, size) {
+        ctx.rect(size.x, size.y, size.w, size.h);
+    };
+
+    CropAreaRectangle.prototype.draw = function () {
+        CropArea.prototype.draw.apply(this, arguments);
+
+        var center = this.getCenterPoint();
+        // draw move icon
+        this._cropCanvas.drawIconMove([center.x, center.y], this._areaIsHover ? this._iconMoveHoverRatio : this._iconMoveNormalRatio);
+
+        // draw resize thumbs
+        var resizeIconsCenterCoords = this._calcRectangleCorners();
+        for (var i = 0, len = resizeIconsCenterCoords.length; i < len; i++) {
+            var resizeIconCenterCoords = resizeIconsCenterCoords[i];
+            this._cropCanvas.drawIconResizeCircle(resizeIconCenterCoords, this._resizeCtrlBaseRadius, this._resizeCtrlIsHover === i ? this._resizeCtrlHoverRatio : this._resizeCtrlNormalRatio);
+        }
+    };
+
+    CropAreaRectangle.prototype.processMouseMove = function (mouseCurX, mouseCurY) {
+        var cursor = 'default';
+        var res = false;
+
+        this._resizeCtrlIsHover = -1;
+        this._areaIsHover = false;
+
+        if (this._areaIsDragging) {
+            this.setCenterPointOnMove({
+                x: mouseCurX - this._posDragStartX,
+                y: mouseCurY - this._posDragStartY
+            });
+            this._areaIsHover = true;
+            cursor = 'move';
+            res = true;
+            this._events.trigger('area-move');
+        } else if (this._resizeCtrlIsDragging > -1) {
+            var s = this.getSize();
+            var se = this.getSouthEastBound();
+            var posX = mouseCurX;
+            switch (this._resizeCtrlIsDragging) {
+                case 0: // Top Left
+                    if (this._aspect) posX = se.x - ((se.y - mouseCurY) * this._aspect);
+                    this.setSizeByCorners({
+                        x: posX,
+                        y: mouseCurY
+                    }, {
+                        x: se.x,
+                        y: se.y
+                    });
+                    cursor = 'nwse-resize';
+                    break;
+                case 1: // Top Right
+                    if (this._aspect) posX = s.x + ((se.y - mouseCurY) * this._aspect);
+                    this.setSizeByCorners({
+                        x: s.x,
+                        y: mouseCurY
+                    }, {
+                        x: posX,
+                        y: se.y
+                    });
+                    cursor = 'nesw-resize';
+                    break;
+                case 2: // Bottom Left
+                    if (this._aspect) posX = se.x - ((mouseCurY - s.y) * this._aspect);
+                    this.setSizeByCorners({
+                        x: posX,
+                        y: s.y
+                    }, {
+                        x: se.x,
+                        y: mouseCurY
+                    });
+                    cursor = 'nesw-resize';
+                    break;
+                case 3: // Bottom Right
+                    if (this._aspect) posX = s.x + ((mouseCurY - s.y) * this._aspect);
+                    this.setSizeByCorners({
+                        x: s.x,
+                        y: s.y
+                    }, {
+                        x: posX,
+                        y: mouseCurY
+                    });
+                    cursor = 'nwse-resize';
+                    break;
+            }
+
+            this._resizeCtrlIsHover = this._resizeCtrlIsDragging;
+            res = true;
+            this._events.trigger('area-resize');
+        } else {
+            var hoveredResizeBox = this._isCoordWithinResizeCtrl([mouseCurX, mouseCurY]);
+            if (hoveredResizeBox > -1) {
+                switch (hoveredResizeBox) {
+                    case 0:
+                        cursor = 'nwse-resize';
+                        break;
+                    case 1:
+                        cursor = 'nesw-resize';
+                        break;
+                    case 2:
+                        cursor = 'nesw-resize';
+                        break;
+                    case 3:
+                        cursor = 'nwse-resize';
+                        break;
+                }
+                this._areaIsHover = false;
+                this._resizeCtrlIsHover = hoveredResizeBox;
+                res = true;
+            } else if (this._isCoordWithinArea([mouseCurX, mouseCurY])) {
+                cursor = 'move';
+                this._areaIsHover = true;
+                res = true;
+            }
+        }
+
+        angular.element(this._ctx.canvas).css({
+            'cursor': cursor
+        });
+
+        return res;
+    };
+
+    CropAreaRectangle.prototype.processMouseDown = function (mouseDownX, mouseDownY) {
+        var isWithinResizeCtrl = this._isCoordWithinResizeCtrl([mouseDownX, mouseDownY]);
+        if (isWithinResizeCtrl > -1) {
+            this._areaIsDragging = false;
+            this._areaIsHover = false;
+            this._resizeCtrlIsDragging = isWithinResizeCtrl;
+            this._resizeCtrlIsHover = isWithinResizeCtrl;
+            this._posResizeStartX = mouseDownX;
+            this._posResizeStartY = mouseDownY;
+            this._posResizeStartSize = this._size;
+            this._events.trigger('area-resize-start');
+        } else if (this._isCoordWithinArea([mouseDownX, mouseDownY])) {
+            this._areaIsDragging = true;
+            this._areaIsHover = true;
+            this._resizeCtrlIsDragging = -1;
+            this._resizeCtrlIsHover = -1;
+            var center = this.getCenterPoint();
+            this._posDragStartX = mouseDownX - center.x;
+            this._posDragStartY = mouseDownY - center.y;
+            this._events.trigger('area-move-start');
+        }
+    };
+
+    CropAreaRectangle.prototype.processMouseUp = function (/*mouseUpX, mouseUpY*/) {
+        if (this._areaIsDragging) {
+            this._areaIsDragging = false;
+            this._events.trigger('area-move-end');
+        }
+        if (this._resizeCtrlIsDragging > -1) {
+            this._resizeCtrlIsDragging = -1;
+            this._events.trigger('area-resize-end');
+        }
+        this._areaIsHover = false;
+        this._resizeCtrlIsHover = -1;
+
+        this._posDragStartX = 0;
+        this._posDragStartY = 0;
+    };
+
+    return CropAreaRectangle;
+}]);
+
+crop.factory('cropAreaSquare', ['cropArea', function(CropArea) {
+    var CropAreaSquare = function() {
+        CropArea.apply(this, arguments);
+
+        this._resizeCtrlBaseRadius = 15;
+        this._resizeCtrlNormalRatio = 0.75;
+        this._resizeCtrlHoverRatio = 1;
+        this._iconMoveNormalRatio = 0.9;
+        this._iconMoveHoverRatio = 1.2;
+
+        this._resizeCtrlNormalRadius = this._resizeCtrlBaseRadius * this._resizeCtrlNormalRatio;
+        this._resizeCtrlHoverRadius = this._resizeCtrlBaseRadius * this._resizeCtrlHoverRatio;
+
+        this._posDragStartX = 0;
+        this._posDragStartY = 0;
+        this._posResizeStartX = 0;
+        this._posResizeStartY = 0;
+        this._posResizeStartSize = 0;
+
+        this._resizeCtrlIsHover = -1;
+        this._areaIsHover = false;
+        this._resizeCtrlIsDragging = -1;
+        this._areaIsDragging = false;
+    };
+
+    CropAreaSquare.prototype = new CropArea();
+
+    CropAreaSquare.prototype.getType = function() {
+        return 'square';
+    };
+
+    CropAreaSquare.prototype._calcSquareCorners = function() {
+        var size = this.getSize(),
+            se = this.getSouthEastBound();
+        return [
+            [size.x, size.y], //northwest
+            [se.x, size.y], //northeast
+            [size.x, se.y], //southwest
+            [se.x, se.y] //southeast
+        ];
+    };
+
+    CropAreaSquare.prototype._calcSquareDimensions = function() {
+        var size = this.getSize(),
+            se = this.getSouthEastBound();
+        return {
+            left: size.x,
+            top: size.y,
+            right: se.x,
+            bottom: se.y
+        };
+    };
+
+    CropAreaSquare.prototype._isCoordWithinArea = function(coord) {
+        var squareDimensions = this._calcSquareDimensions();
+        return (coord[0] >= squareDimensions.left && coord[0] <= squareDimensions.right && coord[1] >= squareDimensions.top && coord[1] <= squareDimensions.bottom);
+    };
+
+    CropAreaSquare.prototype._isCoordWithinResizeCtrl = function(coord) {
+        var resizeIconsCenterCoords = this._calcSquareCorners();
+        var res = -1;
+        for (var i = 0, len = resizeIconsCenterCoords.length; i < len; i++) {
+            var resizeIconCenterCoords = resizeIconsCenterCoords[i];
+            if (coord[0] > resizeIconCenterCoords[0] - this._resizeCtrlHoverRadius && coord[0] < resizeIconCenterCoords[0] + this._resizeCtrlHoverRadius &&
+                coord[1] > resizeIconCenterCoords[1] - this._resizeCtrlHoverRadius && coord[1] < resizeIconCenterCoords[1] + this._resizeCtrlHoverRadius) {
+                res = i;
+                break;
+            }
+        }
+        return res;
+    };
+
+    CropAreaSquare.prototype._drawArea = function(ctx, centerCoords, size) {
+        var hSize = size / 2;
+        ctx.rect(size.x, size.y, size.w, size.h);
+    };
+
+    CropAreaSquare.prototype.draw = function() {
+        CropArea.prototype.draw.apply(this, arguments);
+
+        // draw move icon
+        var center = this.getCenterPoint();
+        this._cropCanvas.drawIconMove([center.x, center.y], this._areaIsHover ? this._iconMoveHoverRatio : this._iconMoveNormalRatio);
+
+        // draw resize cubes
+        var resizeIconsCenterCoords = this._calcSquareCorners();
+        for (var i = 0, len = resizeIconsCenterCoords.length; i < len; i++) {
+            var resizeIconCenterCoords = resizeIconsCenterCoords[i];
+            this._cropCanvas.drawIconResizeCircle(resizeIconCenterCoords, this._resizeCtrlBaseRadius, this._resizeCtrlIsHover === i ? this._resizeCtrlHoverRatio : this._resizeCtrlNormalRatio);
+        }
+    };
+
+    CropAreaSquare.prototype._clampPoint = function(x, y) {
+        var size = this._ctx.canvas.width;
+
+        if(x < 0) {
+            y -= Math.abs(x);
+            x = 0;
+        }
+
+        if(y < 0) {
+            x -= Math.abs(y);
+            y = 0;
+        }
+
+        if(x > size) {
+            y -= (size - x);
+            x = size;
+        }
+
+        if(y > size) {
+            x -= (size - y);
+            y = size;
+        }
+
+        return {
+            x: x,
+            y: y
+        };
+    };
+
+    CropAreaSquare.prototype.processMouseMove = function(mouseCurX, mouseCurY) {
+        var cursor = 'default';
+        var res = false;
+
+        this._resizeCtrlIsHover = -1;
+        this._areaIsHover = false;
+
+        if (this._areaIsDragging) {
+            this.setCenterPointOnMove({
+                x: mouseCurX - this._posDragStartX,
+                y: mouseCurY - this._posDragStartY
+            });
+            this._areaIsHover = true;
+            cursor = 'move';
+            res = true;
+            this._events.trigger('area-move');
+        } else if (this._resizeCtrlIsDragging > -1) {
+            var xMulti, yMulti;
+            switch (this._resizeCtrlIsDragging) {
+                case 0: // Top Left
+                    xMulti = -1;
+                    yMulti = -1;
+                    cursor = 'nwse-resize';
+                    break;
+                case 1: // Top Right
+                    xMulti = 1;
+                    yMulti = -1;
+                    cursor = 'nesw-resize';
+                    break;
+                case 2: // Bottom Left
+                    xMulti = -1;
+                    yMulti = 1;
+                    cursor = 'nesw-resize';
+                    break;
+                case 3: // Bottom Right
+                    xMulti = 1;
+                    yMulti = 1;
+                    cursor = 'nwse-resize';
+                    break;
+            }
+            var iFX = (mouseCurX - this._posResizeStartX) * xMulti,
+                iFY = (mouseCurY - this._posResizeStartY) * yMulti,
+                iFR;
+            if (iFX > iFY) {
+                iFR = this._posResizeStartSize.w + iFY;
+            } else {
+                iFR = this._posResizeStartSize.w + iFX;
+            }
+            var newSize = Math.max(this._minSize.w, iFR),
+                newNO = {},
+                newSE = {},
+                newSO = {},
+                newNE = {},
+                s = this.getSize(),
+                se = this.getSouthEastBound();
+
+            switch (this._resizeCtrlIsDragging) {
+                case 0: // Top Left
+                    newNO.x = se.x - newSize;
+                    newNO.y = se.y - newSize;
+
+                    newNO = this._clampPoint(newNO.x, newNO.y);
+
+                    this.setSizeByCorners(newNO, {
+                        x: se.x,
+                        y: se.y
+                    });
+
+                    cursor = 'nwse-resize';
+                    break;
+                case 1: // Top Right
+
+                    newNE.x = s.x + newSize;
+                    newNE.y = se.y - newSize;
+
+                    newNE = this._clampPoint(newNE.x, newNE.y);
+
+                    this.setSizeByCorners({
+                        x: s.x,
+                        y: newNE.y
+                    }, {
+                        x: newNE.x,
+                        y: se.y
+                    });
+
+                    cursor = 'nesw-resize';
+                    break;
+                case 2: // Bottom Left
+                    newSO.x = se.x - newSize;
+                    newSO.y = s.y + newSize;
+
+                    newSO = this._clampPoint(newSO.x, newSO.y);
+
+                    this.setSizeByCorners({
+                        x: newSO.x,
+                        y: s.y
+                    }, {
+                        x: se.x,
+                        y: newSO.y
+                    });
+
+                    cursor = 'nesw-resize';
+                    break;
+                case 3: // Bottom Right
+
+                    newSE.x = s.x + newSize;
+                    newSE.y = s.y + newSize;
+
+                    newSE = this._clampPoint(newSE.x, newSE.y);
+
+                    this.setSizeByCorners({
+                        x: s.x,
+                        y: s.y
+                    }, newSE);
+
+                    cursor = 'nwse-resize';
+                    break;
+            }
+            this._resizeCtrlIsHover = this._resizeCtrlIsDragging;
+            res = true;
+            this._events.trigger('area-resize');
+        } else {
+            var hoveredResizeBox = this._isCoordWithinResizeCtrl([mouseCurX, mouseCurY]);
+            if (hoveredResizeBox > -1) {
+                switch (hoveredResizeBox) {
+                    case 0:
+                        cursor = 'nwse-resize';
+                        break;
+                    case 1:
+                        cursor = 'nesw-resize';
+                        break;
+                    case 2:
+                        cursor = 'nesw-resize';
+                        break;
+                    case 3:
+                        cursor = 'nwse-resize';
+                        break;
+                }
+                this._areaIsHover = false;
+                this._resizeCtrlIsHover = hoveredResizeBox;
+                res = true;
+            } else if (this._isCoordWithinArea([mouseCurX, mouseCurY])) {
+                cursor = 'move';
+                this._areaIsHover = true;
+                res = true;
+            }
+        }
+
+        angular.element(this._ctx.canvas).css({
+            'cursor': cursor
+        });
+
+        return res;
+    };
+
+    CropAreaSquare.prototype.processMouseDown = function(mouseDownX, mouseDownY) {
+        var isWithinResizeCtrl = this._isCoordWithinResizeCtrl([mouseDownX, mouseDownY]);
+        if (isWithinResizeCtrl > -1) {
+            this._areaIsDragging = false;
+            this._areaIsHover = false;
+            this._resizeCtrlIsDragging = isWithinResizeCtrl;
+            this._resizeCtrlIsHover = isWithinResizeCtrl;
+            this._posResizeStartX = mouseDownX;
+            this._posResizeStartY = mouseDownY;
+            this._posResizeStartSize = this._size;
+            this._events.trigger('area-resize-start');
+        } else if (this._isCoordWithinArea([mouseDownX, mouseDownY])) {
+            this._areaIsDragging = true;
+            this._areaIsHover = true;
+            this._resizeCtrlIsDragging = -1;
+            this._resizeCtrlIsHover = -1;
+            var center = this.getCenterPoint();
+            this._posDragStartX = mouseDownX - center.x;
+            this._posDragStartY = mouseDownY - center.y;
+            this._events.trigger('area-move-start');
+        }
+    };
+
+    CropAreaSquare.prototype.processMouseUp = function( /*mouseUpX, mouseUpY*/ ) {
+        if (this._areaIsDragging) {
+            this._areaIsDragging = false;
+            this._events.trigger('area-move-end');
+        }
+        if (this._resizeCtrlIsDragging > -1) {
+            this._resizeCtrlIsDragging = -1;
+            this._events.trigger('area-resize-end');
+        }
+        this._areaIsHover = false;
+        this._resizeCtrlIsHover = -1;
+
+        this._posDragStartX = 0;
+        this._posDragStartY = 0;
+    };
+
+    return CropAreaSquare;
+}]);
+
+crop.factory('cropArea', ['cropCanvas', function(CropCanvas) {
+    var CropArea = function(ctx, events) {
+        this._ctx = ctx;
+        this._events = events;
+
+        this._minSize = {
+            x: 0,
+            y: 0,
+            w: 80,
+            h: 80
+        };
+
+        this._initSize = undefined;
+        this._initCoords = undefined;
+        this._allowCropResizeOnCorners = false;
+
+        this._forceAspectRatio = false;
+        this._aspect = null;
+
+        this._cropCanvas = new CropCanvas(ctx);
+
+        this._image = new Image();
+        this._size = {
+            x: 0,
+            y: 0,
+            w: 150,
+            h: 150
+        };
+    };
+
+    /* GETTERS/SETTERS */
+
+    CropArea.prototype.setAllowCropResizeOnCorners = function(bool) {
+        this._allowCropResizeOnCorners=bool;
+    };
+    CropArea.prototype.getImage = function() {
+        return this._image;
+    };
+    CropArea.prototype.setImage = function(image) {
+        this._image = image;
+    };
+
+    CropArea.prototype.setForceAspectRatio = function(force) {
+        this._forceAspectRatio = force;
+    };
+
+    CropArea.prototype.setAspect = function(aspect) {
+        this._aspect=aspect;
+    };
+
+    CropArea.prototype.getAspect = function() {
+        return this._aspect;
+    };
+
+    CropArea.prototype.getCanvasSize = function() {
+        return {
+          w: this._ctx.canvas.width,
+          h: this._ctx.canvas.height
+        };
+    };
+
+    CropArea.prototype.getSize = function() {
+        return this._size;
+    };
+
+    CropArea.prototype.setSize = function(size) {
+        size = this._processSize(size);
+        this._size = this._preventBoundaryCollision(size);
+    };
+
+    CropArea.prototype.setSizeOnMove = function(size) {
+        size = this._processSize(size);
+        if(this._allowCropResizeOnCorners) this._size = this._preventBoundaryCollision(size);
+        else this._size = this._allowMouseOutsideCanvas(size);
+    };
+
+    CropArea.prototype.CircleOnMove = function(northWestCorner, southEastCorner) {
+        var size = {
+            x: northWestCorner.x,
+            y: northWestCorner.y,
+            w: southEastCorner.x - northWestCorner.x,
+            h: southEastCorner.y - northWestCorner.y
+        };
+        var canvasH = this._ctx.canvas.height,
+            canvasW = this._ctx.canvas.width;
+        if(size.w>canvasW||size.h>canvasH){
+            if(canvasW<canvasH){
+                size.w=canvasW;
+                size.h=canvasW;
+            }else{
+                size.w=canvasH;
+                size.h=canvasH;
+            }
+        }
+        if(size.x+size.w>canvasW){
+            size.x=canvasW-size.w;
+        }
+        if(size.y+size.h>canvasH){
+            size.y=canvasH-size.h;
+        }
+        if(size.x<0) size.x=0;
+        if(size.y<0) size.y=0;
+        if(this._minSize.w>size.w){
+            size.w=this._minSize.w;
+            size.x=this._size.x;
+        }
+        if(this._minSize.h>size.h){
+            size.h=this._minSize.h;
+            size.y=this._size.y;
+        }
+        this._size=size;
+    };
+
+    CropArea.prototype.setSizeByCorners = function(northWestCorner, southEastCorner) {
+
+        var size = {
+            x: northWestCorner.x,
+            y: northWestCorner.y,
+            w: southEastCorner.x - northWestCorner.x,
+            h: southEastCorner.y - northWestCorner.y
+        };
+        this.setSize(size);
+    };
+
+    CropArea.prototype.getSouthEastBound = function() {
+        return this._southEastBound(this.getSize());
+    };
+
+    CropArea.prototype.setMinSize = function(size) {
+        this._minSize = this._processSize(size);
+        this.setSize(this._minSize);
+    };
+
+    CropArea.prototype.getMinSize = function() {
+        return this._minSize;
+    };
+
+    CropArea.prototype.getCenterPoint = function() {
+        var s = this.getSize();
+        return {
+            x: s.x + (s.w / 2),
+            y: s.y + (s.h / 2)
+        };
+    };
+
+    CropArea.prototype.setCenterPoint = function(point) {
+        var s = this.getSize();
+        this.setSize({
+            x: point.x - s.w / 2,
+            y: point.y - s.h / 2,
+            w: s.w,
+            h: s.h
+        });
+    };
+    
+    CropArea.prototype.setCenterPointOnMove = function(point) {
+        var s = this.getSize();
+        this.setSizeOnMove({
+            x: point.x - s.w / 2,
+            y: point.y - s.h / 2,
+            w: s.w,
+            h: s.h
+        });
+    };
+
+    CropArea.prototype.setInitSize = function(size) {
+        this._initSize = this._processSize(size);
+        this.setSize(this._initSize);
+    };
+
+    CropArea.prototype.getInitSize = function() {
+        return this._initSize;
+    };
+
+    CropArea.prototype.setInitCoords = function(coords) {
+        //add h/w-data to coords-object
+        coords.h = this.getSize().h;
+        coords.w = this.getSize().w;
+        this._initCoords = this._processSize(coords);
+        this.setSize(this._initCoords);
+    };
+
+    CropArea.prototype.getInitCoords = function() {
+        return this._initCoords;
+    };
+
+    // return a type string
+    CropArea.prototype.getType = function() {
+        //default to circle
+        return 'circle';
+    };
+
+    /* FUNCTIONS */
+    CropArea.prototype._allowMouseOutsideCanvas = function(size) {
+        var canvasH = this._ctx.canvas.height,
+            canvasW = this._ctx.canvas.width;
+        var newSize = {
+            w: size.w,
+            h: size.h,
+        };
+        if(size.x<0) newSize.x=0;
+        else if(size.x+size.w>canvasW) newSize.x=canvasW-size.w;
+        else newSize.x=size.x;
+        if(size.y<0) newSize.y=0;
+        else if(size.y+size.h>canvasH) newSize.y=canvasH-size.h;
+        else newSize.y=size.y;
+        return newSize;
+    };
+
+    CropArea.prototype._preventBoundaryCollision = function(size) {
+        var canvasH = this._ctx.canvas.height,
+            canvasW = this._ctx.canvas.width;
+
+        var nw = {
+            x: size.x,
+            y: size.y
+        };
+        var se = this._southEastBound(size);
+
+        // check northwest corner
+        if (nw.x < 0) {
+            nw.x = 0;
+        }
+        if (nw.y < 0) {
+            nw.y = 0;
+        }
+
+        // check southeast corner
+        if (se.x > canvasW) {
+            se.x = canvasW
+        }
+        if (se.y > canvasH) {
+            se.y = canvasH
+        }
+
+        var newSizeWidth = (this._forceAspectRatio) ? size.w : se.x - nw.x,
+            newSizeHeight = (this._forceAspectRatio) ? size.h : se.y - nw.y;
+
+        // save rectangle scale
+        if(this._aspect){
+            newSizeWidth = newSizeHeight * this._aspect;
+            if(nw.x+newSizeWidth>canvasW){
+                newSizeWidth=canvasW-nw.x;
+                newSizeHeight=newSizeWidth/this._aspect;
+                if(this._minSize.w>newSizeWidth) newSizeWidth=this._minSize.w;
+                if(this._minSize.h>newSizeHeight) newSizeHeight=this._minSize.h;
+                nw.x=canvasW-newSizeWidth;
+            }
+            if(nw.y+newSizeHeight>canvasH) nw.y=canvasH-newSizeHeight;
+        }
+
+        // save square scale
+        if(this._forceAspectRatio) {
+            newSizeWidth = newSizeHeight;
+            if(nw.x+newSizeWidth>canvasW){
+                newSizeWidth=canvasW-nw.x;
+                if(newSizeWidth<this._minSize.w) newSizeWidth=this._minSize.w;
+                newSizeHeight=newSizeWidth;
+            }
+        }
+
+        var newSize = {
+            x: nw.x,
+            y: nw.y,
+            w: newSizeWidth,
+            h: newSizeHeight
+        };
+
+        //check size (if < min, adjust nw corner)
+        if ( (newSize.w < this._minSize.w) && !this._forceAspectRatio) {
+            newSize.w = this._minSize.w;
+            se = this._southEastBound(newSize);
+            //adjust se corner, if it's out of bounds
+            if (se.x > canvasW) {
+                se.x = canvasW;
+                //adjust nw corner according to min width
+                nw.x = Math.max(se.x - canvasW, se.x - this._minSize.w);
+                newSize = {
+                    x: nw.x,
+                    y: nw.y,
+                    w: se.x - nw.x,
+                    h: se.y - nw.y
+                };
+            }
+        }
+
+        if ( (newSize.h < this._minSize.h) && !this._forceAspectRatio) {
+            newSize.h = this._minSize.h;
+            se = this._southEastBound(newSize);
+
+            if (se.y > canvasH) {
+                se.y = canvasH;
+                //adjust nw corner according to min height
+                nw.y = Math.max(se.y - canvasH, se.y - this._minSize.h);
+                newSize = {
+                    x: nw.x,
+                    y: nw.y,
+                    w: se.x - nw.x,
+                    h: se.y - nw.y
+                };
+            }
+        }
+
+        if(this._forceAspectRatio) {
+            //check if outside SE bound
+            se = this._southEastBound(newSize);
+            if (se.y > canvasH) {
+                newSize.y = canvasH - newSize.h;
+            }
+            if (se.x > canvasW) {
+                newSize.x = canvasW - newSize.w;
+            }
+        }
+
+        return newSize;
+    };
+
+    CropArea.prototype._dontDragOutside = function() {
+        var h = this._ctx.canvas.height,
+            w = this._ctx.canvas.width;
+
+        if (this._width > w) {
+            this._width = w;
+        }
+        if (this._height > h) {
+            this._height = h;
+        }
+        if (this._x < this._width / 2) {
+            this._x = this._width / 2;
+        }
+        if (this._x > w - this._width / 2) {
+            this._x = w - this._width / 2;
+        }
+        if (this._y < this._height / 2) {
+            this._y = this._height / 2;
+        }
+        if (this._y > h - this._height / 2) {
+            this._y = h - this._height / 2;
+        }
+    };
+
+    CropArea.prototype._drawArea = function() {};
+
+    CropArea.prototype._processSize = function(size) {
+        // make this polymorphic to accept a single floating point number
+        // for square-like sizes (including circle)
+        if (typeof size == "number") {
+            size = {
+                w: size,
+                h: size
+            };
+        }
+        var width = size.w;
+        if(this._aspect) width = size.h * this._aspect;
+        return {
+            x: (typeof size.x === "undefined") ? this.getSize().x : size.x,
+            y: (typeof size.y === "undefined") ? this.getSize().y : size.y,
+            w: width || this._minSize.w,
+            h: size.h || this._minSize.h
+        };
+    };
+
+    CropArea.prototype._southEastBound = function(size) {
+        return {
+            x: size.x + size.w,
+            y: size.y + size.h
+        };
+    };
+
+    CropArea.prototype.draw = function() {
+        // draw crop area
+        this._cropCanvas.drawCropArea(this._image, this.getCenterPoint(), this._size, this._drawArea);
+    };
+
+    CropArea.prototype.processMouseMove = function() {};
+
+    CropArea.prototype.processMouseDown = function() {};
+
+    CropArea.prototype.processMouseUp = function() {};
+
+    return CropArea;
+}]);
+
+crop.factory('cropCanvas', [function() {
+    // Shape = Array of [x,y]; [0, 0] - center
+    var shapeArrowNW = [
+        [-0.5, -2],
+        [-3, -4.5],
+        [-0.5, -7],
+        [-7, -7],
+        [-7, -0.5],
+        [-4.5, -3],
+        [-2, -0.5]
+    ];
+    var shapeArrowNE = [
+        [0.5, -2],
+        [3, -4.5],
+        [0.5, -7],
+        [7, -7],
+        [7, -0.5],
+        [4.5, -3],
+        [2, -0.5]
+    ];
+    var shapeArrowSW = [
+        [-0.5, 2],
+        [-3, 4.5],
+        [-0.5, 7],
+        [-7, 7],
+        [-7, 0.5],
+        [-4.5, 3],
+        [-2, 0.5]
+    ];
+    var shapeArrowSE = [
+        [0.5, 2],
+        [3, 4.5],
+        [0.5, 7],
+        [7, 7],
+        [7, 0.5],
+        [4.5, 3],
+        [2, 0.5]
+    ];
+    var shapeArrowN = [
+        [-1.5, -2.5],
+        [-1.5, -6],
+        [-5, -6],
+        [0, -11],
+        [5, -6],
+        [1.5, -6],
+        [1.5, -2.5]
+    ];
+    var shapeArrowW = [
+        [-2.5, -1.5],
+        [-6, -1.5],
+        [-6, -5],
+        [-11, 0],
+        [-6, 5],
+        [-6, 1.5],
+        [-2.5, 1.5]
+    ];
+    var shapeArrowS = [
+        [-1.5, 2.5],
+        [-1.5, 6],
+        [-5, 6],
+        [0, 11],
+        [5, 6],
+        [1.5, 6],
+        [1.5, 2.5]
+    ];
+    var shapeArrowE = [
+        [2.5, -1.5],
+        [6, -1.5],
+        [6, -5],
+        [11, 0],
+        [6, 5],
+        [6, 1.5],
+        [2.5, 1.5]
+    ];
+
+    // Colors
+    var colors = {
+        areaOutline: '#fff',
+        resizeBoxStroke: '#fff',
+        resizeBoxFill: '#444',
+        resizeBoxArrowFill: '#fff',
+        resizeCircleStroke: '#fff',
+        resizeCircleFill: '#444',
+        moveIconFill: '#fff'
+    };
+
+    return function(ctx) {
+
+        /* Base functions */
+
+        // Calculate Point
+        var calcPoint = function(point, offset, scale) {
+            return [scale * point[0] + offset[0], scale * point[1] + offset[1]];
+        };
+
+        // Draw Filled Polygon
+        var drawFilledPolygon = function(shape, fillStyle, centerCoords, scale) {
+            ctx.save();
+            ctx.fillStyle = fillStyle;
+            ctx.beginPath();
+            var pc, pc0 = calcPoint(shape[0], centerCoords, scale);
+            ctx.moveTo(pc0[0], pc0[1]);
+
+            for (var p in shape) {
+                if (p > 0) {
+                    pc = calcPoint(shape[p], centerCoords, scale);
+                    ctx.lineTo(pc[0], pc[1]);
+                }
+            }
+
+            ctx.lineTo(pc0[0], pc0[1]);
+            ctx.fill();
+            ctx.closePath();
+            ctx.restore();
+        };
+
+        /* Icons */
+
+        this.drawIconMove = function(centerCoords, scale) {
+            drawFilledPolygon(shapeArrowN, colors.moveIconFill, centerCoords, scale);
+            drawFilledPolygon(shapeArrowW, colors.moveIconFill, centerCoords, scale);
+            drawFilledPolygon(shapeArrowS, colors.moveIconFill, centerCoords, scale);
+            drawFilledPolygon(shapeArrowE, colors.moveIconFill, centerCoords, scale);
+        };
+
+        this.drawIconResizeCircle = function(centerCoords, circleRadius, scale) {
+            var scaledCircleRadius = circleRadius * scale;
+            ctx.save();
+            ctx.strokeStyle = colors.resizeCircleStroke;
+            ctx.lineWidth = 2;
+            ctx.fillStyle = colors.resizeCircleFill;
+            ctx.beginPath();
+            ctx.arc(centerCoords[0], centerCoords[1], scaledCircleRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            ctx.closePath();
+            ctx.restore();
+        };
+
+        this.drawIconResizeBoxBase = function(centerCoords, boxSize, scale) {
+            var scaledBoxSize = boxSize * scale;
+            ctx.save();
+            ctx.strokeStyle = colors.resizeBoxStroke;
+            ctx.lineWidth = 2;
+            ctx.fillStyle = colors.resizeBoxFill;
+            ctx.fillRect(centerCoords[0] - scaledBoxSize / 2, centerCoords[1] - scaledBoxSize / 2, scaledBoxSize, scaledBoxSize);
+            ctx.strokeRect(centerCoords[0] - scaledBoxSize / 2, centerCoords[1] - scaledBoxSize / 2, scaledBoxSize, scaledBoxSize);
+            ctx.restore();
+        };
+        this.drawIconResizeBoxNESW = function(centerCoords, boxSize, scale) {
+            this.drawIconResizeBoxBase(centerCoords, boxSize, scale);
+            drawFilledPolygon(shapeArrowNE, colors.resizeBoxArrowFill, centerCoords, scale);
+            drawFilledPolygon(shapeArrowSW, colors.resizeBoxArrowFill, centerCoords, scale);
+        };
+        this.drawIconResizeBoxNWSE = function(centerCoords, boxSize, scale) {
+            this.drawIconResizeBoxBase(centerCoords, boxSize, scale);
+            drawFilledPolygon(shapeArrowNW, colors.resizeBoxArrowFill, centerCoords, scale);
+            drawFilledPolygon(shapeArrowSE, colors.resizeBoxArrowFill, centerCoords, scale);
+        };
+
+        /* Crop Area */
+
+        this.drawCropArea = function(image, centerCoords, size, fnDrawClipPath) {
+            var xRatio = Math.abs(image.width / ctx.canvas.width),
+                yRatio = Math.abs(image.height / ctx.canvas.height),
+                xLeft = Math.abs(centerCoords.x - size.w / 2),
+                yTop = Math.abs(centerCoords.y - size.h / 2);
+
+            ctx.save();
+            ctx.strokeStyle = colors.areaOutline;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            fnDrawClipPath(ctx, centerCoords, size);
+            ctx.stroke();
+            ctx.clip();
+
+            // draw part of original image
+            if (size.w > 0) {
+                ctx.drawImage(image, xLeft * xRatio, yTop * yRatio, Math.abs(size.w * xRatio), Math.abs(size.h * yRatio), xLeft, yTop, Math.abs(size.w), Math.abs(size.h));
+            }
+
+            ctx.beginPath();
+            fnDrawClipPath(ctx, centerCoords, size);
+            ctx.stroke();
+            ctx.clip();
+
+            ctx.restore();
+        };
+
+    };
+}]);
+
+/**
+ * EXIF service is based on the exif-js library (https://github.com/jseidelin/exif-js)
+ */
+
+crop.service('cropEXIF', [function() {
+    var debug = false;
+
+    var ExifTags = this.Tags = {
+
+        // version tags
+        0x9000: "ExifVersion", // EXIF version
+        0xA000: "FlashpixVersion", // Flashpix format version
+
+        // colorspace tags
+        0xA001: "ColorSpace", // Color space information tag
+
+        // image configuration
+        0xA002: "PixelXDimension", // Valid width of meaningful image
+        0xA003: "PixelYDimension", // Valid height of meaningful image
+        0x9101: "ComponentsConfiguration", // Information about channels
+        0x9102: "CompressedBitsPerPixel", // Compressed bits per pixel
+
+        // user information
+        0x927C: "MakerNote", // Any desired information written by the manufacturer
+        0x9286: "UserComment", // Comments by user
+
+        // related file
+        0xA004: "RelatedSoundFile", // Name of related sound file
+
+        // date and time
+        0x9003: "DateTimeOriginal", // Date and time when the original image was generated
+        0x9004: "DateTimeDigitized", // Date and time when the image was stored digitally
+        0x9290: "SubsecTime", // Fractions of seconds for DateTime
+        0x9291: "SubsecTimeOriginal", // Fractions of seconds for DateTimeOriginal
+        0x9292: "SubsecTimeDigitized", // Fractions of seconds for DateTimeDigitized
+
+        // picture-taking conditions
+        0x829A: "ExposureTime", // Exposure time (in seconds)
+        0x829D: "FNumber", // F number
+        0x8822: "ExposureProgram", // Exposure program
+        0x8824: "SpectralSensitivity", // Spectral sensitivity
+        0x8827: "ISOSpeedRatings", // ISO speed rating
+        0x8828: "OECF", // Optoelectric conversion factor
+        0x9201: "ShutterSpeedValue", // Shutter speed
+        0x9202: "ApertureValue", // Lens aperture
+        0x9203: "BrightnessValue", // Value of brightness
+        0x9204: "ExposureBias", // Exposure bias
+        0x9205: "MaxApertureValue", // Smallest F number of lens
+        0x9206: "SubjectDistance", // Distance to subject in meters
+        0x9207: "MeteringMode", // Metering mode
+        0x9208: "LightSource", // Kind of light source
+        0x9209: "Flash", // Flash status
+        0x9214: "SubjectArea", // Location and area of main subject
+        0x920A: "FocalLength", // Focal length of the lens in mm
+        0xA20B: "FlashEnergy", // Strobe energy in BCPS
+        0xA20C: "SpatialFrequencyResponse", //
+        0xA20E: "FocalPlaneXResolution", // Number of pixels in width direction per FocalPlaneResolutionUnit
+        0xA20F: "FocalPlaneYResolution", // Number of pixels in height direction per FocalPlaneResolutionUnit
+        0xA210: "FocalPlaneResolutionUnit", // Unit for measuring FocalPlaneXResolution and FocalPlaneYResolution
+        0xA214: "SubjectLocation", // Location of subject in image
+        0xA215: "ExposureIndex", // Exposure index selected on camera
+        0xA217: "SensingMethod", // Image sensor type
+        0xA300: "FileSource", // Image source (3 == DSC)
+        0xA301: "SceneType", // Scene type (1 == directly photographed)
+        0xA302: "CFAPattern", // Color filter array geometric pattern
+        0xA401: "CustomRendered", // Special processing
+        0xA402: "ExposureMode", // Exposure mode
+        0xA403: "WhiteBalance", // 1 = auto white balance, 2 = manual
+        0xA404: "DigitalZoomRation", // Digital zoom ratio
+        0xA405: "FocalLengthIn35mmFilm", // Equivalent foacl length assuming 35mm film camera (in mm)
+        0xA406: "SceneCaptureType", // Type of scene
+        0xA407: "GainControl", // Degree of overall image gain adjustment
+        0xA408: "Contrast", // Direction of contrast processing applied by camera
+        0xA409: "Saturation", // Direction of saturation processing applied by camera
+        0xA40A: "Sharpness", // Direction of sharpness processing applied by camera
+        0xA40B: "DeviceSettingDescription", //
+        0xA40C: "SubjectDistanceRange", // Distance to subject
+
+        // other tags
+        0xA005: "InteroperabilityIFDPointer",
+        0xA420: "ImageUniqueID" // Identifier assigned uniquely to each image
+    };
+
+    var TiffTags = this.TiffTags = {
+        0x0100: "ImageWidth",
+        0x0101: "ImageHeight",
+        0x8769: "ExifIFDPointer",
+        0x8825: "GPSInfoIFDPointer",
+        0xA005: "InteroperabilityIFDPointer",
+        0x0102: "BitsPerSample",
+        0x0103: "Compression",
+        0x0106: "PhotometricInterpretation",
+        0x0112: "Orientation",
+        0x0115: "SamplesPerPixel",
+        0x011C: "PlanarConfiguration",
+        0x0212: "YCbCrSubSampling",
+        0x0213: "YCbCrPositioning",
+        0x011A: "XResolution",
+        0x011B: "YResolution",
+        0x0128: "ResolutionUnit",
+        0x0111: "StripOffsets",
+        0x0116: "RowsPerStrip",
+        0x0117: "StripByteCounts",
+        0x0201: "JPEGInterchangeFormat",
+        0x0202: "JPEGInterchangeFormatLength",
+        0x012D: "TransferFunction",
+        0x013E: "WhitePoint",
+        0x013F: "PrimaryChromaticities",
+        0x0211: "YCbCrCoefficients",
+        0x0214: "ReferenceBlackWhite",
+        0x0132: "DateTime",
+        0x010E: "ImageDescription",
+        0x010F: "Make",
+        0x0110: "Model",
+        0x0131: "Software",
+        0x013B: "Artist",
+        0x8298: "Copyright"
+    };
+
+    var GPSTags = this.GPSTags = {
+        0x0000: "GPSVersionID",
+        0x0001: "GPSLatitudeRef",
+        0x0002: "GPSLatitude",
+        0x0003: "GPSLongitudeRef",
+        0x0004: "GPSLongitude",
+        0x0005: "GPSAltitudeRef",
+        0x0006: "GPSAltitude",
+        0x0007: "GPSTimeStamp",
+        0x0008: "GPSSatellites",
+        0x0009: "GPSStatus",
+        0x000A: "GPSMeasureMode",
+        0x000B: "GPSDOP",
+        0x000C: "GPSSpeedRef",
+        0x000D: "GPSSpeed",
+        0x000E: "GPSTrackRef",
+        0x000F: "GPSTrack",
+        0x0010: "GPSImgDirectionRef",
+        0x0011: "GPSImgDirection",
+        0x0012: "GPSMapDatum",
+        0x0013: "GPSDestLatitudeRef",
+        0x0014: "GPSDestLatitude",
+        0x0015: "GPSDestLongitudeRef",
+        0x0016: "GPSDestLongitude",
+        0x0017: "GPSDestBearingRef",
+        0x0018: "GPSDestBearing",
+        0x0019: "GPSDestDistanceRef",
+        0x001A: "GPSDestDistance",
+        0x001B: "GPSProcessingMethod",
+        0x001C: "GPSAreaInformation",
+        0x001D: "GPSDateStamp",
+        0x001E: "GPSDifferential"
+    };
+
+    var StringValues = this.StringValues = {
+        ExposureProgram: {
+            0: "Not defined",
+            1: "Manual",
+            2: "Normal program",
+            3: "Aperture priority",
+            4: "Shutter priority",
+            5: "Creative program",
+            6: "Action program",
+            7: "Portrait mode",
+            8: "Landscape mode"
+        },
+        MeteringMode: {
+            0: "Unknown",
+            1: "Average",
+            2: "CenterWeightedAverage",
+            3: "Spot",
+            4: "MultiSpot",
+            5: "Pattern",
+            6: "Partial",
+            255: "Other"
+        },
+        LightSource: {
+            0: "Unknown",
+            1: "Daylight",
+            2: "Fluorescent",
+            3: "Tungsten (incandescent light)",
+            4: "Flash",
+            9: "Fine weather",
+            10: "Cloudy weather",
+            11: "Shade",
+            12: "Daylight fluorescent (D 5700 - 7100K)",
+            13: "Day white fluorescent (N 4600 - 5400K)",
+            14: "Cool white fluorescent (W 3900 - 4500K)",
+            15: "White fluorescent (WW 3200 - 3700K)",
+            17: "Standard light A",
+            18: "Standard light B",
+            19: "Standard light C",
+            20: "D55",
+            21: "D65",
+            22: "D75",
+            23: "D50",
+            24: "ISO studio tungsten",
+            255: "Other"
+        },
+        Flash: {
+            0x0000: "Flash did not fire",
+            0x0001: "Flash fired",
+            0x0005: "Strobe return light not detected",
+            0x0007: "Strobe return light detected",
+            0x0009: "Flash fired, compulsory flash mode",
+            0x000D: "Flash fired, compulsory flash mode, return light not detected",
+            0x000F: "Flash fired, compulsory flash mode, return light detected",
+            0x0010: "Flash did not fire, compulsory flash mode",
+            0x0018: "Flash did not fire, auto mode",
+            0x0019: "Flash fired, auto mode",
+            0x001D: "Flash fired, auto mode, return light not detected",
+            0x001F: "Flash fired, auto mode, return light detected",
+            0x0020: "No flash function",
+            0x0041: "Flash fired, red-eye reduction mode",
+            0x0045: "Flash fired, red-eye reduction mode, return light not detected",
+            0x0047: "Flash fired, red-eye reduction mode, return light detected",
+            0x0049: "Flash fired, compulsory flash mode, red-eye reduction mode",
+            0x004D: "Flash fired, compulsory flash mode, red-eye reduction mode, return light not detected",
+            0x004F: "Flash fired, compulsory flash mode, red-eye reduction mode, return light detected",
+            0x0059: "Flash fired, auto mode, red-eye reduction mode",
+            0x005D: "Flash fired, auto mode, return light not detected, red-eye reduction mode",
+            0x005F: "Flash fired, auto mode, return light detected, red-eye reduction mode"
+        },
+        SensingMethod: {
+            1: "Not defined",
+            2: "One-chip color area sensor",
+            3: "Two-chip color area sensor",
+            4: "Three-chip color area sensor",
+            5: "Color sequential area sensor",
+            7: "Trilinear sensor",
+            8: "Color sequential linear sensor"
+        },
+        SceneCaptureType: {
+            0: "Standard",
+            1: "Landscape",
+            2: "Portrait",
+            3: "Night scene"
+        },
+        SceneType: {
+            1: "Directly photographed"
+        },
+        CustomRendered: {
+            0: "Normal process",
+            1: "Custom process"
+        },
+        WhiteBalance: {
+            0: "Auto white balance",
+            1: "Manual white balance"
+        },
+        GainControl: {
+            0: "None",
+            1: "Low gain up",
+            2: "High gain up",
+            3: "Low gain down",
+            4: "High gain down"
+        },
+        Contrast: {
+            0: "Normal",
+            1: "Soft",
+            2: "Hard"
+        },
+        Saturation: {
+            0: "Normal",
+            1: "Low saturation",
+            2: "High saturation"
+        },
+        Sharpness: {
+            0: "Normal",
+            1: "Soft",
+            2: "Hard"
+        },
+        SubjectDistanceRange: {
+            0: "Unknown",
+            1: "Macro",
+            2: "Close view",
+            3: "Distant view"
+        },
+        FileSource: {
+            3: "DSC"
+        },
+
+        Components: {
+            0: "",
+            1: "Y",
+            2: "Cb",
+            3: "Cr",
+            4: "R",
+            5: "G",
+            6: "B"
+        }
+    };
+
+    function addEvent(element, event, handler) {
+        if (element.addEventListener) {
+            element.addEventListener(event, handler, false);
+        } else if (element.attachEvent) {
+            element.attachEvent("on" + event, handler);
+        }
+    }
+
+    function imageHasData(img) {
+        return !!(img.exifdata);
+    }
+
+    function base64ToArrayBuffer(base64, contentType) {
+        contentType = contentType || base64.match(/^data\:([^\;]+)\;base64,/mi)[1] || ''; // e.g. 'data:image/jpeg;base64,...' => 'image/jpeg'
+        base64 = base64.replace(/^data\:([^\;]+)\;base64,/gmi, '');
+        var binary = atob(base64);
+        var len = binary.length;
+        var buffer = new ArrayBuffer(len);
+        var view = new Uint8Array(buffer);
+        for (var i = 0; i < len; i++) {
+            view[i] = binary.charCodeAt(i);
+        }
+        return buffer;
+    }
+
+    function objectURLToBlob(url, callback) {
+        var http = new XMLHttpRequest();
+        http.open("GET", url, true);
+        http.responseType = "blob";
+        http.onload = function(e) {
+            if (this.status == 200 || this.status === 0) {
+                callback(this.response);
+            }
+        };
+        http.send();
+    }
+
+    function getImageData(img, callback) {
+        function handleBinaryFile(binFile) {
+            var data = findEXIFinJPEG(binFile);
+            var iptcdata = findIPTCinJPEG(binFile);
+            img.exifdata = data || {};
+            img.iptcdata = iptcdata || {};
+            if (callback) {
+                callback.call(img);
+            }
+        }
+
+        if (img.src) {
+            if (/^data\:/i.test(img.src)) { // Data URI
+                var arrayBuffer = base64ToArrayBuffer(img.src);
+                handleBinaryFile(arrayBuffer);
+
+            } else if (/^blob\:/i.test(img.src)) { // Object URL
+                var fileReader = new FileReader();
+                fileReader.onload = function(e) {
+                    handleBinaryFile(e.target.result);
+                };
+                objectURLToBlob(img.src, function(blob) {
+                    fileReader.readAsArrayBuffer(blob);
+                });
+            } else {
+                var http = new XMLHttpRequest();
+                http.onload = function() {
+                    if (this.status == 200 || this.status === 0) {
+                        handleBinaryFile(http.response);
+                    } else {
+                        throw "Could not load image";
+                    }
+                    http = null;
+                };
+                http.open("GET", img.src, true);
+                http.responseType = "arraybuffer";
+                http.send(null);
+            }
+        } else if (window.FileReader && (img instanceof window.Blob || img instanceof window.File)) {
+            var fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                if (debug) console.log("Got file of length " + e.target.result.byteLength);
+                handleBinaryFile(e.target.result);
+            };
+
+            fileReader.readAsArrayBuffer(img);
+        }
+    }
+
+    function findEXIFinJPEG(file) {
+        var dataView = new DataView(file);
+
+        if (debug) console.log("Got file of length " + file.byteLength);
+        if ((dataView.getUint8(0) != 0xFF) || (dataView.getUint8(1) != 0xD8)) {
+            if (debug) console.log("Not a valid JPEG");
+            return false; // not a valid jpeg
+        }
+
+        var offset = 2,
+            length = file.byteLength,
+            marker;
+
+        while (offset < length) {
+            if (dataView.getUint8(offset) != 0xFF) {
+                if (debug) console.log("Not a valid marker at offset " + offset + ", found: " + dataView.getUint8(offset));
+                return false; // not a valid marker, something is wrong
+            }
+
+            marker = dataView.getUint8(offset + 1);
+            if (debug) console.log(marker);
+
+            // we could implement handling for other markers here,
+            // but we're only looking for 0xFFE1 for EXIF data
+
+            if (marker == 225) {
+                if (debug) console.log("Found 0xFFE1 marker");
+
+                return readEXIFData(dataView, offset + 4, dataView.getUint16(offset + 2) - 2);
+
+                // offset += 2 + file.getShortAt(offset+2, true);
+
+            } else {
+                offset += 2 + dataView.getUint16(offset + 2);
+            }
+
+        }
+
+    }
+
+    function findIPTCinJPEG(file) {
+        var dataView = new DataView(file);
+
+        if (debug) console.log("Got file of length " + file.byteLength);
+        if ((dataView.getUint8(0) != 0xFF) || (dataView.getUint8(1) != 0xD8)) {
+            if (debug) console.log("Not a valid JPEG");
+            return false; // not a valid jpeg
+        }
+
+        var offset = 2,
+            length = file.byteLength;
+
+        var isFieldSegmentStart = function(dataView, offset) {
+            return (
+                dataView.getUint8(offset) === 0x38 &&
+                dataView.getUint8(offset + 1) === 0x42 &&
+                dataView.getUint8(offset + 2) === 0x49 &&
+                dataView.getUint8(offset + 3) === 0x4D &&
+                dataView.getUint8(offset + 4) === 0x04 &&
+                dataView.getUint8(offset + 5) === 0x04
+            );
+        };
+
+        while (offset < length) {
+
+            if (isFieldSegmentStart(dataView, offset)) {
+
+                // Get the length of the name header (which is padded to an even number of bytes)
+                var nameHeaderLength = dataView.getUint8(offset + 7);
+                if (nameHeaderLength % 2 !== 0) nameHeaderLength += 1;
+                // Check for pre photoshop 6 format
+                if (nameHeaderLength === 0) {
+                    // Always 4
+                    nameHeaderLength = 4;
+                }
+
+                var startOffset = offset + 8 + nameHeaderLength;
+                var sectionLength = dataView.getUint16(offset + 6 + nameHeaderLength);
+
+                return readIPTCData(file, startOffset, sectionLength);
+
+                break;
+
+            }
+
+            // Not the marker, continue searching
+            offset++;
+
+        }
+
+    }
+    var IptcFieldMap = {
+        0x78: 'caption',
+        0x6E: 'credit',
+        0x19: 'keywords',
+        0x37: 'dateCreated',
+        0x50: 'byline',
+        0x55: 'bylineTitle',
+        0x7A: 'captionWriter',
+        0x69: 'headline',
+        0x74: 'copyright',
+        0x0F: 'category'
+    };
+
+    function readIPTCData(file, startOffset, sectionLength) {
+        var dataView = new DataView(file);
+        var data = {};
+        var fieldValue, fieldName, dataSize, segmentType, segmentSize;
+        var segmentStartPos = startOffset;
+        while (segmentStartPos < startOffset + sectionLength) {
+            if (dataView.getUint8(segmentStartPos) === 0x1C && dataView.getUint8(segmentStartPos + 1) === 0x02) {
+                segmentType = dataView.getUint8(segmentStartPos + 2);
+                if (segmentType in IptcFieldMap) {
+                    dataSize = dataView.getInt16(segmentStartPos + 3);
+                    segmentSize = dataSize + 5;
+                    fieldName = IptcFieldMap[segmentType];
+                    fieldValue = getStringFromDB(dataView, segmentStartPos + 5, dataSize);
+                    // Check if we already stored a value with this name
+                    if (data.hasOwnProperty(fieldName)) {
+                        // Value already stored with this name, create multivalue field
+                        if (data[fieldName] instanceof Array) {
+                            data[fieldName].push(fieldValue);
+                        } else {
+                            data[fieldName] = [data[fieldName], fieldValue];
+                        }
+                    } else {
+                        data[fieldName] = fieldValue;
+                    }
+                }
+
+            }
+            segmentStartPos++;
+        }
+        return data;
+    }
+
+    function readTags(file, tiffStart, dirStart, strings, bigEnd) {
+        var entries = file.getUint16(dirStart, !bigEnd),
+            tags = {},
+            entryOffset, tag,
+            i;
+
+        for (i = 0; i < entries; i++) {
+            entryOffset = dirStart + i * 12 + 2;
+            tag = strings[file.getUint16(entryOffset, !bigEnd)];
+            if (!tag && debug) console.log("Unknown tag: " + file.getUint16(entryOffset, !bigEnd));
+            tags[tag] = readTagValue(file, entryOffset, tiffStart, dirStart, bigEnd);
+        }
+        return tags;
+    }
+
+    function readTagValue(file, entryOffset, tiffStart, dirStart, bigEnd) {
+        var type = file.getUint16(entryOffset + 2, !bigEnd),
+            numValues = file.getUint32(entryOffset + 4, !bigEnd),
+            valueOffset = file.getUint32(entryOffset + 8, !bigEnd) + tiffStart,
+            offset,
+            vals, val, n,
+            numerator, denominator;
+
+        switch (type) {
+            case 1: // byte, 8-bit unsigned int
+            case 7: // undefined, 8-bit byte, value depending on field
+                if (numValues == 1) {
+                    return file.getUint8(entryOffset + 8, !bigEnd);
+                } else {
+                    offset = numValues > 4 ? valueOffset : (entryOffset + 8);
+                    vals = [];
+                    for (n = 0; n < numValues; n++) {
+                        vals[n] = file.getUint8(offset + n);
+                    }
+                    return vals;
+                }
+
+            case 2: // ascii, 8-bit byte
+                offset = numValues > 4 ? valueOffset : (entryOffset + 8);
+                return getStringFromDB(file, offset, numValues - 1);
+
+            case 3: // short, 16 bit int
+                if (numValues == 1) {
+                    return file.getUint16(entryOffset + 8, !bigEnd);
+                } else {
+                    offset = numValues > 2 ? valueOffset : (entryOffset + 8);
+                    vals = [];
+                    for (n = 0; n < numValues; n++) {
+                        vals[n] = file.getUint16(offset + 2 * n, !bigEnd);
+                    }
+                    return vals;
+                }
+
+            case 4: // long, 32 bit int
+                if (numValues == 1) {
+                    return file.getUint32(entryOffset + 8, !bigEnd);
+                } else {
+                    vals = [];
+                    for (n = 0; n < numValues; n++) {
+                        vals[n] = file.getUint32(valueOffset + 4 * n, !bigEnd);
+                    }
+                    return vals;
+                }
+
+            case 5: // rational = two long values, first is numerator, second is denominator
+                if (numValues == 1) {
+                    numerator = file.getUint32(valueOffset, !bigEnd);
+                    denominator = file.getUint32(valueOffset + 4, !bigEnd);
+                    val = new Number(numerator / denominator);
+                    val.numerator = numerator;
+                    val.denominator = denominator;
+                    return val;
+                } else {
+                    vals = [];
+                    for (n = 0; n < numValues; n++) {
+                        numerator = file.getUint32(valueOffset + 8 * n, !bigEnd);
+                        denominator = file.getUint32(valueOffset + 4 + 8 * n, !bigEnd);
+                        vals[n] = new Number(numerator / denominator);
+                        vals[n].numerator = numerator;
+                        vals[n].denominator = denominator;
+                    }
+                    return vals;
+                }
+
+            case 9: // slong, 32 bit signed int
+                if (numValues == 1) {
+                    return file.getInt32(entryOffset + 8, !bigEnd);
+                } else {
+                    vals = [];
+                    for (n = 0; n < numValues; n++) {
+                        vals[n] = file.getInt32(valueOffset + 4 * n, !bigEnd);
+                    }
+                    return vals;
+                }
+
+            case 10: // signed rational, two slongs, first is numerator, second is denominator
+                if (numValues == 1) {
+                    return file.getInt32(valueOffset, !bigEnd) / file.getInt32(valueOffset + 4, !bigEnd);
+                } else {
+                    vals = [];
+                    for (n = 0; n < numValues; n++) {
+                        vals[n] = file.getInt32(valueOffset + 8 * n, !bigEnd) / file.getInt32(valueOffset + 4 + 8 * n, !bigEnd);
+                    }
+                    return vals;
+                }
+        }
+    }
+
+    function getStringFromDB(buffer, start, length) {
+        var outstr = "";
+        for (var n = start; n < start + length; n++) {
+            outstr += String.fromCharCode(buffer.getUint8(n));
+        }
+        return outstr;
+    }
+
+    function readEXIFData(file, start) {
+        if (getStringFromDB(file, start, 4) != "Exif") {
+            if (debug) console.log("Not valid EXIF data! " + getStringFromDB(file, start, 4));
+            return false;
+        }
+
+        var bigEnd,
+            tags, tag,
+            exifData, gpsData,
+            tiffOffset = start + 6;
+
+        // test for TIFF validity and endianness
+        if (file.getUint16(tiffOffset) == 0x4949) {
+            bigEnd = false;
+        } else if (file.getUint16(tiffOffset) == 0x4D4D) {
+            bigEnd = true;
+        } else {
+            if (debug) console.log("Not valid TIFF data! (no 0x4949 or 0x4D4D)");
+            return false;
+        }
+
+        if (file.getUint16(tiffOffset + 2, !bigEnd) != 0x002A) {
+            if (debug) console.log("Not valid TIFF data! (no 0x002A)");
+            return false;
+        }
+
+        var firstIFDOffset = file.getUint32(tiffOffset + 4, !bigEnd);
+
+        if (firstIFDOffset < 0x00000008) {
+            if (debug) console.log("Not valid TIFF data! (First offset less than 8)", file.getUint32(tiffOffset + 4, !bigEnd));
+            return false;
+        }
+
+        tags = readTags(file, tiffOffset, tiffOffset + firstIFDOffset, TiffTags, bigEnd);
+
+        if (tags.ExifIFDPointer) {
+            exifData = readTags(file, tiffOffset, tiffOffset + tags.ExifIFDPointer, ExifTags, bigEnd);
+            for (tag in exifData) {
+                switch (tag) {
+                    case "LightSource":
+                    case "Flash":
+                    case "MeteringMode":
+                    case "ExposureProgram":
+                    case "SensingMethod":
+                    case "SceneCaptureType":
+                    case "SceneType":
+                    case "CustomRendered":
+                    case "WhiteBalance":
+                    case "GainControl":
+                    case "Contrast":
+                    case "Saturation":
+                    case "Sharpness":
+                    case "SubjectDistanceRange":
+                    case "FileSource":
+                        exifData[tag] = StringValues[tag][exifData[tag]];
+                        break;
+
+                    case "ExifVersion":
+                    case "FlashpixVersion":
+                        exifData[tag] = String.fromCharCode(exifData[tag][0], exifData[tag][1], exifData[tag][2], exifData[tag][3]);
+                        break;
+
+                    case "ComponentsConfiguration":
+                        exifData[tag] =
+                            StringValues.Components[exifData[tag][0]] +
+                            StringValues.Components[exifData[tag][1]] +
+                            StringValues.Components[exifData[tag][2]] +
+                            StringValues.Components[exifData[tag][3]];
+                        break;
+                }
+                tags[tag] = exifData[tag];
+            }
+        }
+
+        if (tags.GPSInfoIFDPointer) {
+            gpsData = readTags(file, tiffOffset, tiffOffset + tags.GPSInfoIFDPointer, GPSTags, bigEnd);
+            for (tag in gpsData) {
+                switch (tag) {
+                    case "GPSVersionID":
+                        gpsData[tag] = gpsData[tag][0] +
+                            "." + gpsData[tag][1] +
+                            "." + gpsData[tag][2] +
+                            "." + gpsData[tag][3];
+                        break;
+                }
+                tags[tag] = gpsData[tag];
+            }
+        }
+
+        return tags;
+    }
+
+    this.getData = function(img, callback) {
+        if ((img instanceof Image || img instanceof HTMLImageElement) && !img.complete) return false;
+
+        if (!imageHasData(img)) {
+            getImageData(img, callback);
+        } else {
+            if (callback) {
+                callback.call(img);
+            }
+        }
+        return true;
+    }
+
+    this.getTag = function(img, tag) {
+        if (!imageHasData(img)) return;
+        return img.exifdata[tag];
+    }
+
+    this.getAllTags = function(img) {
+        if (!imageHasData(img)) return {};
+        var a,
+            data = img.exifdata,
+            tags = {};
+        for (a in data) {
+            if (data.hasOwnProperty(a)) {
+                tags[a] = data[a];
+            }
+        }
+        return tags;
+    }
+
+    this.pretty = function(img) {
+        if (!imageHasData(img)) return "";
+        var a,
+            data = img.exifdata,
+            strPretty = "";
+        for (a in data) {
+            if (data.hasOwnProperty(a)) {
+                if (typeof data[a] == "object") {
+                    if (data[a] instanceof Number) {
+                        strPretty += a + " : " + data[a] + " [" + data[a].numerator + "/" + data[a].denominator + "]\r\n";
+                    } else {
+                        strPretty += a + " : [" + data[a].length + " values]\r\n";
+                    }
+                } else {
+                    strPretty += a + " : " + data[a] + "\r\n";
+                }
+            }
+        }
+        return strPretty;
+    }
+
+    this.readFromBinaryFile = function(file) {
+        return findEXIFinJPEG(file);
+    }
+}]);
+
+crop.factory('cropHost', ['$document', '$q', 'cropAreaCircle', 'cropAreaSquare', 'cropAreaRectangle', 'cropEXIF', function($document, $q, CropAreaCircle, CropAreaSquare, CropAreaRectangle, cropEXIF) {
+    /* STATIC FUNCTIONS */
+
+    // Get Element's Offset
+    var getElementOffset = function(elem) {
+        var box = elem.getBoundingClientRect();
+
+        var body = document.body;
+        var docElem = document.documentElement;
+
+        var scrollTop = window.pageYOffset || docElem.scrollTop || body.scrollTop;
+        var scrollLeft = window.pageXOffset || docElem.scrollLeft || body.scrollLeft;
+
+        var clientTop = docElem.clientTop || body.clientTop || 0;
+        var clientLeft = docElem.clientLeft || body.clientLeft || 0;
+
+        var top = box.top + scrollTop - clientTop;
+        var left = box.left + scrollLeft - clientLeft;
+
+        var colorPaletteLength = 8;
+
+        return {
+            top: Math.round(top),
+            left: Math.round(left)
+        };
+    };
+
+    return function(elCanvas, opts, events) {
+        /* PRIVATE VARIABLES */
+
+        // Object Pointers
+        var ctx = null,
+            image = null,
+            theArea = null,
+            initMax = null,
+            isAspectRatio = null,
+            self = this,
+
+            // Dimensions
+            minCanvasDims = [100, 100],
+            maxCanvasDims = [300, 300],
+
+            // Result Image size
+            resImgSizeArray = [],
+            resImgSize = {
+                w: 200,
+                h: 200
+            },
+            areaMinRelativeSize = null,
+
+            // Result Image type
+            resImgFormat = 'image/png',
+
+            // Result Image quality
+            resImgQuality = null,
+
+            forceAspectRatio = false;
+
+        /* PRIVATE FUNCTIONS */
+        this.setInitMax = function(bool){
+            initMax=bool;
+        }
+        this.setAllowCropResizeOnCorners = function(bool){
+            theArea.setAllowCropResizeOnCorners(bool);
+        }
+        // Draw Scene
+        function drawScene() {
+            // clear canvas
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            if (image !== null) {
+                // draw source image
+                ctx.drawImage(image, 0, 0, ctx.canvas.width, ctx.canvas.height);
+
+                ctx.save();
+
+                // and make it darker
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+                ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+                ctx.restore();
+
+                // draw Area
+                theArea.draw();
+            }
+        }
+
+        // Resets CropHost
+        var resetCropHost = function() {
+            if (image !== null) {
+                theArea.setImage(image);
+                var imageDims = [image.width, image.height],
+                    imageRatio = image.width / image.height,
+                    canvasDims = imageDims;
+
+                if (canvasDims[0] > maxCanvasDims[0]) {
+                    canvasDims[0] = maxCanvasDims[0];
+                    canvasDims[1] = canvasDims[0] / imageRatio;
+                } else if (canvasDims[0] < minCanvasDims[0]) {
+                    canvasDims[0] = minCanvasDims[0];
+                    canvasDims[1] = canvasDims[0] / imageRatio;
+                }
+                if (canvasDims[1] > maxCanvasDims[1]) {
+                    canvasDims[1] = maxCanvasDims[1];
+                    canvasDims[0] = canvasDims[1] * imageRatio;
+                } else if (canvasDims[1] < minCanvasDims[1]) {
+                    canvasDims[1] = minCanvasDims[1];
+                    canvasDims[0] = canvasDims[1] * imageRatio;
+                }
+                elCanvas.prop('width', canvasDims[0]).prop('height', canvasDims[1]).css({
+                    'margin-left': -canvasDims[0] / 2 + 'px',
+                    'margin-top': -canvasDims[1] / 2 + 'px'
+                });
+
+                var cw = ctx.canvas.width;
+                var ch = ctx.canvas.height;
+
+                var areaType = self.getAreaType();
+                // enforce 1:1 aspect ratio for square-like selections
+                if ((areaType === 'circle') || (areaType === 'square')) {
+                    if(ch < cw) cw = ch;
+                    else ch = cw;
+                }else if(areaType === 'rectangle' && isAspectRatio){
+                  var aspectRatio = theArea.getAspect(); // use `aspectRatio` instead of `resImgSize` dimensions bc `resImgSize` can be 'selection' string
+                    if(cw/ch > aspectRatio){
+                        cw = aspectRatio * ch;
+                    }else{
+                        ch = aspectRatio * cw;
+                    }
+                }
+
+                if(initMax){
+                    theArea.setSize({
+                        w: cw,
+                        h: ch
+                    });
+                }else if(undefined !== theArea.getInitSize() ) {
+                    theArea.setSize({
+                        w: Math.min(theArea.getInitSize().w, cw / 2),
+                        h: Math.min(theArea.getInitSize().h, ch / 2)
+                    });
+                } else {
+                    theArea.setSize({
+                        w: Math.min(200, cw / 2),
+                        h: Math.min(200, ch / 2)
+                    });
+                }
+
+                if(theArea.getInitCoords()) {
+                    if (self.areaInitIsRelativeToImage) {
+                        var ratio = image.width / canvasDims[0];
+                        theArea.setSize({
+                            w: theArea.getInitSize().w / ratio,
+                            h: theArea.getInitSize().h / ratio,
+                            x: theArea.getInitCoords().x / ratio,
+                            y: theArea.getInitCoords().y / ratio
+                        });
+                    } else {
+                        theArea.setSize({
+                            w: theArea.getSize().w,
+                            h: theArea.getSize().h,
+                            x: theArea.getInitCoords().x,
+                            y: theArea.getInitCoords().y
+                        });
+                    }
+                } else {
+                    theArea.setCenterPoint({
+                        x: ctx.canvas.width / 2,
+                        y: ctx.canvas.height / 2
+                    });
+                }
+
+            } else {
+                elCanvas.prop('width', 0).prop('height', 0).css({
+                    'margin-top': 0
+                });
+            }
+
+            drawScene();
+        };
+
+        var getChangedTouches = function(event) {
+            if (angular.isDefined(event.changedTouches)) {
+                return event.changedTouches;
+            } else {
+                return event.originalEvent.changedTouches;
+            }
+        };
+
+        var onMouseMove = function(e) {
+            if (image !== null) {
+                var offset = getElementOffset(ctx.canvas),
+                    pageX, pageY;
+                if (e.type === 'touchmove') {
+                    pageX = getChangedTouches(e)[0].pageX;
+                    pageY = getChangedTouches(e)[0].pageY;
+                } else {
+                    pageX = e.pageX;
+                    pageY = e.pageY;
+                }
+                theArea.processMouseMove(pageX - offset.left, pageY - offset.top);
+                drawScene();
+            }
+        };
+
+        var onMouseDown = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (image !== null) {
+                var offset = getElementOffset(ctx.canvas),
+                    pageX, pageY;
+                if (e.type === 'touchstart') {
+                    pageX = getChangedTouches(e)[0].pageX;
+                    pageY = getChangedTouches(e)[0].pageY;
+                } else {
+                    pageX = e.pageX;
+                    pageY = e.pageY;
+                }
+                theArea.processMouseDown(pageX - offset.left, pageY - offset.top);
+                drawScene();
+            }
+        };
+
+        var onMouseUp = function(e) {
+            if (image !== null) {
+                var offset = getElementOffset(ctx.canvas),
+                    pageX, pageY;
+                if (e.type === 'touchend') {
+                    pageX = getChangedTouches(e)[0].pageX;
+                    pageY = getChangedTouches(e)[0].pageY;
+                } else {
+                    pageX = e.pageX;
+                    pageY = e.pageY;
+                }
+                theArea.processMouseUp(pageX - offset.left, pageY - offset.top);
+                drawScene();
+            }
+        };
+
+        var renderImageToDataURL = function(getResultImageSize){
+            var temp_ctx, temp_canvas,
+                ris = getResultImageSize,
+                center = theArea.getCenterPoint(),
+                retObj = {
+                    dataURI: null,
+                    imageData: null
+                };
+            temp_canvas = angular.element('<canvas></canvas>')[0];
+            temp_ctx = temp_canvas.getContext('2d');
+            temp_canvas.width = ris.w;
+            temp_canvas.height = ris.h;
+            if (image !== null) {
+                var x = (center.x - theArea.getSize().w / 2) * (image.width / ctx.canvas.width),
+                    y = (center.y - theArea.getSize().h / 2) * (image.height / ctx.canvas.height),
+                    areaWidth = theArea.getSize().w * (image.width / ctx.canvas.width),
+                    areaHeight = theArea.getSize().h * (image.height / ctx.canvas.height);
+
+                if (forceAspectRatio) {
+                    temp_ctx.drawImage(image, x, y,
+                        areaWidth,
+                        areaHeight,
+                        0,
+                        0,
+                        ris.w,
+                        ris.h);
+                } else {
+                    var aspectRatio = areaWidth / areaHeight;
+                    var resultHeight, resultWidth;
+
+                    if (aspectRatio > 1) {
+                        resultWidth = ris.w;
+                        resultHeight = resultWidth / aspectRatio;
+                    } else {
+                        resultHeight = ris.h;
+                        resultWidth = resultHeight * aspectRatio;
+                    }
+
+                    temp_ctx.drawImage(image,
+                        x,
+                        y,
+                        areaWidth,
+                        areaHeight,
+                        0,
+                        0,
+                        Math.round(resultWidth),
+                        Math.round(resultHeight));
+                }
+
+                if (resImgQuality !== null) {
+                    retObj.dataURI = temp_canvas.toDataURL(resImgFormat, resImgQuality);
+                } else {
+                    retObj.dataURI = temp_canvas.toDataURL(resImgFormat);
+                }
+            }
+            return retObj;
+        };
+
+        this.getResultImage = function() {
+            if(resImgSizeArray.length==0){
+                return renderImageToDataURL(this.getResultImageSize());
+            }else{
+                var arrayResultImages=[];
+                for (var i = 0; i < resImgSizeArray.length; i++) {
+                    arrayResultImages.push({
+                        dataURI:renderImageToDataURL(resImgSizeArray[i]).dataURI,
+                        w:resImgSizeArray[i].w,
+                        h:resImgSizeArray[i].h
+                    });
+                };
+                return arrayResultImages;
+            }
+        };
+
+        this.getResultImageDataBlob = function() {
+            var temp_ctx, temp_canvas,
+                center = theArea.getCenterPoint(),
+                ris = this.getResultImageSize(),
+                _p = $q.defer();
+            temp_canvas = angular.element('<canvas></canvas>')[0];
+            temp_ctx = temp_canvas.getContext('2d');
+            temp_canvas.width = ris.w;
+            temp_canvas.height = ris.h;
+            if (image !== null) {
+                var x = (center.x - theArea.getSize().w / 2) * (image.width / ctx.canvas.width),
+                    y = (center.y - theArea.getSize().h / 2) * (image.height / ctx.canvas.height),
+                    areaWidth = theArea.getSize().w * (image.width / ctx.canvas.width),
+                    areaHeight = theArea.getSize().h * (image.height / ctx.canvas.height);
+
+                if (forceAspectRatio) {
+                    temp_ctx.drawImage(image, x, y,
+                        areaWidth,
+                        areaHeight,
+                        0,
+                        0,
+                        ris.w,
+                        ris.h);
+                } else {
+                    var aspectRatio = areaWidth / areaHeight;
+                    var resultHeight, resultWidth;
+
+                    if (aspectRatio > 1) {
+                        resultWidth = ris.w;
+                        resultHeight = resultWidth / aspectRatio;
+                    } else {
+                        resultHeight = ris.h;
+                        resultWidth = resultHeight * aspectRatio;
+                    }
+
+                    temp_ctx.drawImage(image,
+                        x,
+                        y,
+                        areaWidth,
+                        areaHeight,
+                        0,
+                        0,
+                        Math.round(resultWidth),
+                        Math.round(resultHeight));
+                }
+            }
+
+            if (resImgQuality !== null) {
+                temp_canvas.toBlob(function(blob) {
+                    _p.resolve(blob);
+                }, resImgFormat, resImgQuality);
+            } else {
+                temp_canvas.toBlob(function(blob) {
+                    _p.resolve(blob);
+                }, resImgFormat);
+            }
+
+            return _p.promise;
+        };
+
+        this.getAreaCoords = function() {
+            return theArea.getSize()
+        };
+
+        this.getArea = function() {
+          return theArea;
+        }
+
+        this.setNewImageSource = function(imageSource) {
+            image = null;
+            resetCropHost();
+            events.trigger('image-updated');
+            if (!!imageSource) {
+                var newImage = new Image();
+                newImage.onload = function() {
+                    events.trigger('load-done');
+
+                    cropEXIF.getData(newImage, function() {
+                        var orientation = cropEXIF.getTag(newImage, 'Orientation');
+
+                        if ([3, 6, 8].indexOf(orientation) > -1) {
+                            var canvas = document.createElement("canvas"),
+                                ctx = canvas.getContext("2d"),
+                                cw = newImage.width,
+                                ch = newImage.height,
+                                cx = 0,
+                                cy = 0,
+                                deg = 0,
+                                rw = 0,
+                                rh = 0;
+                            rw = cw;
+                            rh = ch;
+                            switch (orientation) {
+                                case 3:
+                                    cx = -newImage.width;
+                                    cy = -newImage.height;
+                                    deg = 180;
+                                    break;
+                                case 6:
+                                    cw = newImage.height;
+                                    ch = newImage.width;
+                                    cy = -newImage.height;
+                                    rw = ch;
+                                    rh = cw;
+                                    deg = 90;
+                                    break;
+                                case 8:
+                                    cw = newImage.height;
+                                    ch = newImage.width;
+                                    cx = -newImage.width;
+                                    rw = ch;
+                                    rh = cw;
+                                    deg = 270;
+                                    break;
+                            }
+
+                            //// canvas.toDataURL will only work if the canvas isn't too large. Resize to 1000px.
+                            var maxWorH = 1000;
+                            if (cw > maxWorH || ch > maxWorH) {
+                                var p = 0;
+                                if (cw > maxWorH) {
+                                    p = (maxWorH) / cw;
+                                    cw = maxWorH;
+                                    ch = p * ch;
+                                } else if (ch > maxWorH) {
+                                    p = (maxWorH) / ch;
+                                    ch = maxWorH;
+                                    cw = p * cw;
+                                }
+
+                                cy = p * cy;
+                                cx = p * cx;
+                                rw = p * rw;
+                                rh = p * rh;
+                            }
+
+                            canvas.width = cw;
+                            canvas.height = ch;
+                            ctx.rotate(deg * Math.PI / 180);
+                            ctx.drawImage(newImage, cx, cy, rw, rh);
+
+                            image = new Image();
+                            image.onload = function () {
+                                resetCropHost();
+                                events.trigger('image-updated');
+                            };
+
+                            image.src = canvas.toDataURL(resImgFormat);
+                        } else {
+                            image = newImage;
+                        }
+                        resetCropHost();
+                        events.trigger('image-updated');
+                    });
+                };
+                newImage.onerror = function() {
+                    events.trigger('load-error');
+                };
+                events.trigger('load-start');
+                if (imageSource instanceof window.Blob) {
+                    newImage.src = URL.createObjectURL(imageSource);
+                } else {
+                    if (imageSource.substring(0, 4).toLowerCase() === 'http' || imageSource.substring(0, 2) === '//') {
+                      newImage.crossOrigin = 'anonymous';
+                    }
+                    newImage.src = imageSource;
+                }
+            }
+        };
+
+        this.setMaxDimensions = function(width, height) {
+            maxCanvasDims = [width, height];
+
+            if (image !== null) {
+                var curWidth = ctx.canvas.width,
+                    curHeight = ctx.canvas.height;
+
+                var imageDims = [image.width, image.height],
+                    imageRatio = image.width / image.height,
+                    canvasDims = imageDims;
+
+                if (canvasDims[0] > maxCanvasDims[0]) {
+                    canvasDims[0] = maxCanvasDims[0];
+                    canvasDims[1] = canvasDims[0] / imageRatio;
+                } else if (canvasDims[0] < minCanvasDims[0]) {
+                    canvasDims[0] = minCanvasDims[0];
+                    canvasDims[1] = canvasDims[0] / imageRatio;
+                }
+                if (canvasDims[1] > maxCanvasDims[1]) {
+                    canvasDims[1] = maxCanvasDims[1];
+                    canvasDims[0] = canvasDims[1] * imageRatio;
+                } else if (canvasDims[1] < minCanvasDims[1]) {
+                    canvasDims[1] = minCanvasDims[1];
+                    canvasDims[0] = canvasDims[1] * imageRatio;
+                }
+                elCanvas.prop('width', canvasDims[0]).prop('height', canvasDims[1]).css({
+                    'margin-left': -canvasDims[0] / 2 + 'px',
+                    'margin-top': -canvasDims[1] / 2 + 'px'
+                });
+
+                var ratioNewCurWidth = ctx.canvas.width / curWidth,
+                    ratioNewCurHeight = ctx.canvas.height / curHeight,
+                    ratioMin = Math.min(ratioNewCurWidth, ratioNewCurHeight);
+
+                //TODO: use top left corner point
+                var center = theArea.getCenterPoint();
+                theArea.setSize({
+                    w: theArea.getSize().w * ratioMin,
+                    h: theArea.getSize().h * ratioMin
+                });
+                theArea.setCenterPoint({
+                    x: center.x * ratioNewCurWidth,
+                    y: center.y * ratioNewCurHeight
+                });
+
+            } else {
+                elCanvas.prop('width', 0).prop('height', 0).css({
+                    'margin-top': 0
+                });
+            }
+
+            drawScene();
+
+        };
+
+        this.setAreaMinSize = function(size) {
+            if (angular.isUndefined(size)) {
+                return;
+            } else if (typeof size == 'number' || typeof size == 'string') {
+                size = {
+                    w: parseInt(parseInt(size), 10),
+                    h: parseInt(parseInt(size), 10)
+                };
+            } else {
+                size = {
+                    w: parseInt(size.w, 10),
+                    h: parseInt(size.h, 10)
+                };
+            }
+            if (!isNaN(size.w) && !isNaN(size.h)) {
+                theArea.setMinSize(size);
+                drawScene();
+            }
+        };
+
+        this.setAreaMinRelativeSize = function(size) {
+            if (image !== null) {
+              var canvasSize = theArea.getCanvasSize();
+              if (angular.isUndefined(size)) {
+                  return;
+              } else if(typeof size == 'number' || typeof size == 'string') {
+                  areaMinRelativeSize = {
+                      w: size,
+                      h: size
+                  };
+                  size = {
+                      w: canvasSize.w/(image.width/parseInt(parseInt(size), 10)),
+                      h: canvasSize.h/(image.height/parseInt(parseInt(size), 10))
+                  };
+              } else{
+                  areaMinRelativeSize = size;
+                  size = {
+                      w: canvasSize.w/(image.width/parseInt(parseInt(size.w), 10)),
+                      h: canvasSize.h/(image.height/parseInt(parseInt(size.h), 10))
+                  };
+              }
+              if (!isNaN(size.w) && !isNaN(size.h)) {
+                  theArea.setMinSize(size);
+                  drawScene();
+              }
+            }
+        };
+
+        this.setAreaInitSize = function(size) {
+            if (angular.isUndefined(size)) {
+                return;
+            }else if(typeof size == 'number' || typeof size == 'string'){
+                size = {
+                    w: parseInt(parseInt(size), 10),
+                    h: parseInt(parseInt(size), 10)
+                };
+            }else{
+                size = {
+                    w: parseInt(size.w, 10),
+                    h: parseInt(size.h, 10)
+                };
+            }
+            if (!isNaN(size.w) && !isNaN(size.h)) {
+                theArea.setInitSize(size);
+                drawScene();
+            }
+        };
+
+        this.setAreaInitCoords = function(coords) {
+            if (angular.isUndefined(coords)) {
+                return;
+            }else{
+                coords = {
+                    x: parseInt(coords.x, 10),
+                    y: parseInt(coords.y, 10)
+                };
+            }
+            if (!isNaN(coords.x) && !isNaN(coords.y)) {
+                theArea.setInitCoords(coords);
+                drawScene();
+            }
+        };
+
+        this.setMaxCanvasDimensions = function(maxCanvasDimensions) {
+            if (!angular.isUndefined(maxCanvasDimensions)) {
+                var newMaxCanvasDims = [];
+                if (typeof maxCanvasDimensions == 'number' || typeof maxCanvasDimensions == 'string') {
+                    newMaxCanvasDims = [
+                        parseInt(parseInt(maxCanvasDimensions), 10),
+                        parseInt(parseInt(maxCanvasDimensions), 10)
+                    ];
+                } else {
+                    newMaxCanvasDims = [
+                        parseInt(maxCanvasDimensions.w, 10),
+                        parseInt(maxCanvasDimensions.h, 10)
+                    ];
+                }
+                if ((!isNaN(newMaxCanvasDims[0]) && newMaxCanvasDims[0] > 0 && newMaxCanvasDims[0] > minCanvasDims[0])
+                    && (!isNaN(newMaxCanvasDims[1]) && newMaxCanvasDims[1] > 0 && newMaxCanvasDims[1] > minCanvasDims[1])) {
+                    maxCanvasDims = newMaxCanvasDims;
+                }
+            }
+        };
+
+        this.setMinCanvasDimensions = function(minCanvasDimensions) {
+            if (!angular.isUndefined(minCanvasDimensions)) {
+                var newMinCanvasDims = [];
+                if (typeof minCanvasDimensions == 'number' || typeof minCanvasDimensions == 'string') {
+                    newMinCanvasDims = [
+                        parseInt(parseInt(minCanvasDimensions), 10),
+                        parseInt(parseInt(minCanvasDimensions), 10)
+                    ];
+                } else {
+                    newMinCanvasDims = [
+                        parseInt(minCanvasDimensions.w, 10),
+                        parseInt(minCanvasDimensions.h, 10)
+                    ];
+                }
+                if ((!isNaN(newMinCanvasDims[0]) && newMinCanvasDims[0] >= 0)
+                    && (!isNaN(newMinCanvasDims[1]) && newMinCanvasDims[1] >= 0)) {
+                    minCanvasDims = newMinCanvasDims;
+                }
+            }
+        };
+
+        this.getResultImageSize = function() {
+            if (resImgSize == "selection") {
+                return theArea.getSize();
+            }else if(resImgSize == "max") {
+                 // We maximize the rendered size
+                var zoom = 1;
+                if (image && ctx && ctx.canvas) {
+                    zoom = image.width / ctx.canvas.width;
+                }
+                var size = {
+                    w: zoom * theArea.getSize().w,
+                    h: zoom * theArea.getSize().h
+                };
+
+                if (areaMinRelativeSize) {
+                  if (size.w < areaMinRelativeSize.w) {
+                    size.w = areaMinRelativeSize.w;
+                  }
+                  if (size.h < areaMinRelativeSize.h) {
+                    size.h = areaMinRelativeSize.h;
+                  }
+                }
+
+                return size;
+            }
+
+            return resImgSize;
+        };
+
+        this.setResultImageSize = function(size) {
+            if(angular.isArray(size)){
+                resImgSizeArray=size.slice();
+                size = {
+                    w: parseInt(size[0].w, 10),
+                    h: parseInt(size[0].h, 10)
+                };
+                return;
+            }
+            if (angular.isUndefined(size)) {
+                return;
+            }
+            //allow setting of size to "selection" for mirroring selection's dimensions
+            if (angular.isString(size)) {
+                resImgSize = size;
+                return;
+            }
+            //allow scalar values for square-like selection shapes
+            if (angular.isNumber(size)) {
+                size = parseInt(size, 10);
+                size = {
+                    w: size,
+                    h: size
+                };
+            }
+            size = {
+                w: parseInt(size.w, 10),
+                h: parseInt(size.h, 10)
+            };
+            if (!isNaN(size.w) && !isNaN(size.h)) {
+                resImgSize = size;
+                drawScene();
+            }
+        };
+
+        this.setResultImageFormat = function(format) {
+            resImgFormat = format;
+        };
+
+        this.setResultImageQuality = function(quality) {
+            quality = parseFloat(quality);
+            if (!isNaN(quality) && quality >= 0 && quality <= 1) {
+                resImgQuality = quality;
+            }
+        };
+
+        // returns a string of the selection area's type
+        this.getAreaType = function() {
+            return theArea.getType();
+        }
+
+        this.setAreaType = function(type) {
+            var center = theArea.getCenterPoint();
+            var curSize = theArea.getSize(),
+                curMinSize = theArea.getMinSize(),
+                curX = center.x,
+                curY = center.y;
+
+            var AreaClass = CropAreaCircle;
+            if (type === 'square') {
+                AreaClass = CropAreaSquare;
+            } else if (type === 'rectangle') {
+                AreaClass = CropAreaRectangle;
+            }
+            theArea = new AreaClass(ctx, events);
+            theArea.setMinSize(curMinSize);
+            theArea.setSize(curSize);
+            if (type === 'square' || type === 'circle') {
+                forceAspectRatio = true;
+                theArea.setForceAspectRatio(true);
+            }else{
+                forceAspectRatio = false;
+                theArea.setForceAspectRatio(false);
+            }
+
+            //TODO: use top left point
+            theArea.setCenterPoint({
+                x: curX,
+                y: curY
+            });
+
+            // resetCropHost();
+            if (image !== null) {
+                theArea.setImage(image);
+            }
+
+            drawScene();
+        };
+
+        this.getDominantColor = function(uri) {
+            var imageDC = new Image(),
+                colorThief = new ColorThief(),
+                dominantColor = null,
+                _p = $q.defer();
+            imageDC.src = uri;
+            imageDC.onload = function() {
+                dominantColor = colorThief.getColor(imageDC);
+                _p.resolve(dominantColor);
+            };
+
+            return _p.promise;
+        };
+
+        this.getPalette = function(uri) {
+            var imageDC = new Image(),
+                colorThief = new ColorThief(),
+                palette = null,
+                _p = $q.defer();
+            imageDC.src = uri;
+            imageDC.onload = function() {
+                palette = colorThief.getPalette(imageDC, colorPaletteLength);
+                _p.resolve(palette);
+            };
+
+            return _p.promise;
+        };
+
+        this.setPaletteColorLength = function(lg) {
+            colorPaletteLength = lg;
+        };
+
+        this.setAspect = function(aspect) {
+            isAspectRatio=true;
+            theArea.setAspect(aspect);
+            var minSize = theArea.getMinSize();
+            minSize.w=minSize.h*aspect;
+            theArea.setMinSize(minSize);
+            var size = theArea.getSize();
+            size.w=size.h*aspect;
+            theArea.setSize(size);
+        };
+
+        /* Life Cycle begins */
+
+        // Init Context var
+        ctx = elCanvas[0].getContext('2d');
+
+        // Init CropArea
+        theArea = new CropAreaCircle(ctx, events);
+
+        // Init Mouse Event Listeners
+        $document.on('mousemove', onMouseMove);
+        elCanvas.on('mousedown', onMouseDown);
+        $document.on('mouseup', onMouseUp);
+
+        // Init Touch Event Listeners
+        $document.on('touchmove', onMouseMove);
+        elCanvas.on('touchstart', onMouseDown);
+        $document.on('touchend', onMouseUp);
+
+        // CropHost Destructor
+        this.destroy = function() {
+            $document.off('mousemove', onMouseMove);
+            elCanvas.off('mousedown', onMouseDown);
+            $document.off('mouseup', onMouseMove);
+
+            $document.off('touchmove', onMouseMove);
+            elCanvas.off('touchstart', onMouseDown);
+            $document.off('touchend', onMouseMove);
+
+            elCanvas.remove();
+        };
+    };
+}]);
+
+crop.factory('cropPubSub', [function() {
+    return function() {
+        var events = {};
+        // Subscribe
+        this.on = function(names, handler) {
+            names.split(' ').forEach(function(name) {
+                if (!events[name]) {
+                    events[name] = [];
+                }
+                events[name].push(handler);
+            });
+            return this;
+        };
+        // Publish
+        this.trigger = function(name, args) {
+            angular.forEach(events[name], function(handler) {
+                handler.call(null, args);
+            });
+            return this;
+        };
+    };
+}]);
+
+crop.directive('imgCrop', ['$timeout', 'cropHost', 'cropPubSub', function ($timeout, CropHost, CropPubSub) {
+    return {
+        restrict: 'E',
+        scope: {
+            image: '=',
+            resultImage: '=',
+            resultArrayImage: '=?',
+            resultBlob: '=?',
+            urlBlob: '=?',
+            chargement: '=?',
+            cropject: '=?',
+            maxCanvasDimensions: '=?',
+            minCanvasDimensions: '=?',
+
+            changeOnFly: '=?',
+            liveView: '=?',
+            initMaxArea: '=?',
+            areaCoords: '=?',
+            areaType: '@',
+            areaMinSize: '=?',
+            areaInitSize: '=?',
+            areaInitCoords: '=?',
+            areaInitIsRelativeToImage: '=?', /* Boolean: If true the areaInitCoords and areaInitSize is scaled according to canvas size. */
+                                             /* No matter how big/small the canvas is, the resultImage remains the same */
+                                             /* Example: areaInitCoords are {x: 100, y: 100}, areaInitSize {w: 100, h: 100}   */
+                                             /* Image is 1000x1000
+                                             /* if canvas is 500x500 Crop coordinates will be x: 50, y: 50, w: 50, h: 50 */
+                                             /* if canvas is 100x100 crop coordinates will be x: 10, y: 10, w: 10, h: 10 */
+            areaMinRelativeSize: '=?',
+            resultImageSize: '=?',
+            resultImageFormat: '=?',
+            resultImageQuality: '=?',
+
+            aspectRatio: '=?',
+            allowCropResizeOnCorners: '=?',
+
+            dominantColor: '=?',
+            paletteColor: '=?',
+            paletteColorLength: '=?',
+
+            onChange: '&',
+            onLoadBegin: '&',
+            onLoadDone: '&',
+            onLoadError: '&'
+        },
+        template: '<canvas></canvas>',
+        controller: ['$scope', function ($scope) {
+            $scope.events = new CropPubSub();
+        }],
+        link: function (scope, element) {
+
+            if (scope.liveView && typeof scope.liveView.block == 'boolean') {
+                scope.liveView.render = function (callback) {
+                    updateResultImage(scope, true, callback);
+                }
+            } else scope.liveView = {block: false};
+
+            // Init Events Manager
+            var events = scope.events;
+
+            // Init Crop Host
+            var cropHost = new CropHost(element.find('canvas'), {}, events);
+
+            // Store Result Image to check if it's changed
+            var storedResultImage;
+
+            var updateResultImage = function (scope, force, callback) {
+                if (scope.image !== '' && (!scope.liveView.block || force)) {
+                    var resultImageObj = cropHost.getResultImage();
+                    if (angular.isArray(resultImageObj)) {
+                        resultImage = resultImageObj[0].dataURI;
+                        scope.resultArrayImage = resultImageObj;
+                        console.log(scope.resultArrayImage);
+                    } else var resultImage = resultImageObj.dataURI;
+
+                    var urlCreator = window.URL || window.webkitURL;
+                    if (storedResultImage !== resultImage) {
+                        storedResultImage = resultImage;
+                        scope.resultImage = resultImage;
+                        if (scope.liveView.callback) scope.liveView.callback(resultImage);
+                        if (callback) callback(resultImage);
+                        cropHost.getResultImageDataBlob().then(function (blob) {
+                            scope.resultBlob = blob;
+                            scope.urlBlob = urlCreator.createObjectURL(blob);
+                        });
+
+                        if (scope.resultImage) {
+                            cropHost.getDominantColor(scope.resultImage).then(function (dominantColor) {
+                                scope.dominantColor = dominantColor;
+                            });
+                            cropHost.getPalette(scope.resultImage).then(function (palette) {
+                                scope.paletteColor = palette;
+                            });
+                        }
+
+                        updateAreaCoords(scope);
+                        scope.onChange({
+                            $dataURI: scope.resultImage
+                        });
+                    }
+                }
+            };
+
+            var updateAreaCoords = function (scope) {
+                var areaCoords = cropHost.getAreaCoords();
+                scope.areaCoords = areaCoords;
+            };
+
+            var updateCropject = function (scope) {
+                var areaCoords = cropHost.getAreaCoords();
+
+                var dimRatio = {
+                  x: cropHost.getArea().getImage().width / cropHost.getArea().getCanvasSize().w,
+                  y: cropHost.getArea().getImage().height / cropHost.getArea().getCanvasSize().h
+                };
+
+                scope.cropject = {
+                    areaCoords: areaCoords,
+                    cropWidth: areaCoords.w,
+                    cropHeight: areaCoords.h,
+                    cropTop: areaCoords.y,
+                    cropLeft: areaCoords.x,
+                    cropImageWidth: Math.round(areaCoords.w * dimRatio.x),
+                    cropImageHeight: Math.round(areaCoords.h * dimRatio.y),
+                    cropImageTop: Math.round(areaCoords.y * dimRatio.y),
+                    cropImageLeft: Math.round(areaCoords.x * dimRatio.x)
+                };
+            };
+
+            // Wrapper to safely exec functions within $apply on a running $digest cycle
+            var fnSafeApply = function (fn) {
+                return function () {
+                    $timeout(function () {
+                        scope.$apply(function (scope) {
+                            fn(scope);
+                        });
+                    });
+                };
+            };
+
+            if (scope.chargement == null) scope.chargement = 'Chargement';
+            var displayLoading = function () {
+                element.append('<div class="loading"><span>' + scope.chargement + '...</span></div>')
+            };
+
+            // Setup CropHost Event Handlers
+            events
+                .on('load-start', fnSafeApply(function (scope) {
+                    scope.onLoadBegin({});
+                }))
+                .on('load-done', fnSafeApply(function (scope) {
+                    var children = element.children();
+                    angular.forEach(children, function (child, index) {
+                        if (angular.element(child).hasClass("loading"))
+                            angular.element(child).remove();
+                    });
+                    scope.onLoadDone({});
+                }))
+                .on('load-error', fnSafeApply(function (scope) {
+                    scope.onLoadError({});
+                }))
+                .on('area-move area-resize', fnSafeApply(function (scope) {
+                    if (!!scope.changeOnFly) {
+                        updateResultImage(scope);
+                    }
+                    updateCropject(scope);
+                }))
+                .on('area-move-end area-resize-end image-updated', fnSafeApply(function (scope) {
+                    updateResultImage(scope);
+                    updateCropject(scope);
+                }))
+                .on('image-updated', fnSafeApply(function(scope) {
+                    cropHost.setAreaMinRelativeSize(scope.areaMinRelativeSize);
+                }));
+
+            // Sync CropHost with Directive's options
+            scope.$watch('image', function (newVal) {
+                if (newVal) {
+                    displayLoading();
+                }
+                $timeout(function () {
+                    cropHost.setInitMax(scope.initMaxArea);
+                    cropHost.setNewImageSource(scope.image);
+                }, 100);
+            });
+            scope.$watch('areaType', function () {
+                cropHost.setAreaType(scope.areaType);
+                updateResultImage(scope);
+            });
+            scope.$watch('areaMinSize', function () {
+                cropHost.setAreaMinSize(scope.areaMinSize);
+                updateResultImage(scope);
+            });
+            scope.$watch('areaMinRelativeSize', function () {
+                if (scope.image !== '') {
+                    cropHost.setAreaMinRelativeSize(scope.areaMinRelativeSize);
+                    updateResultImage(scope);
+                }
+            });
+            scope.$watch('areaInitSize', function () {
+                cropHost.setAreaInitSize(scope.areaInitSize);
+                updateResultImage(scope);
+            });
+            scope.$watch('areaInitCoords', function () {
+                cropHost.setAreaInitCoords(scope.areaInitCoords);
+                cropHost.areaInitIsRelativeToImage = scope.areaInitIsRelativeToImage;
+                updateResultImage(scope);
+            });
+            scope.$watch('maxCanvasDimensions', function () {
+                cropHost.setMaxCanvasDimensions(scope.maxCanvasDimensions);
+            });
+            scope.$watch('minCanvasDimensions', function () {
+                cropHost.setMinCanvasDimensions(scope.minCanvasDimensions);
+            });
+            scope.$watch('resultImageFormat', function () {
+                cropHost.setResultImageFormat(scope.resultImageFormat);
+                updateResultImage(scope);
+            });
+            scope.$watch('resultImageQuality', function () {
+                cropHost.setResultImageQuality(scope.resultImageQuality);
+                updateResultImage(scope);
+            });
+            scope.$watch('resultImageSize', function () {
+                cropHost.setResultImageSize(scope.resultImageSize);
+                updateResultImage(scope);
+            });
+            scope.$watch('paletteColorLength', function () {
+                cropHost.setPaletteColorLength(scope.paletteColorLength);
+            });
+            scope.$watch('aspectRatio', function () {
+                if (typeof scope.aspectRatio == 'string' && scope.aspectRatio != '') {
+                    scope.aspectRatio = parseInt(scope.aspectRatio);
+                }
+                if (scope.aspectRatio) cropHost.setAspect(scope.aspectRatio);
+            });
+            scope.$watch('allowCropResizeOnCorners', function () {
+                if (scope.allowCropResizeOnCorners) cropHost.setAllowCropResizeOnCorners(scope.allowCropResizeOnCorners);
+            });
+
+            // Update CropHost dimensions when the directive element is resized
+            scope.$watch(
+                function () {
+                    return [element[0].clientWidth, element[0].clientHeight];
+                },
+                function (value) {
+                    if(value[0] > 0 && value[1] > 0) {
+                        cropHost.setMaxDimensions(value[0], value[1]);
+                        updateResultImage(scope);
+                    }
+                },
+                true
+            );
+
+            // Destroy CropHost Instance when the directive is destroying
+            scope.$on('$destroy', function () {
+                cropHost.destroy();
+            });
+        }
+    };
+}]);
+
+/* canvas-toBlob.js
+ * A canvas.toBlob() implementation.
+ * 2013-12-27
+ * 
+ * By Eli Grey, http://eligrey.com and Devin Samarin, https://github.com/eboyjr
+ * License: X11/MIT
+ *   See https://github.com/eligrey/canvas-toBlob.js/blob/master/LICENSE.md
+ */
+
+/*global self */
+/*jslint bitwise: true, regexp: true, confusion: true, es5: true, vars: true, white: true,
+  plusplus: true */
+
+/*! @source http://purl.eligrey.com/github/canvas-toBlob.js/blob/master/canvas-toBlob.js */
+
+(function(view) {
+    "use strict";
+    var
+        Uint8Array = view.Uint8Array,
+        HTMLCanvasElement = view.HTMLCanvasElement,
+        canvas_proto = HTMLCanvasElement && HTMLCanvasElement.prototype,
+        is_base64_regex = /\s*;\s*base64\s*(?:;|$)/i,
+        to_data_url = "toDataURL",
+        base64_ranks, decode_base64 = function(base64) {
+            var
+                len = base64.length,
+                buffer = new Uint8Array(len / 4 * 3 | 0),
+                i = 0,
+                outptr = 0,
+                last = [0, 0],
+                state = 0,
+                save = 0,
+                rank, code, undef;
+            while (len--) {
+                code = base64.charCodeAt(i++);
+                rank = base64_ranks[code - 43];
+                if (rank !== 255 && rank !== undef) {
+                    last[1] = last[0];
+                    last[0] = code;
+                    save = (save << 6) | rank;
+                    state++;
+                    if (state === 4) {
+                        buffer[outptr++] = save >>> 16;
+                        if (last[1] !== 61 /* padding character */ ) {
+                            buffer[outptr++] = save >>> 8;
+                        }
+                        if (last[0] !== 61 /* padding character */ ) {
+                            buffer[outptr++] = save;
+                        }
+                        state = 0;
+                    }
+                }
+            }
+            // 2/3 chance there's going to be some null bytes at the end, but that
+            // doesn't really matter with most image formats.
+            // If it somehow matters for you, truncate the buffer up outptr.
+            return buffer;
+        };
+    if (Uint8Array) {
+        base64_ranks = new Uint8Array([
+            62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, 0, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
+        ]);
+    }
+    if (HTMLCanvasElement && !canvas_proto.toBlob) {
+        canvas_proto.toBlob = function(callback, type /*, ...args*/ ) {
+            if (!type) {
+                type = "image/png";
+            }
+            if (this.mozGetAsFile) {
+                callback(this.mozGetAsFile("canvas", type));
+                return;
+            }
+            if (this.msToBlob && /^\s*image\/png\s*(?:$|;)/i.test(type)) {
+                callback(this.msToBlob());
+                return;
+            }
+
+            var
+                args = Array.prototype.slice.call(arguments, 1),
+                dataURI = this[to_data_url].apply(this, args),
+                header_end = dataURI.indexOf(","),
+                data = dataURI.substring(header_end + 1),
+                is_base64 = is_base64_regex.test(dataURI.substring(0, header_end)),
+                blob;
+            if (Blob.fake) {
+                // no reason to decode a data: URI that's just going to become a data URI again
+                blob = new Blob
+                if (is_base64) {
+                    blob.encoding = "base64";
+                } else {
+                    blob.encoding = "URI";
+                }
+                blob.data = data;
+                blob.size = data.length;
+            } else if (Uint8Array) {
+                if (is_base64) {
+                    blob = new Blob([decode_base64(data)], {
+                        type: type
+                    });
+                } else {
+                    blob = new Blob([decodeURIComponent(data)], {
+                        type: type
+                    });
+                }
+            }
+            if (typeof callback !== 'undefined') {
+                callback(blob);
+            }
+        };
+
+        if (canvas_proto.toDataURLHD) {
+            canvas_proto.toBlobHD = function() {
+                to_data_url = "toDataURLHD";
+                var blob = this.toBlob();
+                to_data_url = "toDataURL";
+                return blob;
+            }
+        } else {
+            canvas_proto.toBlobHD = canvas_proto.toBlob;
+        }
+    }
+}(typeof self !== "undefined" && self || typeof window !== "undefined" && window || this.content || this));
+
+/*!
+ * Color Thief v2.0
+ * by Lokesh Dhakar - http://www.lokeshdhakar.com
+ *
+ * Thanks
+ * ------
+ * Nick Rabinowitz - For creating quantize.js.
+ * John Schulz - For clean up and optimization. @JFSIII
+ * Nathan Spady - For adding drag and drop support to the demo page.
+ *
+ * License
+ * -------
+ * Copyright 2011, 2015 Lokesh Dhakar
+ * Released under the MIT license
+ * https://raw.githubusercontent.com/lokesh/color-thief/master/LICENSE
+ *
+ */
+(function() {
+    /*!
+     * Color Thief v2.0
+     * by Lokesh Dhakar - http://www.lokeshdhakar.com
+     *
+     * Thanks
+     * ------
+     * Nick Rabinowitz - For creating quantize.js.
+     * John Schulz - For clean up and optimization. @JFSIII
+     * Nathan Spady - For adding drag and drop support to the demo page.
+     *
+     * License
+     * -------
+     * Copyright 2011, 2015 Lokesh Dhakar
+     * Released under the MIT license
+     * https://raw.githubusercontent.com/lokesh/color-thief/master/LICENSE
+     *
+     */
+
+    /*
+      CanvasImage Class
+      Class that wraps the html image element and canvas.
+      It also simplifies some of the canvas context manipulation
+      with a set of helper functions.
+    */
+    var CanvasImage = function(image) {
+        this.canvas = document.createElement('canvas');
+        this.context = this.canvas.getContext('2d');
+
+        document.body.appendChild(this.canvas);
+
+        this.width = this.canvas.width = image.width;
+        this.height = this.canvas.height = image.height;
+
+        this.context.drawImage(image, 0, 0, this.width, this.height);
+    };
+
+    CanvasImage.prototype.clear = function() {
+        this.context.clearRect(0, 0, this.width, this.height);
+    };
+
+    CanvasImage.prototype.update = function(imageData) {
+        this.context.putImageData(imageData, 0, 0);
+    };
+
+    CanvasImage.prototype.getPixelCount = function() {
+        return this.width * this.height;
+    };
+
+    CanvasImage.prototype.getImageData = function() {
+        return this.context.getImageData(0, 0, this.width, this.height);
+    };
+
+    CanvasImage.prototype.removeCanvas = function() {
+        this.canvas.parentNode.removeChild(this.canvas);
+    };
+
+    var ColorThief = function() {};
+
+    /*
+     * getColor(sourceImage[, quality])
+     * returns {r: num, g: num, b: num}
+     *
+     * Use the median cut algorithm provided by quantize.js to cluster similar
+     * colors and return the base color from the largest cluster.
+     *
+     * Quality is an optional argument. It needs to be an integer. 1 is the highest quality settings.
+     * 10 is the default. There is a trade-off between quality and speed. The bigger the number, the
+     * faster a color will be returned but the greater the likelihood that it will not be the visually
+     * most dominant color.
+     *
+     * */
+    ColorThief.prototype.getColor = function(sourceImage, quality) {
+        var palette = this.getPalette(sourceImage, 5, quality);
+        var dominantColor = palette[0];
+        return dominantColor;
+    };
+
+    /*
+     * getPalette(sourceImage[, colorCount, quality])
+     * returns array[ {r: num, g: num, b: num}, {r: num, g: num, b: num}, ...]
+     *
+     * Use the median cut algorithm provided by quantize.js to cluster similar colors.
+     *
+     * colorCount determines the size of the palette; the number of colors returned. If not set, it
+     * defaults to 10.
+     *
+     * BUGGY: Function does not always return the requested amount of colors. It can be +/- 2.
+     *
+     * quality is an optional argument. It needs to be an integer. 1 is the highest quality settings.
+     * 10 is the default. There is a trade-off between quality and speed. The bigger the number, the
+     * faster the palette generation but the greater the likelihood that colors will be missed.
+     *
+     *
+     */
+    ColorThief.prototype.getPalette = function(sourceImage, colorCount, quality) {
+
+        if (typeof colorCount === 'undefined') {
+            colorCount = 10;
+        }
+        if (typeof quality === 'undefined' || quality < 1) {
+            quality = 10;
+        }
+
+        // Create custom CanvasImage object
+        var image = new CanvasImage(sourceImage);
+        var imageData = image.getImageData();
+        var pixels = imageData.data;
+        var pixelCount = image.getPixelCount();
+
+        // Store the RGB values in an array format suitable for quantize function
+        var pixelArray = [];
+        for (var i = 0, offset, r, g, b, a; i < pixelCount; i = i + quality) {
+            offset = i * 4;
+            r = pixels[offset + 0];
+            g = pixels[offset + 1];
+            b = pixels[offset + 2];
+            a = pixels[offset + 3];
+            // If pixel is mostly opaque and not white
+            if (a >= 125) {
+                if (!(r > 250 && g > 250 && b > 250)) {
+                    pixelArray.push([r, g, b]);
+                }
+            }
+        }
+
+        // Send array to quantize function which clusters values
+        // using median cut algorithm
+        var cmap = MMCQ.quantize(pixelArray, colorCount);
+        var palette = cmap ? cmap.palette() : null;
+
+        // Clean up
+        image.removeCanvas();
+
+        return palette;
+    };
+
+    /*!
+     * quantize.js Copyright 2008 Nick Rabinowitz.
+     * Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+     */
+
+    // fill out a couple protovis dependencies
+    /*!
+     * Block below copied from Protovis: http://mbostock.github.com/protovis/
+     * Copyright 2010 Stanford Visualization Group
+     * Licensed under the BSD License: http://www.opensource.org/licenses/bsd-license.php
+     */
+    if (!pv) {
+        var pv = {
+            map: function(array, f) {
+                var o = {};
+                return f ? array.map(function(d, i) {
+                    o.index = i;
+                    return f.call(o, d);
+                }) : array.slice();
+            },
+            naturalOrder: function(a, b) {
+                return (a < b) ? -1 : ((a > b) ? 1 : 0);
+            },
+            sum: function(array, f) {
+                var o = {};
+                return array.reduce(f ? function(p, d, i) {
+                    o.index = i;
+                    return p + f.call(o, d);
+                } : function(p, d) {
+                    return p + d;
+                }, 0);
+            },
+            max: function(array, f) {
+                return Math.max.apply(null, f ? pv.map(array, f) : array);
+            }
+        };
+    }
+
+    /**
+     * Basic Javascript port of the MMCQ (modified median cut quantization)
+     * algorithm from the Leptonica library (http://www.leptonica.com/).
+     * Returns a color map you can use to map original pixels to the reduced
+     * palette. Still a work in progress.
+     *
+     * @author Nick Rabinowitz
+     * @example
+
+    // array of pixels as [R,G,B] arrays
+    var myPixels = [[190,197,190], [202,204,200], [207,214,210], [211,214,211], [205,207,207]
+                    // etc
+                    ];
+    var maxColors = 4;
+
+    var cmap = MMCQ.quantize(myPixels, maxColors);
+    var newPalette = cmap.palette();
+    var newPixels = myPixels.map(function(p) {
+        return cmap.map(p);
+    });
+
+     */
+    var MMCQ = (function() {
+        // private constants
+        var sigbits = 5,
+            rshift = 8 - sigbits,
+            maxIterations = 1000,
+            fractByPopulations = 0.75;
+
+        // get reduced-space color index for a pixel
+        function getColorIndex(r, g, b) {
+            return (r << (2 * sigbits)) + (g << sigbits) + b;
+        }
+
+        // Simple priority queue
+        function PQueue(comparator) {
+            var contents = [],
+                sorted = false;
+
+            function sort() {
+                contents.sort(comparator);
+                sorted = true;
+            }
+
+            return {
+                push: function(o) {
+                    contents.push(o);
+                    sorted = false;
+                },
+                peek: function(index) {
+                    if (!sorted) sort();
+                    if (index === undefined) index = contents.length - 1;
+                    return contents[index];
+                },
+                pop: function() {
+                    if (!sorted) sort();
+                    return contents.pop();
+                },
+                size: function() {
+                    return contents.length;
+                },
+                map: function(f) {
+                    return contents.map(f);
+                },
+                debug: function() {
+                    if (!sorted) sort();
+                    return contents;
+                }
+            };
+        }
+
+        // 3d color space box
+        function VBox(r1, r2, g1, g2, b1, b2, histo) {
+            var vbox = this;
+            vbox.r1 = r1;
+            vbox.r2 = r2;
+            vbox.g1 = g1;
+            vbox.g2 = g2;
+            vbox.b1 = b1;
+            vbox.b2 = b2;
+            vbox.histo = histo;
+        }
+        VBox.prototype = {
+            volume: function(force) {
+                var vbox = this;
+                if (!vbox._volume || force) {
+                    vbox._volume = ((vbox.r2 - vbox.r1 + 1) * (vbox.g2 - vbox.g1 + 1) * (vbox.b2 - vbox.b1 + 1));
+                }
+                return vbox._volume;
+            },
+            count: function(force) {
+                var vbox = this,
+                    histo = vbox.histo;
+                if (!vbox._count_set || force) {
+                    var npix = 0,
+                        i, j, k;
+                    for (i = vbox.r1; i <= vbox.r2; i++) {
+                        for (j = vbox.g1; j <= vbox.g2; j++) {
+                            for (k = vbox.b1; k <= vbox.b2; k++) {
+                                index = getColorIndex(i, j, k);
+                                npix += (histo[index] || 0);
+                            }
+                        }
+                    }
+                    vbox._count = npix;
+                    vbox._count_set = true;
+                }
+                return vbox._count;
+            },
+            copy: function() {
+                var vbox = this;
+                return new VBox(vbox.r1, vbox.r2, vbox.g1, vbox.g2, vbox.b1, vbox.b2, vbox.histo);
+            },
+            avg: function(force) {
+                var vbox = this,
+                    histo = vbox.histo;
+                if (!vbox._avg || force) {
+                    var ntot = 0,
+                        mult = 1 << (8 - sigbits),
+                        rsum = 0,
+                        gsum = 0,
+                        bsum = 0,
+                        hval,
+                        i, j, k, histoindex;
+                    for (i = vbox.r1; i <= vbox.r2; i++) {
+                        for (j = vbox.g1; j <= vbox.g2; j++) {
+                            for (k = vbox.b1; k <= vbox.b2; k++) {
+                                histoindex = getColorIndex(i, j, k);
+                                hval = histo[histoindex] || 0;
+                                ntot += hval;
+                                rsum += (hval * (i + 0.5) * mult);
+                                gsum += (hval * (j + 0.5) * mult);
+                                bsum += (hval * (k + 0.5) * mult);
+                            }
+                        }
+                    }
+                    if (ntot) {
+                        vbox._avg = [~~(rsum / ntot), ~~(gsum / ntot), ~~(bsum / ntot)];
+                    } else {
+                        //                    console.log('empty box');
+                        vbox._avg = [~~(mult * (vbox.r1 + vbox.r2 + 1) / 2), ~~(mult * (vbox.g1 + vbox.g2 + 1) / 2), ~~(mult * (vbox.b1 + vbox.b2 + 1) / 2)];
+                    }
+                }
+                return vbox._avg;
+            },
+            contains: function(pixel) {
+                var vbox = this,
+                    rval = pixel[0] >> rshift;
+                gval = pixel[1] >> rshift;
+                bval = pixel[2] >> rshift;
+                return (rval >= vbox.r1 && rval <= vbox.r2 &&
+                    gval >= vbox.g1 && gval <= vbox.g2 &&
+                    bval >= vbox.b1 && bval <= vbox.b2);
+            }
+        };
+
+        // Color map
+        function CMap() {
+            this.vboxes = new PQueue(function(a, b) {
+                return pv.naturalOrder(
+                    a.vbox.count() * a.vbox.volume(),
+                    b.vbox.count() * b.vbox.volume()
+                );
+            });
+        }
+        CMap.prototype = {
+            push: function(vbox) {
+                this.vboxes.push({
+                    vbox: vbox,
+                    color: vbox.avg()
+                });
+            },
+            palette: function() {
+                return this.vboxes.map(function(vb) {
+                    return vb.color;
+                });
+            },
+            size: function() {
+                return this.vboxes.size();
+            },
+            map: function(color) {
+                var vboxes = this.vboxes;
+                for (var i = 0; i < vboxes.size(); i++) {
+                    if (vboxes.peek(i).vbox.contains(color)) {
+                        return vboxes.peek(i).color;
+                    }
+                }
+                return this.nearest(color);
+            },
+            nearest: function(color) {
+                var vboxes = this.vboxes,
+                    d1, d2, pColor;
+                for (var i = 0; i < vboxes.size(); i++) {
+                    d2 = Math.sqrt(
+                        Math.pow(color[0] - vboxes.peek(i).color[0], 2) +
+                        Math.pow(color[1] - vboxes.peek(i).color[1], 2) +
+                        Math.pow(color[2] - vboxes.peek(i).color[2], 2)
+                    );
+                    if (d2 < d1 || d1 === undefined) {
+                        d1 = d2;
+                        pColor = vboxes.peek(i).color;
+                    }
+                }
+                return pColor;
+            },
+            forcebw: function() {
+                // XXX: won't  work yet
+                var vboxes = this.vboxes;
+                vboxes.sort(function(a, b) {
+                    return pv.naturalOrder(pv.sum(a.color), pv.sum(b.color));
+                });
+
+                // force darkest color to black if everything < 5
+                var lowest = vboxes[0].color;
+                if (lowest[0] < 5 && lowest[1] < 5 && lowest[2] < 5)
+                    vboxes[0].color = [0, 0, 0];
+
+                // force lightest color to white if everything > 251
+                var idx = vboxes.length - 1,
+                    highest = vboxes[idx].color;
+                if (highest[0] > 251 && highest[1] > 251 && highest[2] > 251)
+                    vboxes[idx].color = [255, 255, 255];
+            }
+        };
+
+        // histo (1-d array, giving the number of pixels in
+        // each quantized region of color space), or null on error
+        function getHisto(pixels) {
+            var histosize = 1 << (3 * sigbits),
+                histo = new Array(histosize),
+                index, rval, gval, bval;
+            pixels.forEach(function(pixel) {
+                rval = pixel[0] >> rshift;
+                gval = pixel[1] >> rshift;
+                bval = pixel[2] >> rshift;
+                index = getColorIndex(rval, gval, bval);
+                histo[index] = (histo[index] || 0) + 1;
+            });
+            return histo;
+        }
+
+        function vboxFromPixels(pixels, histo) {
+            var rmin = 1000000,
+                rmax = 0,
+                gmin = 1000000,
+                gmax = 0,
+                bmin = 1000000,
+                bmax = 0,
+                rval, gval, bval;
+            // find min/max
+            pixels.forEach(function(pixel) {
+                rval = pixel[0] >> rshift;
+                gval = pixel[1] >> rshift;
+                bval = pixel[2] >> rshift;
+                if (rval < rmin) rmin = rval;
+                else if (rval > rmax) rmax = rval;
+                if (gval < gmin) gmin = gval;
+                else if (gval > gmax) gmax = gval;
+                if (bval < bmin) bmin = bval;
+                else if (bval > bmax) bmax = bval;
+            });
+            return new VBox(rmin, rmax, gmin, gmax, bmin, bmax, histo);
+        }
+
+        function medianCutApply(histo, vbox) {
+            if (!vbox.count()) return;
+
+            var rw = vbox.r2 - vbox.r1 + 1,
+                gw = vbox.g2 - vbox.g1 + 1,
+                bw = vbox.b2 - vbox.b1 + 1,
+                maxw = pv.max([rw, gw, bw]);
+            // only one pixel, no split
+            if (vbox.count() == 1) {
+                return [vbox.copy()];
+            }
+            /* Find the partial sum arrays along the selected axis. */
+            var total = 0,
+                partialsum = [],
+                lookaheadsum = [],
+                i, j, k, sum, index;
+            if (maxw == rw) {
+                for (i = vbox.r1; i <= vbox.r2; i++) {
+                    sum = 0;
+                    for (j = vbox.g1; j <= vbox.g2; j++) {
+                        for (k = vbox.b1; k <= vbox.b2; k++) {
+                            index = getColorIndex(i, j, k);
+                            sum += (histo[index] || 0);
+                        }
+                    }
+                    total += sum;
+                    partialsum[i] = total;
+                }
+            } else if (maxw == gw) {
+                for (i = vbox.g1; i <= vbox.g2; i++) {
+                    sum = 0;
+                    for (j = vbox.r1; j <= vbox.r2; j++) {
+                        for (k = vbox.b1; k <= vbox.b2; k++) {
+                            index = getColorIndex(j, i, k);
+                            sum += (histo[index] || 0);
+                        }
+                    }
+                    total += sum;
+                    partialsum[i] = total;
+                }
+            } else { /* maxw == bw */
+                for (i = vbox.b1; i <= vbox.b2; i++) {
+                    sum = 0;
+                    for (j = vbox.r1; j <= vbox.r2; j++) {
+                        for (k = vbox.g1; k <= vbox.g2; k++) {
+                            index = getColorIndex(j, k, i);
+                            sum += (histo[index] || 0);
+                        }
+                    }
+                    total += sum;
+                    partialsum[i] = total;
+                }
+            }
+            partialsum.forEach(function(d, i) {
+                lookaheadsum[i] = total - d;
+            });
+
+            function doCut(color) {
+                var dim1 = color + '1',
+                    dim2 = color + '2',
+                    left, right, vbox1, vbox2, d2, count2 = 0;
+                for (i = vbox[dim1]; i <= vbox[dim2]; i++) {
+                    if (partialsum[i] > total / 2) {
+                        vbox1 = vbox.copy();
+                        vbox2 = vbox.copy();
+                        left = i - vbox[dim1];
+                        right = vbox[dim2] - i;
+                        if (left <= right)
+                            d2 = Math.min(vbox[dim2] - 1, ~~(i + right / 2));
+                        else d2 = Math.max(vbox[dim1], ~~(i - 1 - left / 2));
+                        // avoid 0-count boxes
+                        while (!partialsum[d2]) d2++;
+                        count2 = lookaheadsum[d2];
+                        while (!count2 && partialsum[d2 - 1]) count2 = lookaheadsum[--d2];
+                        // set dimensions
+                        vbox1[dim2] = d2;
+                        vbox2[dim1] = vbox1[dim2] + 1;
+                        //                    console.log('vbox counts:', vbox.count(), vbox1.count(), vbox2.count());
+                        return [vbox1, vbox2];
+                    }
+                }
+
+            }
+            // determine the cut planes
+            return maxw == rw ? doCut('r') :
+                maxw == gw ? doCut('g') :
+                doCut('b');
+        }
+
+        function quantize(pixels, maxcolors) {
+            // short-circuit
+            if (!pixels.length || maxcolors < 2 || maxcolors > 256) {
+                //            console.log('wrong number of maxcolors');
+                return false;
+            }
+
+            // XXX: check color content and convert to grayscale if insufficient
+
+            var histo = getHisto(pixels),
+                histosize = 1 << (3 * sigbits);
+
+            // check that we aren't below maxcolors already
+            var nColors = 0;
+            histo.forEach(function() {
+                nColors++;
+            });
+            if (nColors <= maxcolors) {
+                // XXX: generate the new colors from the histo and return
+            }
+
+            // get the beginning vbox from the colors
+            var vbox = vboxFromPixels(pixels, histo),
+                pq = new PQueue(function(a, b) {
+                    return pv.naturalOrder(a.count(), b.count());
+                });
+            pq.push(vbox);
+
+            // inner function to do the iteration
+            function iter(lh, target) {
+                var ncolors = 1,
+                    niters = 0,
+                    vbox;
+                while (niters < maxIterations) {
+                    vbox = lh.pop();
+                    if (!vbox.count()) { /* just put it back */
+                        lh.push(vbox);
+                        niters++;
+                        continue;
+                    }
+                    // do the cut
+                    var vboxes = medianCutApply(histo, vbox),
+                        vbox1 = vboxes[0],
+                        vbox2 = vboxes[1];
+
+                    if (!vbox1) {
+                        //                    console.log("vbox1 not defined; shouldn't happen!");
+                        return;
+                    }
+                    lh.push(vbox1);
+                    if (vbox2) { /* vbox2 can be null */
+                        lh.push(vbox2);
+                        ncolors++;
+                    }
+                    if (ncolors >= target) return;
+                    if (niters++ > maxIterations) {
+                        //                    console.log("infinite loop; perhaps too few pixels!");
+                        return;
+                    }
+                }
+            }
+
+            // first set of colors, sorted by population
+            iter(pq, fractByPopulations * maxcolors);
+
+            // Re-sort by the product of pixel occupancy times the size in color space.
+            var pq2 = new PQueue(function(a, b) {
+                return pv.naturalOrder(a.count() * a.volume(), b.count() * b.volume());
+            });
+            while (pq.size()) {
+                pq2.push(pq.pop());
+            }
+
+            // next set - generate the median cuts using the (npix * vol) sorting.
+            iter(pq2, maxcolors - pq2.size());
+
+            // calculate the actual colors
+            var cmap = new CMap();
+            while (pq2.size()) {
+                cmap.push(pq2.pop());
+            }
+
+            return cmap;
+        }
+
+        return {
+            quantize: quantize
+        };
+    })();
+
+    /**
+     * Export class to global
+     */
+    if (typeof define === 'function' && define.amd) {
+        define([], function() {
+            return ColorThief;
+        }); // for AMD loader
+    } else if (typeof exports === 'object') {
+        module.exports = ColorThief; // for CommonJS
+    } else {
+        this.ColorThief = ColorThief;
+    }
+}.call(this));
+
+}());
+
+/*!
+ * Exif.js v2.1.1
+ * https://github.com/exif-js/exif-js
+ */
+(function() {
+
+    var debug = false;
+
+    var root = this;
+
+    var EXIF = function(obj) {
+        if (obj instanceof EXIF) return obj;
+        if (!(this instanceof EXIF)) return new EXIF(obj);
+        this.EXIFwrapped = obj;
+    };
+
+    if (typeof exports !== 'undefined') {
+        if (typeof module !== 'undefined' && module.exports) {
+            exports = module.exports = EXIF;
+        }
+        exports.EXIF = EXIF;
+    } else {
+        root.EXIF = EXIF;
+    }
+
+    var ExifTags = EXIF.Tags = {
+
+        // version tags
+        0x9000 : "ExifVersion",             // EXIF version
+        0xA000 : "FlashpixVersion",         // Flashpix format version
+
+        // colorspace tags
+        0xA001 : "ColorSpace",              // Color space information tag
+
+        // image configuration
+        0xA002 : "PixelXDimension",         // Valid width of meaningful image
+        0xA003 : "PixelYDimension",         // Valid height of meaningful image
+        0x9101 : "ComponentsConfiguration", // Information about channels
+        0x9102 : "CompressedBitsPerPixel",  // Compressed bits per pixel
+
+        // user information
+        0x927C : "MakerNote",               // Any desired information written by the manufacturer
+        0x9286 : "UserComment",             // Comments by user
+
+        // related file
+        0xA004 : "RelatedSoundFile",        // Name of related sound file
+
+        // date and time
+        0x9003 : "DateTimeOriginal",        // Date and time when the original image was generated
+        0x9004 : "DateTimeDigitized",       // Date and time when the image was stored digitally
+        0x9290 : "SubsecTime",              // Fractions of seconds for DateTime
+        0x9291 : "SubsecTimeOriginal",      // Fractions of seconds for DateTimeOriginal
+        0x9292 : "SubsecTimeDigitized",     // Fractions of seconds for DateTimeDigitized
+
+        // picture-taking conditions
+        0x829A : "ExposureTime",            // Exposure time (in seconds)
+        0x829D : "FNumber",                 // F number
+        0x8822 : "ExposureProgram",         // Exposure program
+        0x8824 : "SpectralSensitivity",     // Spectral sensitivity
+        0x8827 : "ISOSpeedRatings",         // ISO speed rating
+        0x8828 : "OECF",                    // Optoelectric conversion factor
+        0x9201 : "ShutterSpeedValue",       // Shutter speed
+        0x9202 : "ApertureValue",           // Lens aperture
+        0x9203 : "BrightnessValue",         // Value of brightness
+        0x9204 : "ExposureBias",            // Exposure bias
+        0x9205 : "MaxApertureValue",        // Smallest F number of lens
+        0x9206 : "SubjectDistance",         // Distance to subject in meters
+        0x9207 : "MeteringMode",            // Metering mode
+        0x9208 : "LightSource",             // Kind of light source
+        0x9209 : "Flash",                   // Flash status
+        0x9214 : "SubjectArea",             // Location and area of main subject
+        0x920A : "FocalLength",             // Focal length of the lens in mm
+        0xA20B : "FlashEnergy",             // Strobe energy in BCPS
+        0xA20C : "SpatialFrequencyResponse",    //
+        0xA20E : "FocalPlaneXResolution",   // Number of pixels in width direction per FocalPlaneResolutionUnit
+        0xA20F : "FocalPlaneYResolution",   // Number of pixels in height direction per FocalPlaneResolutionUnit
+        0xA210 : "FocalPlaneResolutionUnit",    // Unit for measuring FocalPlaneXResolution and FocalPlaneYResolution
+        0xA214 : "SubjectLocation",         // Location of subject in image
+        0xA215 : "ExposureIndex",           // Exposure index selected on camera
+        0xA217 : "SensingMethod",           // Image sensor type
+        0xA300 : "FileSource",              // Image source (3 == DSC)
+        0xA301 : "SceneType",               // Scene type (1 == directly photographed)
+        0xA302 : "CFAPattern",              // Color filter array geometric pattern
+        0xA401 : "CustomRendered",          // Special processing
+        0xA402 : "ExposureMode",            // Exposure mode
+        0xA403 : "WhiteBalance",            // 1 = auto white balance, 2 = manual
+        0xA404 : "DigitalZoomRation",       // Digital zoom ratio
+        0xA405 : "FocalLengthIn35mmFilm",   // Equivalent foacl length assuming 35mm film camera (in mm)
+        0xA406 : "SceneCaptureType",        // Type of scene
+        0xA407 : "GainControl",             // Degree of overall image gain adjustment
+        0xA408 : "Contrast",                // Direction of contrast processing applied by camera
+        0xA409 : "Saturation",              // Direction of saturation processing applied by camera
+        0xA40A : "Sharpness",               // Direction of sharpness processing applied by camera
+        0xA40B : "DeviceSettingDescription",    //
+        0xA40C : "SubjectDistanceRange",    // Distance to subject
+
+        // other tags
+        0xA005 : "InteroperabilityIFDPointer",
+        0xA420 : "ImageUniqueID"            // Identifier assigned uniquely to each image
+    };
+
+    var TiffTags = EXIF.TiffTags = {
+        0x0100 : "ImageWidth",
+        0x0101 : "ImageHeight",
+        0x8769 : "ExifIFDPointer",
+        0x8825 : "GPSInfoIFDPointer",
+        0xA005 : "InteroperabilityIFDPointer",
+        0x0102 : "BitsPerSample",
+        0x0103 : "Compression",
+        0x0106 : "PhotometricInterpretation",
+        0x0112 : "Orientation",
+        0x0115 : "SamplesPerPixel",
+        0x011C : "PlanarConfiguration",
+        0x0212 : "YCbCrSubSampling",
+        0x0213 : "YCbCrPositioning",
+        0x011A : "XResolution",
+        0x011B : "YResolution",
+        0x0128 : "ResolutionUnit",
+        0x0111 : "StripOffsets",
+        0x0116 : "RowsPerStrip",
+        0x0117 : "StripByteCounts",
+        0x0201 : "JPEGInterchangeFormat",
+        0x0202 : "JPEGInterchangeFormatLength",
+        0x012D : "TransferFunction",
+        0x013E : "WhitePoint",
+        0x013F : "PrimaryChromaticities",
+        0x0211 : "YCbCrCoefficients",
+        0x0214 : "ReferenceBlackWhite",
+        0x0132 : "DateTime",
+        0x010E : "ImageDescription",
+        0x010F : "Make",
+        0x0110 : "Model",
+        0x0131 : "Software",
+        0x013B : "Artist",
+        0x8298 : "Copyright"
+    };
+
+    var GPSTags = EXIF.GPSTags = {
+        0x0000 : "GPSVersionID",
+        0x0001 : "GPSLatitudeRef",
+        0x0002 : "GPSLatitude",
+        0x0003 : "GPSLongitudeRef",
+        0x0004 : "GPSLongitude",
+        0x0005 : "GPSAltitudeRef",
+        0x0006 : "GPSAltitude",
+        0x0007 : "GPSTimeStamp",
+        0x0008 : "GPSSatellites",
+        0x0009 : "GPSStatus",
+        0x000A : "GPSMeasureMode",
+        0x000B : "GPSDOP",
+        0x000C : "GPSSpeedRef",
+        0x000D : "GPSSpeed",
+        0x000E : "GPSTrackRef",
+        0x000F : "GPSTrack",
+        0x0010 : "GPSImgDirectionRef",
+        0x0011 : "GPSImgDirection",
+        0x0012 : "GPSMapDatum",
+        0x0013 : "GPSDestLatitudeRef",
+        0x0014 : "GPSDestLatitude",
+        0x0015 : "GPSDestLongitudeRef",
+        0x0016 : "GPSDestLongitude",
+        0x0017 : "GPSDestBearingRef",
+        0x0018 : "GPSDestBearing",
+        0x0019 : "GPSDestDistanceRef",
+        0x001A : "GPSDestDistance",
+        0x001B : "GPSProcessingMethod",
+        0x001C : "GPSAreaInformation",
+        0x001D : "GPSDateStamp",
+        0x001E : "GPSDifferential"
+    };
+
+    var StringValues = EXIF.StringValues = {
+        ExposureProgram : {
+            0 : "Not defined",
+            1 : "Manual",
+            2 : "Normal program",
+            3 : "Aperture priority",
+            4 : "Shutter priority",
+            5 : "Creative program",
+            6 : "Action program",
+            7 : "Portrait mode",
+            8 : "Landscape mode"
+        },
+        MeteringMode : {
+            0 : "Unknown",
+            1 : "Average",
+            2 : "CenterWeightedAverage",
+            3 : "Spot",
+            4 : "MultiSpot",
+            5 : "Pattern",
+            6 : "Partial",
+            255 : "Other"
+        },
+        LightSource : {
+            0 : "Unknown",
+            1 : "Daylight",
+            2 : "Fluorescent",
+            3 : "Tungsten (incandescent light)",
+            4 : "Flash",
+            9 : "Fine weather",
+            10 : "Cloudy weather",
+            11 : "Shade",
+            12 : "Daylight fluorescent (D 5700 - 7100K)",
+            13 : "Day white fluorescent (N 4600 - 5400K)",
+            14 : "Cool white fluorescent (W 3900 - 4500K)",
+            15 : "White fluorescent (WW 3200 - 3700K)",
+            17 : "Standard light A",
+            18 : "Standard light B",
+            19 : "Standard light C",
+            20 : "D55",
+            21 : "D65",
+            22 : "D75",
+            23 : "D50",
+            24 : "ISO studio tungsten",
+            255 : "Other"
+        },
+        Flash : {
+            0x0000 : "Flash did not fire",
+            0x0001 : "Flash fired",
+            0x0005 : "Strobe return light not detected",
+            0x0007 : "Strobe return light detected",
+            0x0009 : "Flash fired, compulsory flash mode",
+            0x000D : "Flash fired, compulsory flash mode, return light not detected",
+            0x000F : "Flash fired, compulsory flash mode, return light detected",
+            0x0010 : "Flash did not fire, compulsory flash mode",
+            0x0018 : "Flash did not fire, auto mode",
+            0x0019 : "Flash fired, auto mode",
+            0x001D : "Flash fired, auto mode, return light not detected",
+            0x001F : "Flash fired, auto mode, return light detected",
+            0x0020 : "No flash function",
+            0x0041 : "Flash fired, red-eye reduction mode",
+            0x0045 : "Flash fired, red-eye reduction mode, return light not detected",
+            0x0047 : "Flash fired, red-eye reduction mode, return light detected",
+            0x0049 : "Flash fired, compulsory flash mode, red-eye reduction mode",
+            0x004D : "Flash fired, compulsory flash mode, red-eye reduction mode, return light not detected",
+            0x004F : "Flash fired, compulsory flash mode, red-eye reduction mode, return light detected",
+            0x0059 : "Flash fired, auto mode, red-eye reduction mode",
+            0x005D : "Flash fired, auto mode, return light not detected, red-eye reduction mode",
+            0x005F : "Flash fired, auto mode, return light detected, red-eye reduction mode"
+        },
+        SensingMethod : {
+            1 : "Not defined",
+            2 : "One-chip color area sensor",
+            3 : "Two-chip color area sensor",
+            4 : "Three-chip color area sensor",
+            5 : "Color sequential area sensor",
+            7 : "Trilinear sensor",
+            8 : "Color sequential linear sensor"
+        },
+        SceneCaptureType : {
+            0 : "Standard",
+            1 : "Landscape",
+            2 : "Portrait",
+            3 : "Night scene"
+        },
+        SceneType : {
+            1 : "Directly photographed"
+        },
+        CustomRendered : {
+            0 : "Normal process",
+            1 : "Custom process"
+        },
+        WhiteBalance : {
+            0 : "Auto white balance",
+            1 : "Manual white balance"
+        },
+        GainControl : {
+            0 : "None",
+            1 : "Low gain up",
+            2 : "High gain up",
+            3 : "Low gain down",
+            4 : "High gain down"
+        },
+        Contrast : {
+            0 : "Normal",
+            1 : "Soft",
+            2 : "Hard"
+        },
+        Saturation : {
+            0 : "Normal",
+            1 : "Low saturation",
+            2 : "High saturation"
+        },
+        Sharpness : {
+            0 : "Normal",
+            1 : "Soft",
+            2 : "Hard"
+        },
+        SubjectDistanceRange : {
+            0 : "Unknown",
+            1 : "Macro",
+            2 : "Close view",
+            3 : "Distant view"
+        },
+        FileSource : {
+            3 : "DSC"
+        },
+
+        Components : {
+            0 : "",
+            1 : "Y",
+            2 : "Cb",
+            3 : "Cr",
+            4 : "R",
+            5 : "G",
+            6 : "B"
+        }
+    };
+
+    function addEvent(element, event, handler) {
+        if (element.addEventListener) {
+            element.addEventListener(event, handler, false);
+        } else if (element.attachEvent) {
+            element.attachEvent("on" + event, handler);
+        }
+    }
+
+    function imageHasData(img) {
+        return !!(img.exifdata);
+    }
+
+    function base64ToArrayBuffer(base64, contentType) {
+        contentType = contentType || base64.match(/^data\:([^\;]+)\;base64,/mi)[1] || ''; // e.g. 'data:image/jpeg;base64,...' => 'image/jpeg'
+        base64 = base64.replace(/^data\:([^\;]+)\;base64,/gmi, '');
+        var binary = atob(base64);
+        var len = binary.length;
+        var buffer = new ArrayBuffer(len);
+        var view = new Uint8Array(buffer);
+        for (var i = 0; i < len; i++) {
+            view[i] = binary.charCodeAt(i);
+        }
+        return buffer;
+    }
+
+    function objectURLToBlob(url, callback) {
+        var http = new XMLHttpRequest();
+        http.open("GET", url, true);
+        http.responseType = "blob";
+        http.onload = function(e) {
+            if (this.status == 200 || this.status === 0) {
+                callback(this.response);
+            }
+        };
+        http.send();
+    }
+
+    function getImageData(img, callback) {
+        function handleBinaryFile(binFile) {
+            var data = findEXIFinJPEG(binFile);
+            var iptcdata = findIPTCinJPEG(binFile);
+            img.exifdata = data || {};
+            img.iptcdata = iptcdata || {};
+            if (callback) {
+                callback.call(img);
+            }
+        }
+
+        if (img.src) {
+            if (/^data\:/i.test(img.src)) { // Data URI
+                var arrayBuffer = base64ToArrayBuffer(img.src);
+                handleBinaryFile(arrayBuffer);
+
+            } else if (/^blob\:/i.test(img.src)) { // Object URL
+                var fileReader = new FileReader();
+                fileReader.onload = function(e) {
+                    handleBinaryFile(e.target.result);
+                };
+                objectURLToBlob(img.src, function (blob) {
+                    fileReader.readAsArrayBuffer(blob);
+                });
+            } else {
+                var http = new XMLHttpRequest();
+                http.onload = function() {
+                    if (this.status == 200 || this.status === 0) {
+                        handleBinaryFile(http.response);
+                    } else {
+                        throw "Could not load image";
+                    }
+                    http = null;
+                };
+                http.open("GET", img.src, true);
+                http.responseType = "arraybuffer";
+                http.send(null);
+            }
+        } else if (window.FileReader && (img instanceof window.Blob || img instanceof window.File)) {
+            var fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                if (debug) console.log("Got file of length " + e.target.result.byteLength);
+                handleBinaryFile(e.target.result);
+            };
+
+            fileReader.readAsArrayBuffer(img);
+        }
+    }
+
+    function findEXIFinJPEG(file) {
+        var dataView = new DataView(file);
+
+        if (debug) console.log("Got file of length " + file.byteLength);
+        if ((dataView.getUint8(0) != 0xFF) || (dataView.getUint8(1) != 0xD8)) {
+            if (debug) console.log("Not a valid JPEG");
+            return false; // not a valid jpeg
+        }
+
+        var offset = 2,
+            length = file.byteLength,
+            marker;
+
+        while (offset < length) {
+            if (dataView.getUint8(offset) != 0xFF) {
+                if (debug) console.log("Not a valid marker at offset " + offset + ", found: " + dataView.getUint8(offset));
+                return false; // not a valid marker, something is wrong
+            }
+
+            marker = dataView.getUint8(offset + 1);
+            if (debug) console.log(marker);
+
+            // we could implement handling for other markers here,
+            // but we're only looking for 0xFFE1 for EXIF data
+
+            if (marker == 225) {
+                if (debug) console.log("Found 0xFFE1 marker");
+
+                return readEXIFData(dataView, offset + 4, dataView.getUint16(offset + 2) - 2);
+
+                // offset += 2 + file.getShortAt(offset+2, true);
+
+            } else {
+                offset += 2 + dataView.getUint16(offset+2);
+            }
+
+        }
+
+    }
+
+    function findIPTCinJPEG(file) {
+        var dataView = new DataView(file);
+
+        if (debug) console.log("Got file of length " + file.byteLength);
+        if ((dataView.getUint8(0) != 0xFF) || (dataView.getUint8(1) != 0xD8)) {
+            if (debug) console.log("Not a valid JPEG");
+            return false; // not a valid jpeg
+        }
+
+        var offset = 2,
+            length = file.byteLength;
+
+        var isFieldSegmentStart = function(dataView, offset){
+            return (
+                dataView.getUint8(offset) === 0x38 &&
+                dataView.getUint8(offset+1) === 0x42 &&
+                dataView.getUint8(offset+2) === 0x49 &&
+                dataView.getUint8(offset+3) === 0x4D &&
+                dataView.getUint8(offset+4) === 0x04 &&
+                dataView.getUint8(offset+5) === 0x04
+            );
+        };
+
+        while (offset < length) {
+
+            if ( isFieldSegmentStart(dataView, offset )){
+
+                // Get the length of the name header (which is padded to an even number of bytes)
+                var nameHeaderLength = dataView.getUint8(offset+7);
+                if(nameHeaderLength % 2 !== 0) nameHeaderLength += 1;
+                // Check for pre photoshop 6 format
+                if(nameHeaderLength === 0) {
+                    // Always 4
+                    nameHeaderLength = 4;
+                }
+
+                var startOffset = offset + 8 + nameHeaderLength;
+                var sectionLength = dataView.getUint16(offset + 6 + nameHeaderLength);
+
+                return readIPTCData(file, startOffset, sectionLength);
+
+                break;
+
+            }
+
+            // Not the marker, continue searching
+            offset++;
+
+        }
+
+    }
+    var IptcFieldMap = {
+        0x78 : 'caption',
+        0x6E : 'credit',
+        0x19 : 'keywords',
+        0x37 : 'dateCreated',
+        0x50 : 'byline',
+        0x55 : 'bylineTitle',
+        0x7A : 'captionWriter',
+        0x69 : 'headline',
+        0x74 : 'copyright',
+        0x0F : 'category'
+    };
+    function readIPTCData(file, startOffset, sectionLength){
+        var dataView = new DataView(file);
+        var data = {};
+        var fieldValue, fieldName, dataSize, segmentType, segmentSize;
+        var segmentStartPos = startOffset;
+        while(segmentStartPos < startOffset+sectionLength) {
+            if(dataView.getUint8(segmentStartPos) === 0x1C && dataView.getUint8(segmentStartPos+1) === 0x02){
+                segmentType = dataView.getUint8(segmentStartPos+2);
+                if(segmentType in IptcFieldMap) {
+                    dataSize = dataView.getInt16(segmentStartPos+3);
+                    segmentSize = dataSize + 5;
+                    fieldName = IptcFieldMap[segmentType];
+                    fieldValue = getStringFromDB(dataView, segmentStartPos+5, dataSize);
+                    // Check if we already stored a value with this name
+                    if(data.hasOwnProperty(fieldName)) {
+                        // Value already stored with this name, create multivalue field
+                        if(data[fieldName] instanceof Array) {
+                            data[fieldName].push(fieldValue);
+                        }
+                        else {
+                            data[fieldName] = [data[fieldName], fieldValue];
+                        }
+                    }
+                    else {
+                        data[fieldName] = fieldValue;
+                    }
+                }
+
+            }
+            segmentStartPos++;
+        }
+        return data;
+    }
+
+    function readTags(file, tiffStart, dirStart, strings, bigEnd) {
+        var entries = file.getUint16(dirStart, !bigEnd),
+            tags = {},
+            entryOffset, tag,
+            i;
+
+        for (i=0;i<entries;i++) {
+            entryOffset = dirStart + i*12 + 2;
+            tag = strings[file.getUint16(entryOffset, !bigEnd)];
+            if (!tag && debug) console.log("Unknown tag: " + file.getUint16(entryOffset, !bigEnd));
+            tags[tag] = readTagValue(file, entryOffset, tiffStart, dirStart, bigEnd);
+        }
+        return tags;
+    }
+
+    function readTagValue(file, entryOffset, tiffStart, dirStart, bigEnd) {
+        var type = file.getUint16(entryOffset+2, !bigEnd),
+            numValues = file.getUint32(entryOffset+4, !bigEnd),
+            valueOffset = file.getUint32(entryOffset+8, !bigEnd) + tiffStart,
+            offset,
+            vals, val, n,
+            numerator, denominator;
+
+        switch (type) {
+            case 1: // byte, 8-bit unsigned int
+            case 7: // undefined, 8-bit byte, value depending on field
+                if (numValues == 1) {
+                    return file.getUint8(entryOffset + 8, !bigEnd);
+                } else {
+                    offset = numValues > 4 ? valueOffset : (entryOffset + 8);
+                    vals = [];
+                    for (n=0;n<numValues;n++) {
+                        vals[n] = file.getUint8(offset + n);
+                    }
+                    return vals;
+                }
+
+            case 2: // ascii, 8-bit byte
+                offset = numValues > 4 ? valueOffset : (entryOffset + 8);
+                return getStringFromDB(file, offset, numValues-1);
+
+            case 3: // short, 16 bit int
+                if (numValues == 1) {
+                    return file.getUint16(entryOffset + 8, !bigEnd);
+                } else {
+                    offset = numValues > 2 ? valueOffset : (entryOffset + 8);
+                    vals = [];
+                    for (n=0;n<numValues;n++) {
+                        vals[n] = file.getUint16(offset + 2*n, !bigEnd);
+                    }
+                    return vals;
+                }
+
+            case 4: // long, 32 bit int
+                if (numValues == 1) {
+                    return file.getUint32(entryOffset + 8, !bigEnd);
+                } else {
+                    vals = [];
+                    for (n=0;n<numValues;n++) {
+                        vals[n] = file.getUint32(valueOffset + 4*n, !bigEnd);
+                    }
+                    return vals;
+                }
+
+            case 5:    // rational = two long values, first is numerator, second is denominator
+                if (numValues == 1) {
+                    numerator = file.getUint32(valueOffset, !bigEnd);
+                    denominator = file.getUint32(valueOffset+4, !bigEnd);
+                    val = new Number(numerator / denominator);
+                    val.numerator = numerator;
+                    val.denominator = denominator;
+                    return val;
+                } else {
+                    vals = [];
+                    for (n=0;n<numValues;n++) {
+                        numerator = file.getUint32(valueOffset + 8*n, !bigEnd);
+                        denominator = file.getUint32(valueOffset+4 + 8*n, !bigEnd);
+                        vals[n] = new Number(numerator / denominator);
+                        vals[n].numerator = numerator;
+                        vals[n].denominator = denominator;
+                    }
+                    return vals;
+                }
+
+            case 9: // slong, 32 bit signed int
+                if (numValues == 1) {
+                    return file.getInt32(entryOffset + 8, !bigEnd);
+                } else {
+                    vals = [];
+                    for (n=0;n<numValues;n++) {
+                        vals[n] = file.getInt32(valueOffset + 4*n, !bigEnd);
+                    }
+                    return vals;
+                }
+
+            case 10: // signed rational, two slongs, first is numerator, second is denominator
+                if (numValues == 1) {
+                    return file.getInt32(valueOffset, !bigEnd) / file.getInt32(valueOffset+4, !bigEnd);
+                } else {
+                    vals = [];
+                    for (n=0;n<numValues;n++) {
+                        vals[n] = file.getInt32(valueOffset + 8*n, !bigEnd) / file.getInt32(valueOffset+4 + 8*n, !bigEnd);
+                    }
+                    return vals;
+                }
+        }
+    }
+
+    function getStringFromDB(buffer, start, length) {
+        var outstr = "";
+        for (n = start; n < start+length; n++) {
+            outstr += String.fromCharCode(buffer.getUint8(n));
+        }
+        return outstr;
+    }
+
+    function readEXIFData(file, start) {
+        if (getStringFromDB(file, start, 4) != "Exif") {
+            if (debug) console.log("Not valid EXIF data! " + getStringFromDB(file, start, 4));
+            return false;
+        }
+
+        var bigEnd,
+            tags, tag,
+            exifData, gpsData,
+            tiffOffset = start + 6;
+
+        // test for TIFF validity and endianness
+        if (file.getUint16(tiffOffset) == 0x4949) {
+            bigEnd = false;
+        } else if (file.getUint16(tiffOffset) == 0x4D4D) {
+            bigEnd = true;
+        } else {
+            if (debug) console.log("Not valid TIFF data! (no 0x4949 or 0x4D4D)");
+            return false;
+        }
+
+        if (file.getUint16(tiffOffset+2, !bigEnd) != 0x002A) {
+            if (debug) console.log("Not valid TIFF data! (no 0x002A)");
+            return false;
+        }
+
+        var firstIFDOffset = file.getUint32(tiffOffset+4, !bigEnd);
+
+        if (firstIFDOffset < 0x00000008) {
+            if (debug) console.log("Not valid TIFF data! (First offset less than 8)", file.getUint32(tiffOffset+4, !bigEnd));
+            return false;
+        }
+
+        tags = readTags(file, tiffOffset, tiffOffset + firstIFDOffset, TiffTags, bigEnd);
+
+        if (tags.ExifIFDPointer) {
+            exifData = readTags(file, tiffOffset, tiffOffset + tags.ExifIFDPointer, ExifTags, bigEnd);
+            for (tag in exifData) {
+                switch (tag) {
+                    case "LightSource" :
+                    case "Flash" :
+                    case "MeteringMode" :
+                    case "ExposureProgram" :
+                    case "SensingMethod" :
+                    case "SceneCaptureType" :
+                    case "SceneType" :
+                    case "CustomRendered" :
+                    case "WhiteBalance" :
+                    case "GainControl" :
+                    case "Contrast" :
+                    case "Saturation" :
+                    case "Sharpness" :
+                    case "SubjectDistanceRange" :
+                    case "FileSource" :
+                        exifData[tag] = StringValues[tag][exifData[tag]];
+                        break;
+
+                    case "ExifVersion" :
+                    case "FlashpixVersion" :
+                        exifData[tag] = String.fromCharCode(exifData[tag][0], exifData[tag][1], exifData[tag][2], exifData[tag][3]);
+                        break;
+
+                    case "ComponentsConfiguration" :
+                        exifData[tag] =
+                            StringValues.Components[exifData[tag][0]] +
+                            StringValues.Components[exifData[tag][1]] +
+                            StringValues.Components[exifData[tag][2]] +
+                            StringValues.Components[exifData[tag][3]];
+                        break;
+                }
+                tags[tag] = exifData[tag];
+            }
+        }
+
+        if (tags.GPSInfoIFDPointer) {
+            gpsData = readTags(file, tiffOffset, tiffOffset + tags.GPSInfoIFDPointer, GPSTags, bigEnd);
+            for (tag in gpsData) {
+                switch (tag) {
+                    case "GPSVersionID" :
+                        gpsData[tag] = gpsData[tag][0] +
+                            "." + gpsData[tag][1] +
+                            "." + gpsData[tag][2] +
+                            "." + gpsData[tag][3];
+                        break;
+                }
+                tags[tag] = gpsData[tag];
+            }
+        }
+
+        return tags;
+    }
+
+    EXIF.getData = function(img, callback) {
+        if ((img instanceof Image || img instanceof HTMLImageElement) && !img.complete) return false;
+
+        if (!imageHasData(img)) {
+            getImageData(img, callback);
+        } else {
+            if (callback) {
+                callback.call(img);
+            }
+        }
+        return true;
+    }
+
+    EXIF.getTag = function(img, tag) {
+        if (!imageHasData(img)) return;
+        return img.exifdata[tag];
+    }
+
+    EXIF.getAllTags = function(img) {
+        if (!imageHasData(img)) return {};
+        var a,
+            data = img.exifdata,
+            tags = {};
+        for (a in data) {
+            if (data.hasOwnProperty(a)) {
+                tags[a] = data[a];
+            }
+        }
+        return tags;
+    }
+
+    EXIF.pretty = function(img) {
+        if (!imageHasData(img)) return "";
+        var a,
+            data = img.exifdata,
+            strPretty = "";
+        for (a in data) {
+            if (data.hasOwnProperty(a)) {
+                if (typeof data[a] == "object") {
+                    if (data[a] instanceof Number) {
+                        strPretty += a + " : " + data[a] + " [" + data[a].numerator + "/" + data[a].denominator + "]\r\n";
+                    } else {
+                        strPretty += a + " : [" + data[a].length + " values]\r\n";
+                    }
+                } else {
+                    strPretty += a + " : " + data[a] + "\r\n";
+                }
+            }
+        }
+        return strPretty;
+    }
+
+    EXIF.readFromBinaryFile = function(file) {
+        return findEXIFinJPEG(file);
+    }
+
+    if (typeof define === 'function' && define.amd) {
+        define('exif-js', [], function() {
+            return EXIF;
+        });
+    }
+}.call(this));
+
+
+/**
+ * Mega pixel image rendering library for iOS6 Safari
+ *
+ * Fixes iOS6 Safari's image file rendering issue for large size image (over mega-pixel),
+ * which causes unexpected subsampling when drawing it in canvas.
+ * By using this library, you can safely render the image with proper stretching.
+ *
+ * Copyright (c) 2012 Shinichi Tomita <shinichi.tomita@gmail.com>
+ * Released under the MIT license
+ */
+(function() {
+
+  /**
+   * Detect subsampling in loaded image.
+   * In iOS, larger images than 2M pixels may be subsampled in rendering.
+   */
+  function detectSubsampling(img) {
+    var iw = img.naturalWidth, ih = img.naturalHeight;
+    if (iw * ih > 1024 * 1024) { // subsampling may happen over megapixel image
+      var canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 1;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, -iw + 1, 0);
+      // subsampled image becomes half smaller in rendering size.
+      // check alpha channel value to confirm image is covering edge pixel or not.
+      // if alpha value is 0 image is not covering, hence subsampled.
+      return ctx.getImageData(0, 0, 1, 1).data[3] === 0;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Detecting vertical squash in loaded image.
+   * Fixes a bug which squash image vertically while drawing into canvas for some images.
+   */
+  function detectVerticalSquash(img, iw, ih) {
+    var canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = ih;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    var data = ctx.getImageData(0, 0, 1, ih).data;
+    // search image edge pixel position in case it is squashed vertically.
+    var sy = 0;
+    var ey = ih;
+    var py = ih;
+    while (py > sy) {
+      var alpha = data[(py - 1) * 4 + 3];
+      if (alpha === 0) {
+        ey = py;
+      } else {
+        sy = py;
+      }
+      py = (ey + sy) >> 1;
+    }
+    var ratio = (py / ih);
+    return (ratio===0)?1:ratio;
+  }
+
+  /**
+   * Rendering image element (with resizing) and get its data URL
+   */
+  function renderImageToDataURL(img, options, doSquash) {
+    var canvas = document.createElement('canvas');
+    renderImageToCanvas(img, canvas, options, doSquash);
+    return canvas.toDataURL("image/jpeg", options.quality || 0.8);
+  }
+
+  /**
+   * Rendering image element (with resizing) into the canvas element
+   */
+  function renderImageToCanvas(img, canvas, options, doSquash) {
+    var iw = img.naturalWidth, ih = img.naturalHeight;
+    if (!(iw+ih)) return;
+    var width = options.width, height = options.height;
+    var ctx = canvas.getContext('2d');
+    ctx.save();
+    transformCoordinate(canvas, ctx, width, height, options.orientation);
+    var subsampled = detectSubsampling(img);
+    if (subsampled) {
+      iw /= 2;
+      ih /= 2;
+    }
+    var d = 1024; // size of tiling canvas
+    var tmpCanvas = document.createElement('canvas');
+    tmpCanvas.width = tmpCanvas.height = d;
+    var tmpCtx = tmpCanvas.getContext('2d');
+    var vertSquashRatio = doSquash ? detectVerticalSquash(img, iw, ih) : 1;
+    var dw = Math.ceil(d * width / iw);
+    var dh = Math.ceil(d * height / ih / vertSquashRatio);
+    var sy = 0;
+    var dy = 0;
+    while (sy < ih) {
+      var sx = 0;
+      var dx = 0;
+      while (sx < iw) {
+        tmpCtx.clearRect(0, 0, d, d);
+        tmpCtx.drawImage(img, -sx, -sy);
+        ctx.drawImage(tmpCanvas, 0, 0, d, d, dx, dy, dw, dh);
+        sx += d;
+        dx += dw;
+      }
+      sy += d;
+      dy += dh;
+    }
+    ctx.restore();
+    tmpCanvas = tmpCtx = null;
+  }
+
+  /**
+   * Transform canvas coordination according to specified frame size and orientation
+   * Orientation value is from EXIF tag
+   */
+  function transformCoordinate(canvas, ctx, width, height, orientation) {
+    switch (orientation) {
+      case 5:
+      case 6:
+      case 7:
+      case 8:
+        canvas.width = height;
+        canvas.height = width;
+        break;
+      default:
+        canvas.width = width;
+        canvas.height = height;
+    }
+    switch (orientation) {
+      case 2:
+        // horizontal flip
+        ctx.translate(width, 0);
+        ctx.scale(-1, 1);
+        break;
+      case 3:
+        // 180 rotate left
+        ctx.translate(width, height);
+        ctx.rotate(Math.PI);
+        break;
+      case 4:
+        // vertical flip
+        ctx.translate(0, height);
+        ctx.scale(1, -1);
+        break;
+      case 5:
+        // vertical flip + 90 rotate right
+        ctx.rotate(0.5 * Math.PI);
+        ctx.scale(1, -1);
+        break;
+      case 6:
+        // 90 rotate right
+        ctx.rotate(0.5 * Math.PI);
+        ctx.translate(0, -height);
+        break;
+      case 7:
+        // horizontal flip + 90 rotate right
+        ctx.rotate(0.5 * Math.PI);
+        ctx.translate(width, -height);
+        ctx.scale(-1, 1);
+        break;
+      case 8:
+        // 90 rotate left
+        ctx.rotate(-0.5 * Math.PI);
+        ctx.translate(-width, 0);
+        break;
+      default:
+        break;
+    }
+  }
+
+  var URL = window.URL && window.URL.createObjectURL ? window.URL :
+            window.webkitURL && window.webkitURL.createObjectURL ? window.webkitURL :
+            null;
+
+  /**
+   * MegaPixImage class
+   */
+  function MegaPixImage(srcImage) {
+    if (window.Blob && srcImage instanceof Blob) {
+      if (!URL) { throw Error("No createObjectURL function found to create blob url"); }
+      var img = new Image();
+      img.src = URL.createObjectURL(srcImage);
+      this.blob = srcImage;
+      srcImage = img;
+    }
+    if (!srcImage.naturalWidth && !srcImage.naturalHeight) {
+      var _this = this;
+      srcImage.onload = srcImage.onerror = function() {
+        var listeners = _this.imageLoadListeners;
+        if (listeners) {
+          _this.imageLoadListeners = null;
+          for (var i=0, len=listeners.length; i<len; i++) {
+            listeners[i]();
+          }
+        }
+      };
+      this.imageLoadListeners = [];
+    }
+    this.srcImage = srcImage;
+  }
+
+  /**
+   * Rendering megapix image into specified target element
+   */
+  MegaPixImage.prototype.render = function(target, options, callback) {
+    if (this.imageLoadListeners) {
+      var _this = this;
+      this.imageLoadListeners.push(function() { _this.render(target, options, callback); });
+      return;
+    }
+    options = options || {};
+    var imgWidth = this.srcImage.naturalWidth, imgHeight = this.srcImage.naturalHeight,
+        width = options.width, height = options.height,
+        maxWidth = options.maxWidth, maxHeight = options.maxHeight,
+        doSquash = !this.blob || this.blob.type === 'image/jpeg';
+    if (width && !height) {
+      height = (imgHeight * width / imgWidth) << 0;
+    } else if (height && !width) {
+      width = (imgWidth * height / imgHeight) << 0;
+    } else {
+      width = imgWidth;
+      height = imgHeight;
+    }
+    if (maxWidth && width > maxWidth) {
+      width = maxWidth;
+      height = (imgHeight * width / imgWidth) << 0;
+    }
+    if (maxHeight && height > maxHeight) {
+      height = maxHeight;
+      width = (imgWidth * height / imgHeight) << 0;
+    }
+    var opt = { width : width, height : height };
+    for (var k in options) opt[k] = options[k];
+
+    var tagName = target.tagName.toLowerCase();
+    if (tagName === 'img') {
+      target.src = renderImageToDataURL(this.srcImage, opt, doSquash);
+    } else if (tagName === 'canvas') {
+      renderImageToCanvas(this.srcImage, target, opt, doSquash);
+    }
+    if (typeof this.onrender === 'function') {
+      this.onrender(target);
+    }
+    if (callback) {
+      callback();
+    }
+    if (this.blob) {
+      this.blob = null;
+      URL.revokeObjectURL(this.srcImage.src);
+    }
+  };
+
+  /**
+   * Export class to global
+   */
+  if (typeof define === 'function' && define.amd) {
+    define([], function() { return MegaPixImage; }); // for AMD loader
+  } else if (typeof exports === 'object') {
+    module.exports = MegaPixImage; // for CommonJS
+  } else {
+    this.MegaPixImage = MegaPixImage;
+  }
+
+})();
+
+/*!
+ * Color Thief v2.0
+ * by Lokesh Dhakar - http://www.lokeshdhakar.com
+ *
+ * Thanks
+ * ------
+ * Nick Rabinowitz - For creating quantize.js.
+ * John Schulz - For clean up and optimization. @JFSIII
+ * Nathan Spady - For adding drag and drop support to the demo page.
+ *
+ * License
+ * -------
+ * Copyright 2011, 2015 Lokesh Dhakar
+ * Released under the MIT license
+ * https://raw.githubusercontent.com/lokesh/color-thief/master/LICENSE
+ *
+ */
+(function() {
+    /*!
+     * Color Thief v2.0
+     * by Lokesh Dhakar - http://www.lokeshdhakar.com
+     *
+     * Thanks
+     * ------
+     * Nick Rabinowitz - For creating quantize.js.
+     * John Schulz - For clean up and optimization. @JFSIII
+     * Nathan Spady - For adding drag and drop support to the demo page.
+     *
+     * License
+     * -------
+     * Copyright 2011, 2015 Lokesh Dhakar
+     * Released under the MIT license
+     * https://raw.githubusercontent.com/lokesh/color-thief/master/LICENSE
+     *
+     */
+
+    /*
+      CanvasImage Class
+      Class that wraps the html image element and canvas.
+      It also simplifies some of the canvas context manipulation
+      with a set of helper functions.
+    */
+    var CanvasImage = function(image) {
+        this.canvas = document.createElement('canvas');
+        this.context = this.canvas.getContext('2d');
+
+        document.body.appendChild(this.canvas);
+
+        this.width = this.canvas.width = image.width;
+        this.height = this.canvas.height = image.height;
+
+        this.context.drawImage(image, 0, 0, this.width, this.height);
+    };
+
+    CanvasImage.prototype.clear = function() {
+        this.context.clearRect(0, 0, this.width, this.height);
+    };
+
+    CanvasImage.prototype.update = function(imageData) {
+        this.context.putImageData(imageData, 0, 0);
+    };
+
+    CanvasImage.prototype.getPixelCount = function() {
+        return this.width * this.height;
+    };
+
+    CanvasImage.prototype.getImageData = function() {
+        return this.context.getImageData(0, 0, this.width, this.height);
+    };
+
+    CanvasImage.prototype.removeCanvas = function() {
+        this.canvas.parentNode.removeChild(this.canvas);
+    };
+
+    var ColorThief = function() {};
+
+    /*
+     * getColor(sourceImage[, quality])
+     * returns {r: num, g: num, b: num}
+     *
+     * Use the median cut algorithm provided by quantize.js to cluster similar
+     * colors and return the base color from the largest cluster.
+     *
+     * Quality is an optional argument. It needs to be an integer. 1 is the highest quality settings.
+     * 10 is the default. There is a trade-off between quality and speed. The bigger the number, the
+     * faster a color will be returned but the greater the likelihood that it will not be the visually
+     * most dominant color.
+     *
+     * */
+    ColorThief.prototype.getColor = function(sourceImage, quality) {
+        var palette = this.getPalette(sourceImage, 5, quality);
+        var dominantColor = palette[0];
+        return dominantColor;
+    };
+
+    /*
+     * getPalette(sourceImage[, colorCount, quality])
+     * returns array[ {r: num, g: num, b: num}, {r: num, g: num, b: num}, ...]
+     *
+     * Use the median cut algorithm provided by quantize.js to cluster similar colors.
+     *
+     * colorCount determines the size of the palette; the number of colors returned. If not set, it
+     * defaults to 10.
+     *
+     * BUGGY: Function does not always return the requested amount of colors. It can be +/- 2.
+     *
+     * quality is an optional argument. It needs to be an integer. 1 is the highest quality settings.
+     * 10 is the default. There is a trade-off between quality and speed. The bigger the number, the
+     * faster the palette generation but the greater the likelihood that colors will be missed.
+     *
+     *
+     */
+    ColorThief.prototype.getPalette = function(sourceImage, colorCount, quality) {
+
+        if (typeof colorCount === 'undefined') {
+            colorCount = 10;
+        }
+        if (typeof quality === 'undefined' || quality < 1) {
+            quality = 10;
+        }
+
+        // Create custom CanvasImage object
+        var image = new CanvasImage(sourceImage);
+        var imageData = image.getImageData();
+        var pixels = imageData.data;
+        var pixelCount = image.getPixelCount();
+
+        // Store the RGB values in an array format suitable for quantize function
+        var pixelArray = [];
+        for (var i = 0, offset, r, g, b, a; i < pixelCount; i = i + quality) {
+            offset = i * 4;
+            r = pixels[offset + 0];
+            g = pixels[offset + 1];
+            b = pixels[offset + 2];
+            a = pixels[offset + 3];
+            // If pixel is mostly opaque and not white
+            if (a >= 125) {
+                if (!(r > 250 && g > 250 && b > 250)) {
+                    pixelArray.push([r, g, b]);
+                }
+            }
+        }
+
+        // Send array to quantize function which clusters values
+        // using median cut algorithm
+        var cmap = MMCQ.quantize(pixelArray, colorCount);
+        var palette = cmap ? cmap.palette() : null;
+
+        // Clean up
+        image.removeCanvas();
+
+        return palette;
+    };
+
+    /*!
+     * quantize.js Copyright 2008 Nick Rabinowitz.
+     * Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+     */
+
+    // fill out a couple protovis dependencies
+    /*!
+     * Block below copied from Protovis: http://mbostock.github.com/protovis/
+     * Copyright 2010 Stanford Visualization Group
+     * Licensed under the BSD License: http://www.opensource.org/licenses/bsd-license.php
+     */
+    if (!pv) {
+        var pv = {
+            map: function(array, f) {
+                var o = {};
+                return f ? array.map(function(d, i) {
+                    o.index = i;
+                    return f.call(o, d);
+                }) : array.slice();
+            },
+            naturalOrder: function(a, b) {
+                return (a < b) ? -1 : ((a > b) ? 1 : 0);
+            },
+            sum: function(array, f) {
+                var o = {};
+                return array.reduce(f ? function(p, d, i) {
+                    o.index = i;
+                    return p + f.call(o, d);
+                } : function(p, d) {
+                    return p + d;
+                }, 0);
+            },
+            max: function(array, f) {
+                return Math.max.apply(null, f ? pv.map(array, f) : array);
+            }
+        };
+    }
+
+    /**
+     * Basic Javascript port of the MMCQ (modified median cut quantization)
+     * algorithm from the Leptonica library (http://www.leptonica.com/).
+     * Returns a color map you can use to map original pixels to the reduced
+     * palette. Still a work in progress.
+     *
+     * @author Nick Rabinowitz
+     * @example
+
+    // array of pixels as [R,G,B] arrays
+    var myPixels = [[190,197,190], [202,204,200], [207,214,210], [211,214,211], [205,207,207]
+                    // etc
+                    ];
+    var maxColors = 4;
+
+    var cmap = MMCQ.quantize(myPixels, maxColors);
+    var newPalette = cmap.palette();
+    var newPixels = myPixels.map(function(p) {
+        return cmap.map(p);
+    });
+
+     */
+    var MMCQ = (function() {
+        // private constants
+        var sigbits = 5,
+            rshift = 8 - sigbits,
+            maxIterations = 1000,
+            fractByPopulations = 0.75;
+
+        // get reduced-space color index for a pixel
+        function getColorIndex(r, g, b) {
+            return (r << (2 * sigbits)) + (g << sigbits) + b;
+        }
+
+        // Simple priority queue
+        function PQueue(comparator) {
+            var contents = [],
+                sorted = false;
+
+            function sort() {
+                contents.sort(comparator);
+                sorted = true;
+            }
+
+            return {
+                push: function(o) {
+                    contents.push(o);
+                    sorted = false;
+                },
+                peek: function(index) {
+                    if (!sorted) sort();
+                    if (index === undefined) index = contents.length - 1;
+                    return contents[index];
+                },
+                pop: function() {
+                    if (!sorted) sort();
+                    return contents.pop();
+                },
+                size: function() {
+                    return contents.length;
+                },
+                map: function(f) {
+                    return contents.map(f);
+                },
+                debug: function() {
+                    if (!sorted) sort();
+                    return contents;
+                }
+            };
+        }
+
+        // 3d color space box
+        function VBox(r1, r2, g1, g2, b1, b2, histo) {
+            var vbox = this;
+            vbox.r1 = r1;
+            vbox.r2 = r2;
+            vbox.g1 = g1;
+            vbox.g2 = g2;
+            vbox.b1 = b1;
+            vbox.b2 = b2;
+            vbox.histo = histo;
+        }
+        VBox.prototype = {
+            volume: function(force) {
+                var vbox = this;
+                if (!vbox._volume || force) {
+                    vbox._volume = ((vbox.r2 - vbox.r1 + 1) * (vbox.g2 - vbox.g1 + 1) * (vbox.b2 - vbox.b1 + 1));
+                }
+                return vbox._volume;
+            },
+            count: function(force) {
+                var vbox = this,
+                    histo = vbox.histo;
+                if (!vbox._count_set || force) {
+                    var npix = 0,
+                        i, j, k;
+                    for (i = vbox.r1; i <= vbox.r2; i++) {
+                        for (j = vbox.g1; j <= vbox.g2; j++) {
+                            for (k = vbox.b1; k <= vbox.b2; k++) {
+                                index = getColorIndex(i, j, k);
+                                npix += (histo[index] || 0);
+                            }
+                        }
+                    }
+                    vbox._count = npix;
+                    vbox._count_set = true;
+                }
+                return vbox._count;
+            },
+            copy: function() {
+                var vbox = this;
+                return new VBox(vbox.r1, vbox.r2, vbox.g1, vbox.g2, vbox.b1, vbox.b2, vbox.histo);
+            },
+            avg: function(force) {
+                var vbox = this,
+                    histo = vbox.histo;
+                if (!vbox._avg || force) {
+                    var ntot = 0,
+                        mult = 1 << (8 - sigbits),
+                        rsum = 0,
+                        gsum = 0,
+                        bsum = 0,
+                        hval,
+                        i, j, k, histoindex;
+                    for (i = vbox.r1; i <= vbox.r2; i++) {
+                        for (j = vbox.g1; j <= vbox.g2; j++) {
+                            for (k = vbox.b1; k <= vbox.b2; k++) {
+                                histoindex = getColorIndex(i, j, k);
+                                hval = histo[histoindex] || 0;
+                                ntot += hval;
+                                rsum += (hval * (i + 0.5) * mult);
+                                gsum += (hval * (j + 0.5) * mult);
+                                bsum += (hval * (k + 0.5) * mult);
+                            }
+                        }
+                    }
+                    if (ntot) {
+                        vbox._avg = [~~(rsum / ntot), ~~(gsum / ntot), ~~(bsum / ntot)];
+                    } else {
+                        //                    console.log('empty box');
+                        vbox._avg = [~~(mult * (vbox.r1 + vbox.r2 + 1) / 2), ~~(mult * (vbox.g1 + vbox.g2 + 1) / 2), ~~(mult * (vbox.b1 + vbox.b2 + 1) / 2)];
+                    }
+                }
+                return vbox._avg;
+            },
+            contains: function(pixel) {
+                var vbox = this,
+                    rval = pixel[0] >> rshift;
+                gval = pixel[1] >> rshift;
+                bval = pixel[2] >> rshift;
+                return (rval >= vbox.r1 && rval <= vbox.r2 &&
+                    gval >= vbox.g1 && gval <= vbox.g2 &&
+                    bval >= vbox.b1 && bval <= vbox.b2);
+            }
+        };
+
+        // Color map
+        function CMap() {
+            this.vboxes = new PQueue(function(a, b) {
+                return pv.naturalOrder(
+                    a.vbox.count() * a.vbox.volume(),
+                    b.vbox.count() * b.vbox.volume()
+                );
+            });
+        }
+        CMap.prototype = {
+            push: function(vbox) {
+                this.vboxes.push({
+                    vbox: vbox,
+                    color: vbox.avg()
+                });
+            },
+            palette: function() {
+                return this.vboxes.map(function(vb) {
+                    return vb.color;
+                });
+            },
+            size: function() {
+                return this.vboxes.size();
+            },
+            map: function(color) {
+                var vboxes = this.vboxes;
+                for (var i = 0; i < vboxes.size(); i++) {
+                    if (vboxes.peek(i).vbox.contains(color)) {
+                        return vboxes.peek(i).color;
+                    }
+                }
+                return this.nearest(color);
+            },
+            nearest: function(color) {
+                var vboxes = this.vboxes,
+                    d1, d2, pColor;
+                for (var i = 0; i < vboxes.size(); i++) {
+                    d2 = Math.sqrt(
+                        Math.pow(color[0] - vboxes.peek(i).color[0], 2) +
+                        Math.pow(color[1] - vboxes.peek(i).color[1], 2) +
+                        Math.pow(color[2] - vboxes.peek(i).color[2], 2)
+                    );
+                    if (d2 < d1 || d1 === undefined) {
+                        d1 = d2;
+                        pColor = vboxes.peek(i).color;
+                    }
+                }
+                return pColor;
+            },
+            forcebw: function() {
+                // XXX: won't  work yet
+                var vboxes = this.vboxes;
+                vboxes.sort(function(a, b) {
+                    return pv.naturalOrder(pv.sum(a.color), pv.sum(b.color));
+                });
+
+                // force darkest color to black if everything < 5
+                var lowest = vboxes[0].color;
+                if (lowest[0] < 5 && lowest[1] < 5 && lowest[2] < 5)
+                    vboxes[0].color = [0, 0, 0];
+
+                // force lightest color to white if everything > 251
+                var idx = vboxes.length - 1,
+                    highest = vboxes[idx].color;
+                if (highest[0] > 251 && highest[1] > 251 && highest[2] > 251)
+                    vboxes[idx].color = [255, 255, 255];
+            }
+        };
+
+        // histo (1-d array, giving the number of pixels in
+        // each quantized region of color space), or null on error
+        function getHisto(pixels) {
+            var histosize = 1 << (3 * sigbits),
+                histo = new Array(histosize),
+                index, rval, gval, bval;
+            pixels.forEach(function(pixel) {
+                rval = pixel[0] >> rshift;
+                gval = pixel[1] >> rshift;
+                bval = pixel[2] >> rshift;
+                index = getColorIndex(rval, gval, bval);
+                histo[index] = (histo[index] || 0) + 1;
+            });
+            return histo;
+        }
+
+        function vboxFromPixels(pixels, histo) {
+            var rmin = 1000000,
+                rmax = 0,
+                gmin = 1000000,
+                gmax = 0,
+                bmin = 1000000,
+                bmax = 0,
+                rval, gval, bval;
+            // find min/max
+            pixels.forEach(function(pixel) {
+                rval = pixel[0] >> rshift;
+                gval = pixel[1] >> rshift;
+                bval = pixel[2] >> rshift;
+                if (rval < rmin) rmin = rval;
+                else if (rval > rmax) rmax = rval;
+                if (gval < gmin) gmin = gval;
+                else if (gval > gmax) gmax = gval;
+                if (bval < bmin) bmin = bval;
+                else if (bval > bmax) bmax = bval;
+            });
+            return new VBox(rmin, rmax, gmin, gmax, bmin, bmax, histo);
+        }
+
+        function medianCutApply(histo, vbox) {
+            if (!vbox.count()) return;
+
+            var rw = vbox.r2 - vbox.r1 + 1,
+                gw = vbox.g2 - vbox.g1 + 1,
+                bw = vbox.b2 - vbox.b1 + 1,
+                maxw = pv.max([rw, gw, bw]);
+            // only one pixel, no split
+            if (vbox.count() == 1) {
+                return [vbox.copy()];
+            }
+            /* Find the partial sum arrays along the selected axis. */
+            var total = 0,
+                partialsum = [],
+                lookaheadsum = [],
+                i, j, k, sum, index;
+            if (maxw == rw) {
+                for (i = vbox.r1; i <= vbox.r2; i++) {
+                    sum = 0;
+                    for (j = vbox.g1; j <= vbox.g2; j++) {
+                        for (k = vbox.b1; k <= vbox.b2; k++) {
+                            index = getColorIndex(i, j, k);
+                            sum += (histo[index] || 0);
+                        }
+                    }
+                    total += sum;
+                    partialsum[i] = total;
+                }
+            } else if (maxw == gw) {
+                for (i = vbox.g1; i <= vbox.g2; i++) {
+                    sum = 0;
+                    for (j = vbox.r1; j <= vbox.r2; j++) {
+                        for (k = vbox.b1; k <= vbox.b2; k++) {
+                            index = getColorIndex(j, i, k);
+                            sum += (histo[index] || 0);
+                        }
+                    }
+                    total += sum;
+                    partialsum[i] = total;
+                }
+            } else { /* maxw == bw */
+                for (i = vbox.b1; i <= vbox.b2; i++) {
+                    sum = 0;
+                    for (j = vbox.r1; j <= vbox.r2; j++) {
+                        for (k = vbox.g1; k <= vbox.g2; k++) {
+                            index = getColorIndex(j, k, i);
+                            sum += (histo[index] || 0);
+                        }
+                    }
+                    total += sum;
+                    partialsum[i] = total;
+                }
+            }
+            partialsum.forEach(function(d, i) {
+                lookaheadsum[i] = total - d;
+            });
+
+            function doCut(color) {
+                var dim1 = color + '1',
+                    dim2 = color + '2',
+                    left, right, vbox1, vbox2, d2, count2 = 0;
+                for (i = vbox[dim1]; i <= vbox[dim2]; i++) {
+                    if (partialsum[i] > total / 2) {
+                        vbox1 = vbox.copy();
+                        vbox2 = vbox.copy();
+                        left = i - vbox[dim1];
+                        right = vbox[dim2] - i;
+                        if (left <= right)
+                            d2 = Math.min(vbox[dim2] - 1, ~~(i + right / 2));
+                        else d2 = Math.max(vbox[dim1], ~~(i - 1 - left / 2));
+                        // avoid 0-count boxes
+                        while (!partialsum[d2]) d2++;
+                        count2 = lookaheadsum[d2];
+                        while (!count2 && partialsum[d2 - 1]) count2 = lookaheadsum[--d2];
+                        // set dimensions
+                        vbox1[dim2] = d2;
+                        vbox2[dim1] = vbox1[dim2] + 1;
+                        //                    console.log('vbox counts:', vbox.count(), vbox1.count(), vbox2.count());
+                        return [vbox1, vbox2];
+                    }
+                }
+
+            }
+            // determine the cut planes
+            return maxw == rw ? doCut('r') :
+                maxw == gw ? doCut('g') :
+                doCut('b');
+        }
+
+        function quantize(pixels, maxcolors) {
+            // short-circuit
+            if (!pixels.length || maxcolors < 2 || maxcolors > 256) {
+                //            console.log('wrong number of maxcolors');
+                return false;
+            }
+
+            // XXX: check color content and convert to grayscale if insufficient
+
+            var histo = getHisto(pixels),
+                histosize = 1 << (3 * sigbits);
+
+            // check that we aren't below maxcolors already
+            var nColors = 0;
+            histo.forEach(function() {
+                nColors++;
+            });
+            if (nColors <= maxcolors) {
+                // XXX: generate the new colors from the histo and return
+            }
+
+            // get the beginning vbox from the colors
+            var vbox = vboxFromPixels(pixels, histo),
+                pq = new PQueue(function(a, b) {
+                    return pv.naturalOrder(a.count(), b.count());
+                });
+            pq.push(vbox);
+
+            // inner function to do the iteration
+            function iter(lh, target) {
+                var ncolors = 1,
+                    niters = 0,
+                    vbox;
+                while (niters < maxIterations) {
+                    vbox = lh.pop();
+                    if (!vbox.count()) { /* just put it back */
+                        lh.push(vbox);
+                        niters++;
+                        continue;
+                    }
+                    // do the cut
+                    var vboxes = medianCutApply(histo, vbox),
+                        vbox1 = vboxes[0],
+                        vbox2 = vboxes[1];
+
+                    if (!vbox1) {
+                        //                    console.log("vbox1 not defined; shouldn't happen!");
+                        return;
+                    }
+                    lh.push(vbox1);
+                    if (vbox2) { /* vbox2 can be null */
+                        lh.push(vbox2);
+                        ncolors++;
+                    }
+                    if (ncolors >= target) return;
+                    if (niters++ > maxIterations) {
+                        //                    console.log("infinite loop; perhaps too few pixels!");
+                        return;
+                    }
+                }
+            }
+
+            // first set of colors, sorted by population
+            iter(pq, fractByPopulations * maxcolors);
+
+            // Re-sort by the product of pixel occupancy times the size in color space.
+            var pq2 = new PQueue(function(a, b) {
+                return pv.naturalOrder(a.count() * a.volume(), b.count() * b.volume());
+            });
+            while (pq.size()) {
+                pq2.push(pq.pop());
+            }
+
+            // next set - generate the median cuts using the (npix * vol) sorting.
+            iter(pq2, maxcolors - pq2.size());
+
+            // calculate the actual colors
+            var cmap = new CMap();
+            while (pq2.size()) {
+                cmap.push(pq2.pop());
+            }
+
+            return cmap;
+        }
+
+        return {
+            quantize: quantize
+        };
+    })();
+
+    /**
+     * Export class to global
+     */
+    if (typeof define === 'function' && define.amd) {
+        define([], function() {
+            return ColorThief;
+        }); // for AMD loader
+    } else if (typeof exports === 'object') {
+        module.exports = ColorThief; // for CommonJS
+    } else {
+        this.ColorThief = ColorThief;
+    }
+}.call(this));
+
+},{}],62:[function(require,module,exports){
+/*!
+ * Color Thief v2.0
+ * by Lokesh Dhakar - http://www.lokeshdhakar.com
+ *
+ * Thanks
+ * ------
+ * Nick Rabinowitz - For creating quantize.js.
+ * John Schulz - For clean up and optimization. @JFSIII
+ * Nathan Spady - For adding drag and drop support to the demo page.
+ *
+ * License
+ * -------
+ * Copyright 2011, 2015 Lokesh Dhakar
+ * Released under the MIT license
+ * https://raw.githubusercontent.com/lokesh/color-thief/master/LICENSE
+ *
+ */
+(function() {
+    /*!
+     * Color Thief v2.0
+     * by Lokesh Dhakar - http://www.lokeshdhakar.com
+     *
+     * Thanks
+     * ------
+     * Nick Rabinowitz - For creating quantize.js.
+     * John Schulz - For clean up and optimization. @JFSIII
+     * Nathan Spady - For adding drag and drop support to the demo page.
+     *
+     * License
+     * -------
+     * Copyright 2011, 2015 Lokesh Dhakar
+     * Released under the MIT license
+     * https://raw.githubusercontent.com/lokesh/color-thief/master/LICENSE
+     *
+     */
+
+
+    /*
+      CanvasImage Class
+      Class that wraps the html image element and canvas.
+      It also simplifies some of the canvas context manipulation
+      with a set of helper functions.
+    */
+    var CanvasImage = function(image) {
+        this.canvas = document.createElement('canvas');
+        this.context = this.canvas.getContext('2d');
+
+        document.body.appendChild(this.canvas);
+
+        this.width = this.canvas.width = image.width;
+        this.height = this.canvas.height = image.height;
+
+        this.context.drawImage(image, 0, 0, this.width, this.height);
+    };
+
+    CanvasImage.prototype.clear = function() {
+        this.context.clearRect(0, 0, this.width, this.height);
+    };
+
+    CanvasImage.prototype.update = function(imageData) {
+        this.context.putImageData(imageData, 0, 0);
+    };
+
+    CanvasImage.prototype.getPixelCount = function() {
+        return this.width * this.height;
+    };
+
+    CanvasImage.prototype.getImageData = function() {
+        return this.context.getImageData(0, 0, this.width, this.height);
+    };
+
+    CanvasImage.prototype.removeCanvas = function() {
+        this.canvas.parentNode.removeChild(this.canvas);
+    };
+
+
+    var ColorThief = function() {};
+
+    /*
+     * getColor(sourceImage[, quality])
+     * returns {r: num, g: num, b: num}
+     *
+     * Use the median cut algorithm provided by quantize.js to cluster similar
+     * colors and return the base color from the largest cluster.
+     *
+     * Quality is an optional argument. It needs to be an integer. 1 is the highest quality settings.
+     * 10 is the default. There is a trade-off between quality and speed. The bigger the number, the
+     * faster a color will be returned but the greater the likelihood that it will not be the visually
+     * most dominant color.
+     *
+     * */
+    ColorThief.prototype.getColor = function(sourceImage, quality) {
+        var palette = this.getPalette(sourceImage, 5, quality);
+        var dominantColor = palette[0];
+        return dominantColor;
+    };
+
+
+    /*
+     * getPalette(sourceImage[, colorCount, quality])
+     * returns array[ {r: num, g: num, b: num}, {r: num, g: num, b: num}, ...]
+     *
+     * Use the median cut algorithm provided by quantize.js to cluster similar colors.
+     *
+     * colorCount determines the size of the palette; the number of colors returned. If not set, it
+     * defaults to 10.
+     *
+     * BUGGY: Function does not always return the requested amount of colors. It can be +/- 2.
+     *
+     * quality is an optional argument. It needs to be an integer. 1 is the highest quality settings.
+     * 10 is the default. There is a trade-off between quality and speed. The bigger the number, the
+     * faster the palette generation but the greater the likelihood that colors will be missed.
+     *
+     *
+     */
+    ColorThief.prototype.getPalette = function(sourceImage, colorCount, quality) {
+
+        if (typeof colorCount === 'undefined') {
+            colorCount = 10;
+        }
+        if (typeof quality === 'undefined' || quality < 1) {
+            quality = 10;
+        }
+
+        // Create custom CanvasImage object
+        var image = new CanvasImage(sourceImage);
+        var imageData = image.getImageData();
+        var pixels = imageData.data;
+        var pixelCount = image.getPixelCount();
+
+        // Store the RGB values in an array format suitable for quantize function
+        var pixelArray = [];
+        for (var i = 0, offset, r, g, b, a; i < pixelCount; i = i + quality) {
+            offset = i * 4;
+            r = pixels[offset + 0];
+            g = pixels[offset + 1];
+            b = pixels[offset + 2];
+            a = pixels[offset + 3];
+            // If pixel is mostly opaque and not white
+            if (a >= 125) {
+                if (!(r > 250 && g > 250 && b > 250)) {
+                    pixelArray.push([r, g, b]);
+                }
+            }
+        }
+
+        // Send array to quantize function which clusters values
+        // using median cut algorithm
+        var cmap = MMCQ.quantize(pixelArray, colorCount);
+        var palette = cmap ? cmap.palette() : null;
+
+        // Clean up
+        image.removeCanvas();
+
+        return palette;
+    };
+
+
+
+
+    /*!
+     * quantize.js Copyright 2008 Nick Rabinowitz.
+     * Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
+     */
+
+    // fill out a couple protovis dependencies
+    /*!
+     * Block below copied from Protovis: http://mbostock.github.com/protovis/
+     * Copyright 2010 Stanford Visualization Group
+     * Licensed under the BSD License: http://www.opensource.org/licenses/bsd-license.php
+     */
+    if (!pv) {
+        var pv = {
+            map: function(array, f) {
+                var o = {};
+                return f ? array.map(function(d, i) {
+                    o.index = i;
+                    return f.call(o, d);
+                }) : array.slice();
+            },
+            naturalOrder: function(a, b) {
+                return (a < b) ? -1 : ((a > b) ? 1 : 0);
+            },
+            sum: function(array, f) {
+                var o = {};
+                return array.reduce(f ? function(p, d, i) {
+                    o.index = i;
+                    return p + f.call(o, d);
+                } : function(p, d) {
+                    return p + d;
+                }, 0);
+            },
+            max: function(array, f) {
+                return Math.max.apply(null, f ? pv.map(array, f) : array);
+            }
+        };
+    }
+
+
+
+    /**
+     * Basic Javascript port of the MMCQ (modified median cut quantization)
+     * algorithm from the Leptonica library (http://www.leptonica.com/).
+     * Returns a color map you can use to map original pixels to the reduced
+     * palette. Still a work in progress.
+     *
+     * @author Nick Rabinowitz
+     * @example
+
+    // array of pixels as [R,G,B] arrays
+    var myPixels = [[190,197,190], [202,204,200], [207,214,210], [211,214,211], [205,207,207]
+                    // etc
+                    ];
+    var maxColors = 4;
+
+    var cmap = MMCQ.quantize(myPixels, maxColors);
+    var newPalette = cmap.palette();
+    var newPixels = myPixels.map(function(p) {
+        return cmap.map(p);
+    });
+
+     */
+    var MMCQ = (function() {
+        // private constants
+        var sigbits = 5,
+            rshift = 8 - sigbits,
+            maxIterations = 1000,
+            fractByPopulations = 0.75;
+
+        // get reduced-space color index for a pixel
+        function getColorIndex(r, g, b) {
+            return (r << (2 * sigbits)) + (g << sigbits) + b;
+        }
+
+        // Simple priority queue
+        function PQueue(comparator) {
+            var contents = [],
+                sorted = false;
+
+            function sort() {
+                contents.sort(comparator);
+                sorted = true;
+            }
+
+            return {
+                push: function(o) {
+                    contents.push(o);
+                    sorted = false;
+                },
+                peek: function(index) {
+                    if (!sorted) sort();
+                    if (index === undefined) index = contents.length - 1;
+                    return contents[index];
+                },
+                pop: function() {
+                    if (!sorted) sort();
+                    return contents.pop();
+                },
+                size: function() {
+                    return contents.length;
+                },
+                map: function(f) {
+                    return contents.map(f);
+                },
+                debug: function() {
+                    if (!sorted) sort();
+                    return contents;
+                }
+            };
+        }
+
+        // 3d color space box
+        function VBox(r1, r2, g1, g2, b1, b2, histo) {
+            var vbox = this;
+            vbox.r1 = r1;
+            vbox.r2 = r2;
+            vbox.g1 = g1;
+            vbox.g2 = g2;
+            vbox.b1 = b1;
+            vbox.b2 = b2;
+            vbox.histo = histo;
+        }
+        VBox.prototype = {
+            volume: function(force) {
+                var vbox = this;
+                if (!vbox._volume || force) {
+                    vbox._volume = ((vbox.r2 - vbox.r1 + 1) * (vbox.g2 - vbox.g1 + 1) * (vbox.b2 - vbox.b1 + 1));
+                }
+                return vbox._volume;
+            },
+            count: function(force) {
+                var vbox = this,
+                    histo = vbox.histo;
+                if (!vbox._count_set || force) {
+                    var npix = 0,
+                        i, j, k;
+                    for (i = vbox.r1; i <= vbox.r2; i++) {
+                        for (j = vbox.g1; j <= vbox.g2; j++) {
+                            for (k = vbox.b1; k <= vbox.b2; k++) {
+                                index = getColorIndex(i, j, k);
+                                npix += (histo[index] || 0);
+                            }
+                        }
+                    }
+                    vbox._count = npix;
+                    vbox._count_set = true;
+                }
+                return vbox._count;
+            },
+            copy: function() {
+                var vbox = this;
+                return new VBox(vbox.r1, vbox.r2, vbox.g1, vbox.g2, vbox.b1, vbox.b2, vbox.histo);
+            },
+            avg: function(force) {
+                var vbox = this,
+                    histo = vbox.histo;
+                if (!vbox._avg || force) {
+                    var ntot = 0,
+                        mult = 1 << (8 - sigbits),
+                        rsum = 0,
+                        gsum = 0,
+                        bsum = 0,
+                        hval,
+                        i, j, k, histoindex;
+                    for (i = vbox.r1; i <= vbox.r2; i++) {
+                        for (j = vbox.g1; j <= vbox.g2; j++) {
+                            for (k = vbox.b1; k <= vbox.b2; k++) {
+                                histoindex = getColorIndex(i, j, k);
+                                hval = histo[histoindex] || 0;
+                                ntot += hval;
+                                rsum += (hval * (i + 0.5) * mult);
+                                gsum += (hval * (j + 0.5) * mult);
+                                bsum += (hval * (k + 0.5) * mult);
+                            }
+                        }
+                    }
+                    if (ntot) {
+                        vbox._avg = [~~(rsum / ntot), ~~(gsum / ntot), ~~(bsum / ntot)];
+                    } else {
+                        //                    console.log('empty box');
+                        vbox._avg = [~~(mult * (vbox.r1 + vbox.r2 + 1) / 2), ~~(mult * (vbox.g1 + vbox.g2 + 1) / 2), ~~(mult * (vbox.b1 + vbox.b2 + 1) / 2)];
+                    }
+                }
+                return vbox._avg;
+            },
+            contains: function(pixel) {
+                var vbox = this,
+                    rval = pixel[0] >> rshift;
+                gval = pixel[1] >> rshift;
+                bval = pixel[2] >> rshift;
+                return (rval >= vbox.r1 && rval <= vbox.r2 &&
+                    gval >= vbox.g1 && gval <= vbox.g2 &&
+                    bval >= vbox.b1 && bval <= vbox.b2);
+            }
+        };
+
+        // Color map
+        function CMap() {
+            this.vboxes = new PQueue(function(a, b) {
+                return pv.naturalOrder(
+                    a.vbox.count() * a.vbox.volume(),
+                    b.vbox.count() * b.vbox.volume()
+                );
+            });
+        }
+        CMap.prototype = {
+            push: function(vbox) {
+                this.vboxes.push({
+                    vbox: vbox,
+                    color: vbox.avg()
+                });
+            },
+            palette: function() {
+                return this.vboxes.map(function(vb) {
+                    return vb.color;
+                });
+            },
+            size: function() {
+                return this.vboxes.size();
+            },
+            map: function(color) {
+                var vboxes = this.vboxes;
+                for (var i = 0; i < vboxes.size(); i++) {
+                    if (vboxes.peek(i).vbox.contains(color)) {
+                        return vboxes.peek(i).color;
+                    }
+                }
+                return this.nearest(color);
+            },
+            nearest: function(color) {
+                var vboxes = this.vboxes,
+                    d1, d2, pColor;
+                for (var i = 0; i < vboxes.size(); i++) {
+                    d2 = Math.sqrt(
+                        Math.pow(color[0] - vboxes.peek(i).color[0], 2) +
+                        Math.pow(color[1] - vboxes.peek(i).color[1], 2) +
+                        Math.pow(color[2] - vboxes.peek(i).color[2], 2)
+                    );
+                    if (d2 < d1 || d1 === undefined) {
+                        d1 = d2;
+                        pColor = vboxes.peek(i).color;
+                    }
+                }
+                return pColor;
+            },
+            forcebw: function() {
+                // XXX: won't  work yet
+                var vboxes = this.vboxes;
+                vboxes.sort(function(a, b) {
+                    return pv.naturalOrder(pv.sum(a.color), pv.sum(b.color));
+                });
+
+                // force darkest color to black if everything < 5
+                var lowest = vboxes[0].color;
+                if (lowest[0] < 5 && lowest[1] < 5 && lowest[2] < 5)
+                    vboxes[0].color = [0, 0, 0];
+
+                // force lightest color to white if everything > 251
+                var idx = vboxes.length - 1,
+                    highest = vboxes[idx].color;
+                if (highest[0] > 251 && highest[1] > 251 && highest[2] > 251)
+                    vboxes[idx].color = [255, 255, 255];
+            }
+        };
+
+        // histo (1-d array, giving the number of pixels in
+        // each quantized region of color space), or null on error
+        function getHisto(pixels) {
+            var histosize = 1 << (3 * sigbits),
+                histo = new Array(histosize),
+                index, rval, gval, bval;
+            pixels.forEach(function(pixel) {
+                rval = pixel[0] >> rshift;
+                gval = pixel[1] >> rshift;
+                bval = pixel[2] >> rshift;
+                index = getColorIndex(rval, gval, bval);
+                histo[index] = (histo[index] || 0) + 1;
+            });
+            return histo;
+        }
+
+        function vboxFromPixels(pixels, histo) {
+            var rmin = 1000000,
+                rmax = 0,
+                gmin = 1000000,
+                gmax = 0,
+                bmin = 1000000,
+                bmax = 0,
+                rval, gval, bval;
+            // find min/max
+            pixels.forEach(function(pixel) {
+                rval = pixel[0] >> rshift;
+                gval = pixel[1] >> rshift;
+                bval = pixel[2] >> rshift;
+                if (rval < rmin) rmin = rval;
+                else if (rval > rmax) rmax = rval;
+                if (gval < gmin) gmin = gval;
+                else if (gval > gmax) gmax = gval;
+                if (bval < bmin) bmin = bval;
+                else if (bval > bmax) bmax = bval;
+            });
+            return new VBox(rmin, rmax, gmin, gmax, bmin, bmax, histo);
+        }
+
+        function medianCutApply(histo, vbox) {
+            if (!vbox.count()) return;
+
+            var rw = vbox.r2 - vbox.r1 + 1,
+                gw = vbox.g2 - vbox.g1 + 1,
+                bw = vbox.b2 - vbox.b1 + 1,
+                maxw = pv.max([rw, gw, bw]);
+            // only one pixel, no split
+            if (vbox.count() == 1) {
+                return [vbox.copy()];
+            }
+            /* Find the partial sum arrays along the selected axis. */
+            var total = 0,
+                partialsum = [],
+                lookaheadsum = [],
+                i, j, k, sum, index;
+            if (maxw == rw) {
+                for (i = vbox.r1; i <= vbox.r2; i++) {
+                    sum = 0;
+                    for (j = vbox.g1; j <= vbox.g2; j++) {
+                        for (k = vbox.b1; k <= vbox.b2; k++) {
+                            index = getColorIndex(i, j, k);
+                            sum += (histo[index] || 0);
+                        }
+                    }
+                    total += sum;
+                    partialsum[i] = total;
+                }
+            } else if (maxw == gw) {
+                for (i = vbox.g1; i <= vbox.g2; i++) {
+                    sum = 0;
+                    for (j = vbox.r1; j <= vbox.r2; j++) {
+                        for (k = vbox.b1; k <= vbox.b2; k++) {
+                            index = getColorIndex(j, i, k);
+                            sum += (histo[index] || 0);
+                        }
+                    }
+                    total += sum;
+                    partialsum[i] = total;
+                }
+            } else { /* maxw == bw */
+                for (i = vbox.b1; i <= vbox.b2; i++) {
+                    sum = 0;
+                    for (j = vbox.r1; j <= vbox.r2; j++) {
+                        for (k = vbox.g1; k <= vbox.g2; k++) {
+                            index = getColorIndex(j, k, i);
+                            sum += (histo[index] || 0);
+                        }
+                    }
+                    total += sum;
+                    partialsum[i] = total;
+                }
+            }
+            partialsum.forEach(function(d, i) {
+                lookaheadsum[i] = total - d;
+            });
+
+            function doCut(color) {
+                var dim1 = color + '1',
+                    dim2 = color + '2',
+                    left, right, vbox1, vbox2, d2, count2 = 0;
+                for (i = vbox[dim1]; i <= vbox[dim2]; i++) {
+                    if (partialsum[i] > total / 2) {
+                        vbox1 = vbox.copy();
+                        vbox2 = vbox.copy();
+                        left = i - vbox[dim1];
+                        right = vbox[dim2] - i;
+                        if (left <= right)
+                            d2 = Math.min(vbox[dim2] - 1, ~~(i + right / 2));
+                        else d2 = Math.max(vbox[dim1], ~~(i - 1 - left / 2));
+                        // avoid 0-count boxes
+                        while (!partialsum[d2]) d2++;
+                        count2 = lookaheadsum[d2];
+                        while (!count2 && partialsum[d2 - 1]) count2 = lookaheadsum[--d2];
+                        // set dimensions
+                        vbox1[dim2] = d2;
+                        vbox2[dim1] = vbox1[dim2] + 1;
+                        //                    console.log('vbox counts:', vbox.count(), vbox1.count(), vbox2.count());
+                        return [vbox1, vbox2];
+                    }
+                }
+
+            }
+            // determine the cut planes
+            return maxw == rw ? doCut('r') :
+                maxw == gw ? doCut('g') :
+                doCut('b');
+        }
+
+        function quantize(pixels, maxcolors) {
+            // short-circuit
+            if (!pixels.length || maxcolors < 2 || maxcolors > 256) {
+                //            console.log('wrong number of maxcolors');
+                return false;
+            }
+
+            // XXX: check color content and convert to grayscale if insufficient
+
+            var histo = getHisto(pixels),
+                histosize = 1 << (3 * sigbits);
+
+            // check that we aren't below maxcolors already
+            var nColors = 0;
+            histo.forEach(function() {
+                nColors++;
+            });
+            if (nColors <= maxcolors) {
+                // XXX: generate the new colors from the histo and return
+            }
+
+            // get the beginning vbox from the colors
+            var vbox = vboxFromPixels(pixels, histo),
+                pq = new PQueue(function(a, b) {
+                    return pv.naturalOrder(a.count(), b.count());
+                });
+            pq.push(vbox);
+
+            // inner function to do the iteration
+            function iter(lh, target) {
+                var ncolors = 1,
+                    niters = 0,
+                    vbox;
+                while (niters < maxIterations) {
+                    vbox = lh.pop();
+                    if (!vbox.count()) { /* just put it back */
+                        lh.push(vbox);
+                        niters++;
+                        continue;
+                    }
+                    // do the cut
+                    var vboxes = medianCutApply(histo, vbox),
+                        vbox1 = vboxes[0],
+                        vbox2 = vboxes[1];
+
+                    if (!vbox1) {
+                        //                    console.log("vbox1 not defined; shouldn't happen!");
+                        return;
+                    }
+                    lh.push(vbox1);
+                    if (vbox2) { /* vbox2 can be null */
+                        lh.push(vbox2);
+                        ncolors++;
+                    }
+                    if (ncolors >= target) return;
+                    if (niters++ > maxIterations) {
+                        //                    console.log("infinite loop; perhaps too few pixels!");
+                        return;
+                    }
+                }
+            }
+
+            // first set of colors, sorted by population
+            iter(pq, fractByPopulations * maxcolors);
+
+            // Re-sort by the product of pixel occupancy times the size in color space.
+            var pq2 = new PQueue(function(a, b) {
+                return pv.naturalOrder(a.count() * a.volume(), b.count() * b.volume());
+            });
+            while (pq.size()) {
+                pq2.push(pq.pop());
+            }
+
+            // next set - generate the median cuts using the (npix * vol) sorting.
+            iter(pq2, maxcolors - pq2.size());
+
+            // calculate the actual colors
+            var cmap = new CMap();
+            while (pq2.size()) {
+                cmap.push(pq2.pop());
+            }
+
+            return cmap;
+        }
+
+        return {
+            quantize: quantize
+        };
+    })();
+
+    /**
+     * Export class to global
+     */
+    if (typeof define === 'function' && define.amd) {
+        define([], function() {
+            return ColorThief;
+        }); // for AMD loader
+    } else if (typeof exports === 'object') {
+        module.exports = ColorThief; // for CommonJS
+    } else {
+        this.ColorThief = ColorThief;
+    }
+}.call(this));
+
+},{}],63:[function(require,module,exports){
 (function(angular, factory) {
     'use strict';
 
@@ -93044,7 +100857,7 @@ angular.module('ngTable').run(['$templateCache', function ($templateCache) {
     return angular.module('ngTable');
 }));
 
-},{}],58:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 (function (global){
 /*!
  * Waves v0.7.5
@@ -93630,7 +101443,7 @@ angular.module('ngTable').run(['$templateCache', function ($templateCache) {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],59:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 /**
  * oclazyload - Load modules on demand (lazy load) with angularJS
  * @version v1.0.9
@@ -94969,7 +102782,7 @@ if (!Array.prototype.indexOf) {
         return -1;
     };
 }
-},{}],60:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -95002,7 +102815,7 @@ var defaultParams = {
 
 exports['default'] = defaultParams;
 module.exports = exports['default'];
-},{}],61:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -95138,7 +102951,7 @@ exports['default'] = {
   handleCancel: handleCancel
 };
 module.exports = exports['default'];
-},{"./handle-dom":62,"./handle-swal-dom":64,"./utils":67}],62:[function(require,module,exports){
+},{"./handle-dom":68,"./handle-swal-dom":70,"./utils":73}],68:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -95330,7 +103143,7 @@ exports.fadeIn = fadeIn;
 exports.fadeOut = fadeOut;
 exports.fireClick = fireClick;
 exports.stopEventPropagation = stopEventPropagation;
-},{}],63:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -95410,7 +103223,7 @@ var handleKeyDown = function handleKeyDown(event, params, modal) {
 
 exports['default'] = handleKeyDown;
 module.exports = exports['default'];
-},{"./handle-dom":62,"./handle-swal-dom":64}],64:[function(require,module,exports){
+},{"./handle-dom":68,"./handle-swal-dom":70}],70:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -95578,7 +103391,7 @@ exports.openModal = openModal;
 exports.resetInput = resetInput;
 exports.resetInputError = resetInputError;
 exports.fixVerticalPosition = fixVerticalPosition;
-},{"./default-params":60,"./handle-dom":62,"./injected-html":65,"./utils":67}],65:[function(require,module,exports){
+},{"./default-params":66,"./handle-dom":68,"./injected-html":71,"./utils":73}],71:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -95621,7 +103434,7 @@ var injectedHTML =
 
 exports["default"] = injectedHTML;
 module.exports = exports["default"];
-},{}],66:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -95847,7 +103660,7 @@ var setParameters = function setParameters(params) {
 
 exports['default'] = setParameters;
 module.exports = exports['default'];
-},{"./handle-dom":62,"./handle-swal-dom":64,"./utils":67}],67:[function(require,module,exports){
+},{"./handle-dom":68,"./handle-swal-dom":70,"./utils":73}],73:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -95921,7 +103734,7 @@ exports.hexToRgb = hexToRgb;
 exports.isIE8 = isIE8;
 exports.logStr = logStr;
 exports.colorLuminance = colorLuminance;
-},{}],68:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -96225,7 +104038,7 @@ if (typeof window !== 'undefined') {
   _extend$hexToRgb$isIE8$logStr$colorLuminance.logStr('SweetAlert is a frontend module!');
 }
 module.exports = exports['default'];
-},{"./modules/default-params":60,"./modules/handle-click":61,"./modules/handle-dom":62,"./modules/handle-key":63,"./modules/handle-swal-dom":64,"./modules/set-params":66,"./modules/utils":67}],69:[function(require,module,exports){
+},{"./modules/default-params":66,"./modules/handle-click":67,"./modules/handle-dom":68,"./modules/handle-key":69,"./modules/handle-swal-dom":70,"./modules/set-params":72,"./modules/utils":73}],75:[function(require,module,exports){
 /*!
  * FullCalendar v2.4.0
  * Docs & License: http://fullcalendar.io/
@@ -96235,7 +104048,7 @@ module.exports = exports['default'];
 }}),db=ra.extend({grid:null,rowCoords:null,colCoords:null,containerEl:null,bounds:null,constructor:function(a){this.grid=a},build:function(){this.grid.build(),this.rowCoords=this.grid.computeRowCoords(),this.colCoords=this.grid.computeColCoords(),this.computeBounds()},clear:function(){this.grid.clear(),this.rowCoords=null,this.colCoords=null},getCell:function(b,c){var d,e,f,g=this.rowCoords,h=g.length,i=this.colCoords,j=i.length,k=null,l=null;if(this.inBounds(b,c)){for(d=0;h>d;d++)if(e=g[d],c>=e.top&&c<e.bottom){k=d;break}for(d=0;j>d;d++)if(e=i[d],b>=e.left&&b<e.right){l=d;break}if(null!==k&&null!==l)return f=this.grid.getCell(k,l),f.grid=this.grid,a.extend(f,g[k],i[l]),f}return null},computeBounds:function(){this.bounds=this.containerEl?p(this.containerEl):null},inBounds:function(a,b){var c=this.bounds;return c?a>=c.left&&a<c.right&&b>=c.top&&b<c.bottom:!0}}),eb=ra.extend({coordMaps:null,constructor:function(a){this.coordMaps=a},build:function(){var a,b=this.coordMaps;for(a=0;a<b.length;a++)b[a].build()},getCell:function(a,b){var c,d=this.coordMaps,e=null;for(c=0;c<d.length&&!e;c++)e=d[c].getCell(a,b);return e},clear:function(){var a,b=this.coordMaps;for(a=0;a<b.length;a++)b[a].clear()}}),fb=Ma.DragListener=ra.extend({options:null,isListening:!1,isDragging:!1,originX:null,originY:null,mousemoveProxy:null,mouseupProxy:null,subjectEl:null,subjectHref:null,scrollEl:null,scrollBounds:null,scrollTopVel:null,scrollLeftVel:null,scrollIntervalId:null,scrollHandlerProxy:null,scrollSensitivity:30,scrollSpeed:200,scrollIntervalMs:50,constructor:function(a){a=a||{},this.options=a,this.subjectEl=a.subjectEl},mousedown:function(a){v(a)&&(a.preventDefault(),this.startListening(a),this.options.distance||this.startDrag(a))},startListening:function(b){var c;this.isListening||(b&&this.options.scroll&&(c=n(a(b.target)),c.is(window)||c.is(document)||(this.scrollEl=c,this.scrollHandlerProxy=da(ca(this,"scrollHandler"),100),this.scrollEl.on("scroll",this.scrollHandlerProxy))),a(document).on("mousemove",this.mousemoveProxy=ca(this,"mousemove")).on("mouseup",this.mouseupProxy=ca(this,"mouseup")).on("selectstart",this.preventDefault),b?(this.originX=b.pageX,this.originY=b.pageY):(this.originX=0,this.originY=0),this.isListening=!0,this.listenStart(b))},listenStart:function(a){this.trigger("listenStart",a)},mousemove:function(a){var b,c,d=a.pageX-this.originX,e=a.pageY-this.originY;this.isDragging||(b=this.options.distance||1,c=d*d+e*e,c>=b*b&&this.startDrag(a)),this.isDragging&&this.drag(d,e,a)},startDrag:function(a){this.isListening||this.startListening(),this.isDragging||(this.isDragging=!0,this.dragStart(a))},dragStart:function(a){var b=this.subjectEl;this.trigger("dragStart",a),(this.subjectHref=b?b.attr("href"):null)&&b.removeAttr("href")},drag:function(a,b,c){this.trigger("drag",a,b,c),this.updateScroll(c)},mouseup:function(a){this.stopListening(a)},stopDrag:function(a){this.isDragging&&(this.stopScrolling(),this.dragStop(a),this.isDragging=!1)},dragStop:function(a){var b=this;this.trigger("dragStop",a),setTimeout(function(){b.subjectHref&&b.subjectEl.attr("href",b.subjectHref)},0)},stopListening:function(b){this.stopDrag(b),this.isListening&&(this.scrollEl&&(this.scrollEl.off("scroll",this.scrollHandlerProxy),this.scrollHandlerProxy=null),a(document).off("mousemove",this.mousemoveProxy).off("mouseup",this.mouseupProxy).off("selectstart",this.preventDefault),this.mousemoveProxy=null,this.mouseupProxy=null,this.isListening=!1,this.listenStop(b))},listenStop:function(a){this.trigger("listenStop",a)},trigger:function(a){this.options[a]&&this.options[a].apply(this,Array.prototype.slice.call(arguments,1))},preventDefault:function(a){a.preventDefault()},computeScrollBounds:function(){var a=this.scrollEl;this.scrollBounds=a?o(a):null},updateScroll:function(a){var b,c,d,e,f=this.scrollSensitivity,g=this.scrollBounds,h=0,i=0;g&&(b=(f-(a.pageY-g.top))/f,c=(f-(g.bottom-a.pageY))/f,d=(f-(a.pageX-g.left))/f,e=(f-(g.right-a.pageX))/f,b>=0&&1>=b?h=b*this.scrollSpeed*-1:c>=0&&1>=c&&(h=c*this.scrollSpeed),d>=0&&1>=d?i=d*this.scrollSpeed*-1:e>=0&&1>=e&&(i=e*this.scrollSpeed)),this.setScrollVel(h,i)},setScrollVel:function(a,b){this.scrollTopVel=a,this.scrollLeftVel=b,this.constrainScrollVel(),!this.scrollTopVel&&!this.scrollLeftVel||this.scrollIntervalId||(this.scrollIntervalId=setInterval(ca(this,"scrollIntervalFunc"),this.scrollIntervalMs))},constrainScrollVel:function(){var a=this.scrollEl;this.scrollTopVel<0?a.scrollTop()<=0&&(this.scrollTopVel=0):this.scrollTopVel>0&&a.scrollTop()+a[0].clientHeight>=a[0].scrollHeight&&(this.scrollTopVel=0),this.scrollLeftVel<0?a.scrollLeft()<=0&&(this.scrollLeftVel=0):this.scrollLeftVel>0&&a.scrollLeft()+a[0].clientWidth>=a[0].scrollWidth&&(this.scrollLeftVel=0)},scrollIntervalFunc:function(){var a=this.scrollEl,b=this.scrollIntervalMs/1e3;this.scrollTopVel&&a.scrollTop(a.scrollTop()+this.scrollTopVel*b),this.scrollLeftVel&&a.scrollLeft(a.scrollLeft()+this.scrollLeftVel*b),this.constrainScrollVel(),this.scrollTopVel||this.scrollLeftVel||this.stopScrolling()},stopScrolling:function(){this.scrollIntervalId&&(clearInterval(this.scrollIntervalId),this.scrollIntervalId=null,this.scrollStop())},scrollHandler:function(){this.scrollIntervalId||this.scrollStop()},scrollStop:function(){}}),gb=fb.extend({coordMap:null,origCell:null,cell:null,coordAdjust:null,constructor:function(a,b){fb.prototype.constructor.call(this,b),this.coordMap=a},listenStart:function(a){var b,c,d,e=this.subjectEl;fb.prototype.listenStart.apply(this,arguments),this.computeCoords(),a?(c={left:a.pageX,top:a.pageY},d=c,e&&(b=o(e),d=x(d,b)),this.origCell=this.getCell(d.left,d.top),e&&this.options.subjectCenter&&(this.origCell&&(b=w(this.origCell,b)||b),d=y(b)),this.coordAdjust=z(d,c)):(this.origCell=null,this.coordAdjust=null)},computeCoords:function(){this.coordMap.build(),this.computeScrollBounds()},dragStart:function(a){var b;fb.prototype.dragStart.apply(this,arguments),b=this.getCell(a.pageX,a.pageY),b&&this.cellOver(b)},drag:function(a,b,c){var d;fb.prototype.drag.apply(this,arguments),d=this.getCell(c.pageX,c.pageY),sa(d,this.cell)||(this.cell&&this.cellOut(),d&&this.cellOver(d))},dragStop:function(){this.cellDone(),fb.prototype.dragStop.apply(this,arguments)},cellOver:function(a){this.cell=a,this.trigger("cellOver",a,sa(a,this.origCell),this.origCell)},cellOut:function(){this.cell&&(this.trigger("cellOut",this.cell),this.cellDone(),this.cell=null)},cellDone:function(){this.cell&&this.trigger("cellDone",this.cell)},listenStop:function(){fb.prototype.listenStop.apply(this,arguments),this.origCell=this.cell=null,this.coordMap.clear()},scrollStop:function(){fb.prototype.scrollStop.apply(this,arguments),this.computeCoords()},getCell:function(a,b){return this.coordAdjust&&(a+=this.coordAdjust.left,b+=this.coordAdjust.top),this.coordMap.getCell(a,b)}}),hb=ra.extend({options:null,sourceEl:null,el:null,parentEl:null,top0:null,left0:null,mouseY0:null,mouseX0:null,topDelta:null,leftDelta:null,mousemoveProxy:null,isFollowing:!1,isHidden:!1,isAnimating:!1,constructor:function(b,c){this.options=c=c||{},this.sourceEl=b,this.parentEl=c.parentEl?a(c.parentEl):b.parent()},start:function(b){this.isFollowing||(this.isFollowing=!0,this.mouseY0=b.pageY,this.mouseX0=b.pageX,this.topDelta=0,this.leftDelta=0,this.isHidden||this.updatePosition(),a(document).on("mousemove",this.mousemoveProxy=ca(this,"mousemove")))},stop:function(b,c){function d(){this.isAnimating=!1,e.removeElement(),this.top0=this.left0=null,c&&c()}var e=this,f=this.options.revertDuration;this.isFollowing&&!this.isAnimating&&(this.isFollowing=!1,a(document).off("mousemove",this.mousemoveProxy),b&&f&&!this.isHidden?(this.isAnimating=!0,this.el.animate({top:this.top0,left:this.left0},{duration:f,complete:d})):d())},getEl:function(){var a=this.el;return a||(this.sourceEl.width(),a=this.el=this.sourceEl.clone().css({position:"absolute",visibility:"",display:this.isHidden?"none":"",margin:0,right:"auto",bottom:"auto",width:this.sourceEl.width(),height:this.sourceEl.height(),opacity:this.options.opacity||"",zIndex:this.options.zIndex}).appendTo(this.parentEl)),a},removeElement:function(){this.el&&(this.el.remove(),this.el=null)},updatePosition:function(){var a,b;this.getEl(),null===this.top0&&(this.sourceEl.width(),a=this.sourceEl.offset(),b=this.el.offsetParent().offset(),this.top0=a.top-b.top,this.left0=a.left-b.left),this.el.css({top:this.top0+this.topDelta,left:this.left0+this.leftDelta})},mousemove:function(a){this.topDelta=a.pageY-this.mouseY0,this.leftDelta=a.pageX-this.mouseX0,this.isHidden||this.updatePosition()},hide:function(){this.isHidden||(this.isHidden=!0,this.el&&this.el.hide())},show:function(){this.isHidden&&(this.isHidden=!1,this.updatePosition(),this.getEl().show())}}),ib=ra.extend({view:null,isRTL:null,cellHtml:"<td/>",constructor:function(a){this.view=a,this.isRTL=a.opt("isRTL")},rowHtml:function(a,b){var c,d,e=this.getHtmlRenderer("cell",a),f="";for(b=b||0,c=0;c<this.colCnt;c++)d=this.getCell(b,c),f+=e(d);return f=this.bookendCells(f,a,b),"<tr>"+f+"</tr>"},bookendCells:function(a,b,c){var d=this.getHtmlRenderer("intro",b)(c||0),e=this.getHtmlRenderer("outro",b)(c||0),f=this.isRTL?e:d,g=this.isRTL?d:e;return"string"==typeof a?f+a+g:a.prepend(f).append(g)},getHtmlRenderer:function(a,b){var c,d,e,f,g=this.view;return c=a+"Html",b&&(d=b+_(a)+"Html"),d&&(f=g[d])?e=g:d&&(f=this[d])?e=this:(f=g[c])?e=g:(f=this[c])&&(e=this),"function"==typeof f?function(){return f.apply(e,arguments)||""}:function(){return f||""}}}),jb=Ma.Grid=ib.extend({start:null,end:null,rowCnt:0,colCnt:0,el:null,coordMap:null,elsByFill:null,externalDragStartProxy:null,colHeadFormat:null,eventTimeFormat:null,displayEventTime:null,displayEventEnd:null,cellDuration:null,largeUnit:null,constructor:function(){ib.apply(this,arguments),this.coordMap=new db(this),this.elsByFill={},this.externalDragStartProxy=ca(this,"externalDragStart")},computeColHeadFormat:function(){},computeEventTimeFormat:function(){return this.view.opt("smallTimeFormat")},computeDisplayEventTime:function(){return!0},computeDisplayEventEnd:function(){return!0},setRange:function(a){this.start=a.start.clone(),this.end=a.end.clone(),this.rangeUpdated(),this.processRangeOptions()},rangeUpdated:function(){},processRangeOptions:function(){var a,b,c=this.view;this.colHeadFormat=c.opt("columnFormat")||this.computeColHeadFormat(),this.eventTimeFormat=c.opt("eventTimeFormat")||c.opt("timeFormat")||this.computeEventTimeFormat(),a=c.opt("displayEventTime"),null==a&&(a=this.computeDisplayEventTime()),b=c.opt("displayEventEnd"),null==b&&(b=this.computeDisplayEventEnd()),this.displayEventTime=a,this.displayEventEnd=b},build:function(){},clear:function(){},rangeToSegs:function(a){},diffDates:function(a,b){return this.largeUnit?H(a,b,this.largeUnit):F(a,b)},getCell:function(b,c){var d;return null==c&&("number"==typeof b?(c=b%this.colCnt,b=Math.floor(b/this.colCnt)):(c=b.col,b=b.row)),d={row:b,col:c},a.extend(d,this.getRowData(b),this.getColData(c)),a.extend(d,this.computeCellRange(d)),d},computeCellRange:function(a){var b=this.computeCellDate(a);return{start:b,end:b.clone().add(this.cellDuration)}},computeCellDate:function(a){},getRowData:function(a){return{}},getColData:function(a){return{}},getRowEl:function(a){},getColEl:function(a){},getCellDayEl:function(a){return this.getColEl(a.col)||this.getRowEl(a.row)},computeRowCoords:function(){var a,b,c,d=[];for(a=0;a<this.rowCnt;a++)b=this.getRowEl(a),c=b.offset().top,d.push({top:c,bottom:c+b.outerHeight()});return d},computeColCoords:function(){var a,b,c,d=[];for(a=0;a<this.colCnt;a++)b=this.getColEl(a),c=b.offset().left,d.push({left:c,right:c+b.outerWidth()});return d},setElement:function(b){var c=this;this.el=b,b.on("mousedown",function(b){a(b.target).is(".fc-event-container *, .fc-more")||a(b.target).closest(".fc-popover").length||c.dayMousedown(b)}),this.bindSegHandlers(),this.bindGlobalHandlers()},removeElement:function(){this.unbindGlobalHandlers(),this.el.remove()},renderSkeleton:function(){},renderDates:function(){},unrenderDates:function(){},bindGlobalHandlers:function(){a(document).on("dragstart sortstart",this.externalDragStartProxy)},unbindGlobalHandlers:function(){a(document).off("dragstart sortstart",this.externalDragStartProxy)},dayMousedown:function(a){var b,c,d=this,e=this.view,f=e.opt("selectable"),i=new gb(this.coordMap,{scroll:e.opt("dragScroll"),dragStart:function(){e.unselect()},cellOver:function(a,e,h){h&&(b=e?a:null,f&&(c=d.computeSelection(h,a),c?d.renderSelection(c):g()))},cellOut:function(a){b=null,c=null,d.unrenderSelection(),h()},listenStop:function(a){b&&e.triggerDayClick(b,d.getCellDayEl(b),a),c&&e.reportSelection(c,a),h()}});i.mousedown(a)},renderRangeHelper:function(a,b){var c=this.fabricateHelperEvent(a,b);this.renderHelper(c,b)},fabricateHelperEvent:function(a,b){var c=b?R(b.event):{};return c.start=a.start.clone(),c.end=a.end?a.end.clone():null,c.allDay=null,this.view.calendar.normalizeEventRange(c),c.className=(c.className||[]).concat("fc-helper"),b||(c.editable=!1),c},renderHelper:function(a,b){},unrenderHelper:function(){},renderSelection:function(a){this.renderHighlight(this.selectionRangeToSegs(a))},unrenderSelection:function(){this.unrenderHighlight()},computeSelection:function(a,b){var c,d=[a.start,a.end,b.start,b.end];return d.sort(aa),c={start:d[0].clone(),end:d[3].clone()},this.view.calendar.isSelectionRangeAllowed(c)?c:null},selectionRangeToSegs:function(a){return this.rangeToSegs(a)},renderHighlight:function(a){this.renderFill("highlight",a)},unrenderHighlight:function(){this.unrenderFill("highlight")},highlightSegClasses:function(){return["fc-highlight"]},renderFill:function(a,b){},unrenderFill:function(a){var b=this.elsByFill[a];b&&(b.remove(),delete this.elsByFill[a])},renderFillSegEls:function(b,c){var d,e=this,f=this[b+"SegEl"],g="",h=[];if(c.length){for(d=0;d<c.length;d++)g+=this.fillSegHtml(b,c[d]);a(g).each(function(b,d){var g=c[b],i=a(d);f&&(i=f.call(e,g,i)),i&&(i=a(i),i.is(e.fillSegTag)&&(g.el=i,h.push(g)))})}return h},fillSegTag:"div",fillSegHtml:function(a,b){var c=this[a+"SegClasses"],d=this[a+"SegCss"],e=c?c.call(this,b):[],f=$(d?d.call(this,b):{});return"<"+this.fillSegTag+(e.length?' class="'+e.join(" ")+'"':"")+(f?' style="'+f+'"':"")+" />"},headHtml:function(){return'<div class="fc-row '+this.view.widgetHeaderClass+'"><table><thead>'+this.rowHtml("head")+"</thead></table></div>"},headCellHtml:function(a){var b=this.view,c=a.start;return'<th class="fc-day-header '+b.widgetHeaderClass+" fc-"+Qa[c.day()]+'">'+Y(c.format(this.colHeadFormat))+"</th>"},bgCellHtml:function(a){var b=this.view,c=a.start,d=this.getDayClasses(c);return d.unshift("fc-day",b.widgetContentClass),'<td class="'+d.join(" ")+'" data-date="'+c.format("YYYY-MM-DD")+'"></td>'},getDayClasses:function(a){var b=this.view,c=b.calendar.getNow().stripTime(),d=["fc-"+Qa[a.day()]];return 1==b.intervalDuration.as("months")&&a.month()!=b.intervalStart.month()&&d.push("fc-other-month"),a.isSame(c,"day")?d.push("fc-today",b.highlightStateClass):c>a?d.push("fc-past"):d.push("fc-future"),d}});jb.mixin({mousedOverSeg:null,isDraggingSeg:!1,isResizingSeg:!1,isDraggingExternal:!1,segs:null,renderEvents:function(a){var b,c,d=this.eventsToSegs(a),e=[],f=[];for(b=0;b<d.length;b++)c=d[b],ta(c.event)?e.push(c):f.push(c);e=this.renderBgSegs(e)||e,f=this.renderFgSegs(f)||f,this.segs=e.concat(f)},unrenderEvents:function(){this.triggerSegMouseout(),this.unrenderFgSegs(),this.unrenderBgSegs(),this.segs=null},getEventSegs:function(){return this.segs||[]},renderFgSegs:function(a){},unrenderFgSegs:function(){},renderFgSegEls:function(b,c){var d,e=this.view,f="",g=[];if(b.length){for(d=0;d<b.length;d++)f+=this.fgSegHtml(b[d],c);a(f).each(function(c,d){var f=b[c],h=e.resolveEventEl(f.event,a(d));h&&(h.data("fc-seg",f),f.el=h,g.push(f))})}return g},fgSegHtml:function(a,b){},renderBgSegs:function(a){return this.renderFill("bgEvent",a)},unrenderBgSegs:function(){this.unrenderFill("bgEvent")},bgEventSegEl:function(a,b){return this.view.resolveEventEl(a.event,b)},bgEventSegClasses:function(a){var b=a.event,c=b.source||{};return["fc-bgevent"].concat(b.className,c.className||[])},bgEventSegCss:function(a){var b=this.view,c=a.event,d=c.source||{};return{"background-color":c.backgroundColor||c.color||d.backgroundColor||d.color||b.opt("eventBackgroundColor")||b.opt("eventColor")}},businessHoursSegClasses:function(a){return["fc-nonbusiness","fc-bgevent"]},bindSegHandlers:function(){var b=this,c=this.view;a.each({mouseenter:function(a,c){b.triggerSegMouseover(a,c)},mouseleave:function(a,c){b.triggerSegMouseout(a,c)},click:function(a,b){return c.trigger("eventClick",this,a.event,b)},mousedown:function(d,e){a(e.target).is(".fc-resizer")&&c.isEventResizable(d.event)?b.segResizeMousedown(d,e,a(e.target).is(".fc-start-resizer")):c.isEventDraggable(d.event)&&b.segDragMousedown(d,e)}},function(c,d){b.el.on(c,".fc-event-container > *",function(c){var e=a(this).data("fc-seg");return!e||b.isDraggingSeg||b.isResizingSeg?void 0:d.call(this,e,c)})})},triggerSegMouseover:function(a,b){this.mousedOverSeg||(this.mousedOverSeg=a,this.view.trigger("eventMouseover",a.el[0],a.event,b))},triggerSegMouseout:function(a,b){b=b||{},this.mousedOverSeg&&(a=a||this.mousedOverSeg,this.mousedOverSeg=null,this.view.trigger("eventMouseout",a.el[0],a.event,b))},segDragMousedown:function(a,b){var c,d=this,e=this.view,f=e.calendar,i=a.el,j=a.event,k=new hb(a.el,{parentEl:e.el,opacity:e.opt("dragOpacity"),revertDuration:e.opt("dragRevertDuration"),zIndex:2}),l=new gb(e.coordMap,{distance:5,scroll:e.opt("dragScroll"),subjectEl:i,subjectCenter:!0,listenStart:function(a){k.hide(),k.start(a)},dragStart:function(b){d.triggerSegMouseout(a,b),d.segDragStart(a,b),e.hideEvent(j)},cellOver:function(b,h,i){a.cell&&(i=a.cell),c=d.computeEventDrop(i,b,j),c&&!f.isEventRangeAllowed(c,j)&&(g(),c=null),c&&e.renderDrag(c,a)?k.hide():k.show(),h&&(c=null)},cellOut:function(){e.unrenderDrag(),k.show(),c=null},cellDone:function(){h()},dragStop:function(b){k.stop(!c,function(){e.unrenderDrag(),e.showEvent(j),d.segDragStop(a,b),c&&e.reportEventDrop(j,c,this.largeUnit,i,b)})},listenStop:function(){k.stop()}});l.mousedown(b)},segDragStart:function(a,b){this.isDraggingSeg=!0,this.view.trigger("eventDragStart",a.el[0],a.event,b,{})},segDragStop:function(a,b){this.isDraggingSeg=!1,this.view.trigger("eventDragStop",a.el[0],a.event,b,{})},computeEventDrop:function(a,b,c){var d,e,f=this.view.calendar,g=a.start,h=b.start;return g.hasTime()===h.hasTime()?(d=this.diffDates(h,g),c.allDay&&N(d)?(e={start:c.start.clone(),end:f.getEventEnd(c),allDay:!1},f.normalizeEventRangeTimes(e)):e={start:c.start.clone(),end:c.end?c.end.clone():null,allDay:c.allDay},e.start.add(d),e.end&&e.end.add(d)):e={start:h.clone(),end:null,allDay:!h.hasTime()},e},applyDragOpacity:function(a){var b=this.view.opt("dragOpacity");null!=b&&a.each(function(a,c){c.style.opacity=b})},externalDragStart:function(b,c){var d,e,f=this.view;f.opt("droppable")&&(d=a((c?c.item:null)||b.target),e=f.opt("dropAccept"),(a.isFunction(e)?e.call(d[0],d):d.is(e))&&(this.isDraggingExternal||this.listenToExternalDrag(d,b,c)))},listenToExternalDrag:function(a,b,c){var d,e,f=this,i=ya(a);d=new gb(this.coordMap,{listenStart:function(){f.isDraggingExternal=!0},cellOver:function(a){e=f.computeExternalDrop(a,i),e?f.renderDrag(e):g()},cellOut:function(){e=null,f.unrenderDrag(),h()},dragStop:function(){f.unrenderDrag(),h(),e&&f.view.reportExternalDrop(i,e,a,b,c)},listenStop:function(){f.isDraggingExternal=!1}}),d.startDrag(b)},computeExternalDrop:function(a,b){var c={start:a.start.clone(),end:null};return b.startTime&&!c.start.hasTime()&&c.start.time(b.startTime),b.duration&&(c.end=c.start.clone().add(b.duration)),this.view.calendar.isExternalDropRangeAllowed(c,b.eventProps)?c:null},renderDrag:function(a,b){},unrenderDrag:function(){},segResizeMousedown:function(a,b,c){var d,e,f=this,i=this.view,j=i.calendar,k=a.el,l=a.event,m=j.getEventEnd(l);d=new gb(this.coordMap,{distance:5,scroll:i.opt("dragScroll"),subjectEl:k,dragStart:function(b){f.triggerSegMouseout(a,b),f.segResizeStart(a,b)},cellOver:function(b,d,h){e=c?f.computeEventStartResize(h,b,l):f.computeEventEndResize(h,b,l),e&&(j.isEventRangeAllowed(e,l)?e.start.isSame(l.start)&&e.end.isSame(m)&&(e=null):(g(),e=null)),e&&(i.hideEvent(l),f.renderEventResize(e,a))},cellOut:function(){e=null},cellDone:function(){f.unrenderEventResize(),i.showEvent(l),h()},dragStop:function(b){f.segResizeStop(a,b),e&&i.reportEventResize(l,e,this.largeUnit,k,b)}}),d.mousedown(b)},segResizeStart:function(a,b){this.isResizingSeg=!0,this.view.trigger("eventResizeStart",a.el[0],a.event,b,{})},segResizeStop:function(a,b){this.isResizingSeg=!1,this.view.trigger("eventResizeStop",a.el[0],a.event,b,{})},computeEventStartResize:function(a,b,c){return this.computeEventResize("start",a,b,c)},computeEventEndResize:function(a,b,c){return this.computeEventResize("end",a,b,c)},computeEventResize:function(a,b,c,d){var e,f,g=this.view.calendar,h=this.diffDates(c[a],b[a]);return e={start:d.start.clone(),end:g.getEventEnd(d),allDay:d.allDay},e.allDay&&N(h)&&(e.allDay=!1,g.normalizeEventRangeTimes(e)),e[a].add(h),e.start.isBefore(e.end)||(f=d.allDay?g.defaultAllDayEventDuration:g.defaultTimedEventDuration,this.cellDuration&&this.cellDuration<f&&(f=this.cellDuration),"start"==a?e.start=e.end.clone().subtract(f):e.end=e.start.clone().add(f)),e},renderEventResize:function(a,b){},unrenderEventResize:function(){},getEventTimeText:function(a,b,c){return null==b&&(b=this.eventTimeFormat),null==c&&(c=this.displayEventEnd),this.displayEventTime&&a.start.hasTime()?c&&a.end?this.view.formatRange(a,b):a.start.format(b):""},getSegClasses:function(a,b,c){var d=a.event,e=["fc-event",a.isStart?"fc-start":"fc-not-start",a.isEnd?"fc-end":"fc-not-end"].concat(d.className,d.source?d.source.className:[]);return b&&e.push("fc-draggable"),c&&e.push("fc-resizable"),e},getEventSkinCss:function(a){var b=this.view,c=a.source||{},d=a.color,e=c.color,f=b.opt("eventColor");return{"background-color":a.backgroundColor||d||c.backgroundColor||e||b.opt("eventBackgroundColor")||f,"border-color":a.borderColor||d||c.borderColor||e||b.opt("eventBorderColor")||f,color:a.textColor||c.textColor||b.opt("eventTextColor")}},eventsToSegs:function(a,b){var c,d=this.eventsToRanges(a),e=[];for(c=0;c<d.length;c++)e.push.apply(e,this.eventRangeToSegs(d[c],b));return e},eventsToRanges:function(b){var c=this,d=wa(b),e=[];return a.each(d,function(a,b){b.length&&e.push.apply(e,ua(b[0])?c.eventsToInverseRanges(b):c.eventsToNormalRanges(b))}),e},eventsToNormalRanges:function(a){var b,c,d,e,f=this.view.calendar,g=[];for(b=0;b<a.length;b++)c=a[b],d=c.start.clone().stripZone(),e=f.getEventEnd(c).stripZone(),g.push({event:c,start:d,end:e,eventStartMS:+d,eventDurationMS:e-d});return g},eventsToInverseRanges:function(a){var b,c,d=this.view,e=d.start.clone().stripZone(),f=d.end.clone().stripZone(),g=this.eventsToNormalRanges(a),h=[],i=a[0],j=e;for(g.sort(xa),b=0;b<g.length;b++)c=g[b],c.start>j&&h.push({event:i,start:j,end:c.start}),j=c.end;return f>j&&h.push({event:i,start:j,end:f}),h},eventRangeToSegs:function(a,b){var c,d,e;for(a=this.view.calendar.ensureVisibleEventRange(a),c=b?b(a):this.rangeToSegs(a),d=0;d<c.length;d++)e=c[d],e.event=a.event,e.eventStartMS=a.eventStartMS,e.eventDurationMS=a.eventDurationMS;return c},sortSegs:function(a){a.sort(ca(this,"compareSegs"))},compareSegs:function(a,b){return a.eventStartMS-b.eventStartMS||b.eventDurationMS-a.eventDurationMS||b.event.allDay-a.event.allDay||B(a.event,b.event,this.view.eventOrderSpecs)}}),Ma.dataAttrPrefix="";var kb=jb.extend({numbersVisible:!1,bottomCoordPadding:0,breakOnWeeks:null,cellDates:null,dayToCellOffsets:null,rowEls:null,dayEls:null,helperEls:null,constructor:function(){jb.apply(this,arguments),this.cellDuration=b.duration(1,"day")},renderDates:function(a){var b,c,d,e=this.view,f=this.rowCnt,g=this.colCnt,h=f*g,i="";for(b=0;f>b;b++)i+=this.dayRowHtml(b,a);for(this.el.html(i),this.rowEls=this.el.find(".fc-row"),this.dayEls=this.el.find(".fc-day"),c=0;h>c;c++)d=this.getCell(c),e.trigger("dayRender",null,d.start,this.dayEls.eq(c))},unrenderDates:function(){this.removeSegPopover()},renderBusinessHours:function(){var a=this.view.calendar.getBusinessHoursEvents(!0),b=this.eventsToSegs(a);this.renderFill("businessHours",b,"bgevent")},dayRowHtml:function(a,b){var c=this.view,d=["fc-row","fc-week",c.widgetContentClass];return b&&d.push("fc-rigid"),'<div class="'+d.join(" ")+'"><div class="fc-bg"><table>'+this.rowHtml("day",a)+'</table></div><div class="fc-content-skeleton"><table>'+(this.numbersVisible?"<thead>"+this.rowHtml("number",a)+"</thead>":"")+"</table></div></div>"},dayCellHtml:function(a){return this.bgCellHtml(a)},computeColHeadFormat:function(){return this.rowCnt>1?"ddd":this.colCnt>1?this.view.opt("dayOfMonthFormat"):"dddd"},computeEventTimeFormat:function(){return this.view.opt("extraSmallTimeFormat")},computeDisplayEventEnd:function(){return 1==this.colCnt},rangeUpdated:function(){var a,b,c,d;if(this.updateCellDates(),a=this.cellDates,this.breakOnWeeks){for(b=a[0].day(),d=1;d<a.length&&a[d].day()!=b;d++);c=Math.ceil(a.length/d)}else c=1,d=a.length;this.rowCnt=c,this.colCnt=d},updateCellDates:function(){for(var a=this.view,b=this.start.clone(),c=[],d=-1,e=[];b.isBefore(this.end);)a.isHiddenDay(b)?e.push(d+.5):(d++,e.push(d),c.push(b.clone())),b.add(1,"days");this.cellDates=c,this.dayToCellOffsets=e},computeCellDate:function(a){var b=this.colCnt,c=a.row*b+(this.isRTL?b-a.col-1:a.col);return this.cellDates[c].clone()},getRowEl:function(a){return this.rowEls.eq(a)},getColEl:function(a){return this.dayEls.eq(a)},getCellDayEl:function(a){return this.dayEls.eq(a.row*this.colCnt+a.col)},computeRowCoords:function(){var a=jb.prototype.computeRowCoords.call(this);return a[a.length-1].bottom+=this.bottomCoordPadding,a},rangeToSegs:function(a){var b,c,d,e,f,g,h,i,j,k,l=this.isRTL,m=this.rowCnt,n=this.colCnt,o=[];for(a=this.view.computeDayRange(a),b=this.dateToCellOffset(a.start),c=this.dateToCellOffset(a.end.subtract(1,"days")),d=0;m>d;d++)e=d*n,f=e+n-1,i=Math.max(e,b),j=Math.min(f,c),i=Math.ceil(i),j=Math.floor(j),j>=i&&(g=i===b,h=j===c,i-=e,j-=e,k={row:d,isStart:g,isEnd:h},l?(k.leftCol=n-j-1,k.rightCol=n-i-1):(k.leftCol=i,k.rightCol=j),o.push(k));return o},dateToCellOffset:function(a){var b=this.dayToCellOffsets,c=a.diff(this.start,"days");return 0>c?b[0]-1:c>=b.length?b[b.length-1]+1:b[c]},renderDrag:function(a,b){return this.renderHighlight(this.eventRangeToSegs(a)),b&&!b.el.closest(this.el).length?(this.renderRangeHelper(a,b),this.applyDragOpacity(this.helperEls),!0):void 0},unrenderDrag:function(){this.unrenderHighlight(),this.unrenderHelper()},renderEventResize:function(a,b){this.renderHighlight(this.eventRangeToSegs(a)),this.renderRangeHelper(a,b)},unrenderEventResize:function(){this.unrenderHighlight(),this.unrenderHelper()},renderHelper:function(b,c){var d,e=[],f=this.eventsToSegs([b]);f=this.renderFgSegEls(f),d=this.renderSegRows(f),this.rowEls.each(function(b,f){var g,h=a(f),i=a('<div class="fc-helper-skeleton"><table/></div>');g=c&&c.row===b?c.el.position().top:h.find(".fc-content-skeleton tbody").position().top,i.css("top",g).find("table").append(d[b].tbodyEl),h.append(i),e.push(i[0])}),this.helperEls=a(e)},unrenderHelper:function(){this.helperEls&&(this.helperEls.remove(),this.helperEls=null)},fillSegTag:"td",renderFill:function(b,c,d){var e,f,g,h=[];for(c=this.renderFillSegEls(b,c),e=0;e<c.length;e++)f=c[e],g=this.renderFillRow(b,f,d),this.rowEls.eq(f.row).append(g),h.push(g[0]);return this.elsByFill[b]=a(h),c},renderFillRow:function(b,c,d){var e,f,g=this.colCnt,h=c.leftCol,i=c.rightCol+1;return d=d||b.toLowerCase(),e=a('<div class="fc-'+d+'-skeleton"><table><tr/></table></div>'),f=e.find("tr"),h>0&&f.append('<td colspan="'+h+'"/>'),f.append(c.el.attr("colspan",i-h)),g>i&&f.append('<td colspan="'+(g-i)+'"/>'),this.bookendCells(f,b),e}});kb.mixin({rowStructs:null,unrenderEvents:function(){this.removeSegPopover(),jb.prototype.unrenderEvents.apply(this,arguments)},getEventSegs:function(){return jb.prototype.getEventSegs.call(this).concat(this.popoverSegs||[])},renderBgSegs:function(b){var c=a.grep(b,function(a){return a.event.allDay});return jb.prototype.renderBgSegs.call(this,c)},renderFgSegs:function(b){var c;return b=this.renderFgSegEls(b),c=this.rowStructs=this.renderSegRows(b),this.rowEls.each(function(b,d){a(d).find(".fc-content-skeleton > table").append(c[b].tbodyEl)}),b},unrenderFgSegs:function(){for(var a,b=this.rowStructs||[];a=b.pop();)a.tbodyEl.remove();this.rowStructs=null},renderSegRows:function(a){var b,c,d=[];for(b=this.groupSegRows(a),c=0;c<b.length;c++)d.push(this.renderSegRow(c,b[c]));return d},fgSegHtml:function(a,b){var c,d,e=this.view,f=a.event,g=e.isEventDraggable(f),h=!b&&f.allDay&&a.isStart&&e.isEventResizableFromStart(f),i=!b&&f.allDay&&a.isEnd&&e.isEventResizableFromEnd(f),j=this.getSegClasses(a,g,h||i),k=$(this.getEventSkinCss(f)),l="";return j.unshift("fc-day-grid-event","fc-h-event"),a.isStart&&(c=this.getEventTimeText(f),c&&(l='<span class="fc-time">'+Y(c)+"</span>")),d='<span class="fc-title">'+(Y(f.title||"")||"&nbsp;")+"</span>",'<a class="'+j.join(" ")+'"'+(f.url?' href="'+Y(f.url)+'"':"")+(k?' style="'+k+'"':"")+'><div class="fc-content">'+(this.isRTL?d+" "+l:l+" "+d)+"</div>"+(h?'<div class="fc-resizer fc-start-resizer" />':"")+(i?'<div class="fc-resizer fc-end-resizer" />':"")+"</a>"},renderSegRow:function(b,c){function d(b){for(;b>g;)k=(r[e-1]||[])[g],k?k.attr("rowspan",parseInt(k.attr("rowspan")||1,10)+1):(k=a("<td/>"),h.append(k)),q[e][g]=k,r[e][g]=k,g++}var e,f,g,h,i,j,k,l=this.colCnt,m=this.buildSegLevels(c),n=Math.max(1,m.length),o=a("<tbody/>"),p=[],q=[],r=[];for(e=0;n>e;e++){if(f=m[e],g=0,h=a("<tr/>"),p.push([]),q.push([]),r.push([]),f)for(i=0;i<f.length;i++){for(j=f[i],d(j.leftCol),k=a('<td class="fc-event-container"/>').append(j.el),j.leftCol!=j.rightCol?k.attr("colspan",j.rightCol-j.leftCol+1):r[e][g]=k;g<=j.rightCol;)q[e][g]=k,p[e][g]=j,g++;h.append(k)}d(l),this.bookendCells(h,"eventSkeleton"),o.append(h)}return{row:b,tbodyEl:o,cellMatrix:q,segMatrix:p,segLevels:m,segs:c}},buildSegLevels:function(a){var b,c,d,e=[];for(this.sortSegs(a),b=0;b<a.length;b++){for(c=a[b],d=0;d<e.length&&za(c,e[d]);d++);c.level=d,(e[d]||(e[d]=[])).push(c)}for(d=0;d<e.length;d++)e[d].sort(Aa);return e},groupSegRows:function(a){var b,c=[];for(b=0;b<this.rowCnt;b++)c.push([]);for(b=0;b<a.length;b++)c[a[b].row].push(a[b]);return c}}),kb.mixin({segPopover:null,popoverSegs:null,removeSegPopover:function(){this.segPopover&&this.segPopover.hide()},limitRows:function(a){var b,c,d=this.rowStructs||[];for(b=0;b<d.length;b++)this.unlimitRow(b),c=a?"number"==typeof a?a:this.computeRowLevelLimit(b):!1,c!==!1&&this.limitRow(b,c)},computeRowLevelLimit:function(b){function c(b,c){f=Math.max(f,a(c).outerHeight())}var d,e,f,g=this.rowEls.eq(b),h=g.height(),i=this.rowStructs[b].tbodyEl.children();for(d=0;d<i.length;d++)if(e=i.eq(d).removeClass("fc-limited"),f=0,e.find("> td > :first-child").each(c),e.position().top+f>h)return d;return!1},limitRow:function(b,c){function d(d){for(;d>x;)e=u.getCell(b,x),k=u.getCellSegs(e,c),k.length&&(n=g[c-1][x],t=u.renderMoreLink(e,k),s=a("<div/>").append(t),n.append(s),w.push(s[0])),x++}var e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u=this,v=this.rowStructs[b],w=[],x=0;if(c&&c<v.segLevels.length){for(f=v.segLevels[c-1],g=v.cellMatrix,h=v.tbodyEl.children().slice(c).addClass("fc-limited").get(),i=0;i<f.length;i++){for(j=f[i],d(j.leftCol),m=[],l=0;x<=j.rightCol;)e=this.getCell(b,x),k=this.getCellSegs(e,c),m.push(k),l+=k.length,x++;if(l){for(n=g[c-1][j.leftCol],o=n.attr("rowspan")||1,p=[],q=0;q<m.length;q++)r=a('<td class="fc-more-cell"/>').attr("rowspan",o),k=m[q],e=this.getCell(b,j.leftCol+q),t=this.renderMoreLink(e,[j].concat(k)),s=a("<div/>").append(t),r.append(s),p.push(r[0]),w.push(r[0]);n.addClass("fc-limited").after(a(p)),h.push(n[0])}}d(this.colCnt),v.moreEls=a(w),v.limitedEls=a(h)}},
 unlimitRow:function(a){var b=this.rowStructs[a];b.moreEls&&(b.moreEls.remove(),b.moreEls=null),b.limitedEls&&(b.limitedEls.removeClass("fc-limited"),b.limitedEls=null)},renderMoreLink:function(b,c){var d=this,e=this.view;return a('<a class="fc-more"/>').text(this.getMoreLinkText(c.length)).on("click",function(f){var g=e.opt("eventLimitClick"),h=b.start,i=a(this),j=d.getCellDayEl(b),k=d.getCellSegs(b),l=d.resliceDaySegs(k,h),m=d.resliceDaySegs(c,h);"function"==typeof g&&(g=e.trigger("eventLimitClick",null,{date:h,dayEl:j,moreEl:i,segs:l,hiddenSegs:m},f)),"popover"===g?d.showSegPopover(b,i,l):"string"==typeof g&&e.calendar.zoomTo(h,g)})},showSegPopover:function(a,b,c){var d,e,f=this,g=this.view,h=b.parent();d=1==this.rowCnt?g.el:this.rowEls.eq(a.row),e={className:"fc-more-popover",content:this.renderSegPopoverContent(a,c),parentEl:this.el,top:d.offset().top,autoHide:!0,viewportConstrain:g.opt("popoverViewportConstrain"),hide:function(){f.segPopover.removeElement(),f.segPopover=null,f.popoverSegs=null}},this.isRTL?e.right=h.offset().left+h.outerWidth()+1:e.left=h.offset().left-1,this.segPopover=new cb(e),this.segPopover.show()},renderSegPopoverContent:function(b,c){var d,e=this.view,f=e.opt("theme"),g=b.start.format(e.opt("dayPopoverFormat")),h=a('<div class="fc-header '+e.widgetHeaderClass+'"><span class="fc-close '+(f?"ui-icon ui-icon-closethick":"fc-icon fc-icon-x")+'"></span><span class="fc-title">'+Y(g)+'</span><div class="fc-clear"/></div><div class="fc-body '+e.widgetContentClass+'"><div class="fc-event-container"></div></div>'),i=h.find(".fc-event-container");for(c=this.renderFgSegEls(c,!0),this.popoverSegs=c,d=0;d<c.length;d++)c[d].cell=b,i.append(c[d].el);return h},resliceDaySegs:function(b,c){var d=a.map(b,function(a){return a.event}),e=c.clone().stripTime(),f=e.clone().add(1,"days"),g={start:e,end:f};return b=this.eventsToSegs(d,function(a){var b=E(a,g);return b?[b]:[]}),this.sortSegs(b),b},getMoreLinkText:function(a){var b=this.view.opt("eventLimitText");return"function"==typeof b?b(a):"+"+a+" "+b},getCellSegs:function(a,b){for(var c,d=this.rowStructs[a.row].segMatrix,e=b||0,f=[];e<d.length;)c=d[e][a.col],c&&f.push(c),e++;return f}});var lb=jb.extend({slotDuration:null,snapDuration:null,minTime:null,maxTime:null,colDates:null,labelFormat:null,labelInterval:null,dayEls:null,slatEls:null,slatTops:null,helperEl:null,businessHourSegs:null,constructor:function(){jb.apply(this,arguments),this.processOptions()},renderDates:function(){this.el.html(this.renderHtml()),this.dayEls=this.el.find(".fc-day"),this.slatEls=this.el.find(".fc-slats tr")},renderBusinessHours:function(){var a=this.view.calendar.getBusinessHoursEvents();this.businessHourSegs=this.renderFill("businessHours",this.eventsToSegs(a),"bgevent")},renderHtml:function(){return'<div class="fc-bg"><table>'+this.rowHtml("slotBg")+'</table></div><div class="fc-slats"><table>'+this.slatRowHtml()+"</table></div>"},slotBgCellHtml:function(a){return this.bgCellHtml(a)},slatRowHtml:function(){for(var a,c,d,e=this.view,f=this.isRTL,g="",h=b.duration(+this.minTime);h<this.maxTime;)a=this.start.clone().time(h),c=ba(L(h,this.labelInterval)),d='<td class="fc-axis fc-time '+e.widgetContentClass+'" '+e.axisStyleAttr()+">"+(c?"<span>"+Y(a.format(this.labelFormat))+"</span>":"")+"</td>",g+="<tr "+(c?"":'class="fc-minor"')+">"+(f?"":d)+'<td class="'+e.widgetContentClass+'"/>'+(f?d:"")+"</tr>",h.add(this.slotDuration);return g},processOptions:function(){var c,d=this.view,e=d.opt("slotDuration"),f=d.opt("snapDuration");e=b.duration(e),f=f?b.duration(f):e,this.slotDuration=e,this.snapDuration=f,this.cellDuration=f,this.minTime=b.duration(d.opt("minTime")),this.maxTime=b.duration(d.opt("maxTime")),c=d.opt("slotLabelFormat"),a.isArray(c)&&(c=c[c.length-1]),this.labelFormat=c||d.opt("axisFormat")||d.opt("smallTimeFormat"),c=d.opt("slotLabelInterval"),this.labelInterval=c?b.duration(c):this.computeLabelInterval(e)},computeLabelInterval:function(a){var c,d,e;for(c=yb.length-1;c>=0;c--)if(d=b.duration(yb[c]),e=L(d,a),ba(e)&&e>1)return d;return b.duration(a)},computeColHeadFormat:function(){return this.colCnt>1?this.view.opt("dayOfMonthFormat"):"dddd"},computeEventTimeFormat:function(){return this.view.opt("noMeridiemTimeFormat")},computeDisplayEventEnd:function(){return!0},rangeUpdated:function(){var a,b=this.view,c=[];for(a=this.start.clone();a.isBefore(this.end);)c.push(a.clone()),a.add(1,"day"),a=b.skipHiddenDays(a);this.isRTL&&c.reverse(),this.colDates=c,this.colCnt=c.length,this.rowCnt=Math.ceil((this.maxTime-this.minTime)/this.snapDuration)},computeCellDate:function(a){var b=this.colDates[a.col],c=this.computeSnapTime(a.row);return b=this.view.calendar.rezoneDate(b),b.time(c),b},getColEl:function(a){return this.dayEls.eq(a)},computeSnapTime:function(a){return b.duration(this.minTime+this.snapDuration*a)},rangeToSegs:function(a){var b,c,d,e,f=this.colCnt,g=[];for(a={start:a.start.clone().stripZone(),end:a.end.clone().stripZone()},c=0;f>c;c++)d=this.colDates[c],e={start:d.clone().time(this.minTime),end:d.clone().time(this.maxTime)},b=E(a,e),b&&(b.col=c,g.push(b));return g},updateSize:function(a){this.computeSlatTops(),a&&this.updateSegVerticals()},computeRowCoords:function(){var a,b,c=this.el.offset().top,d=[];for(a=0;a<this.rowCnt;a++)b={top:c+this.computeTimeTop(this.computeSnapTime(a))},a>0&&(d[a-1].bottom=b.top),d.push(b);return b.bottom=b.top+this.computeTimeTop(this.computeSnapTime(a)),d},computeDateTop:function(a,c){return this.computeTimeTop(b.duration(a.clone().stripZone()-c.clone().stripTime()))},computeTimeTop:function(a){var b,c,d,e,f=(a-this.minTime)/this.slotDuration;return f=Math.max(0,f),f=Math.min(this.slatEls.length,f),b=Math.floor(f),c=f-b,d=this.slatTops[b],c?(e=this.slatTops[b+1],d+(e-d)*c):d},computeSlatTops:function(){var b,c=[];this.slatEls.each(function(d,e){b=a(e).position().top,c.push(b)}),c.push(b+this.slatEls.last().outerHeight()),this.slatTops=c},renderDrag:function(a,b){return b?(this.renderRangeHelper(a,b),this.applyDragOpacity(this.helperEl),!0):void this.renderHighlight(this.eventRangeToSegs(a))},unrenderDrag:function(){this.unrenderHelper(),this.unrenderHighlight()},renderEventResize:function(a,b){this.renderRangeHelper(a,b)},unrenderEventResize:function(){this.unrenderHelper()},renderHelper:function(b,c){var d,e,f,g,h=this.eventsToSegs([b]);for(h=this.renderFgSegEls(h),d=this.renderSegTable(h),e=0;e<h.length;e++)f=h[e],c&&c.col===f.col&&(g=c.el,f.el.css({left:g.css("left"),right:g.css("right"),"margin-left":g.css("margin-left"),"margin-right":g.css("margin-right")}));this.helperEl=a('<div class="fc-helper-skeleton"/>').append(d).appendTo(this.el)},unrenderHelper:function(){this.helperEl&&(this.helperEl.remove(),this.helperEl=null)},renderSelection:function(a){this.view.opt("selectHelper")?this.renderRangeHelper(a):this.renderHighlight(this.selectionRangeToSegs(a))},unrenderSelection:function(){this.unrenderHelper(),this.unrenderHighlight()},renderFill:function(b,c,d){var e,f,g,h,i,j,k,l,m,n;if(c.length){for(c=this.renderFillSegEls(b,c),e=this.groupSegCols(c),d=d||b.toLowerCase(),f=a('<div class="fc-'+d+'-skeleton"><table><tr/></table></div>'),g=f.find("tr"),h=0;h<e.length;h++)if(i=e[h],j=a("<td/>").appendTo(g),i.length)for(k=a('<div class="fc-'+d+'-container"/>').appendTo(j),l=this.colDates[h],m=0;m<i.length;m++)n=i[m],k.append(n.el.css({top:this.computeDateTop(n.start,l),bottom:-this.computeDateTop(n.end,l)}));this.bookendCells(g,b),this.el.append(f),this.elsByFill[b]=f}return c}});lb.mixin({eventSkeletonEl:null,renderFgSegs:function(b){return b=this.renderFgSegEls(b),this.el.append(this.eventSkeletonEl=a('<div class="fc-content-skeleton"/>').append(this.renderSegTable(b))),b},unrenderFgSegs:function(a){this.eventSkeletonEl&&(this.eventSkeletonEl.remove(),this.eventSkeletonEl=null)},renderSegTable:function(b){var c,d,e,f,g,h,i=a("<table><tr/></table>"),j=i.find("tr");for(c=this.groupSegCols(b),this.computeSegVerticals(b),f=0;f<c.length;f++){for(g=c[f],this.placeSlotSegs(g),h=a('<div class="fc-event-container"/>'),d=0;d<g.length;d++)e=g[d],e.el.css(this.generateSegPositionCss(e)),e.bottom-e.top<30&&e.el.addClass("fc-short"),h.append(e.el);j.append(a("<td/>").append(h))}return this.bookendCells(j,"eventSkeleton"),i},placeSlotSegs:function(a){var b,c,d;if(this.sortSegs(a),b=Ba(a),Ca(b),c=b[0]){for(d=0;d<c.length;d++)Da(c[d]);for(d=0;d<c.length;d++)this.computeSlotSegCoords(c[d],0,0)}},computeSlotSegCoords:function(a,b,c){var d,e=a.forwardSegs;if(void 0===a.forwardCoord)for(e.length?(this.sortForwardSlotSegs(e),this.computeSlotSegCoords(e[0],b+1,c),a.forwardCoord=e[0].backwardCoord):a.forwardCoord=1,a.backwardCoord=a.forwardCoord-(a.forwardCoord-c)/(b+1),d=0;d<e.length;d++)this.computeSlotSegCoords(e[d],0,a.forwardCoord)},updateSegVerticals:function(){var a,b=(this.segs||[]).concat(this.businessHourSegs||[]);for(this.computeSegVerticals(b),a=0;a<b.length;a++)b[a].el.css(this.generateSegVerticalCss(b[a]))},computeSegVerticals:function(a){var b,c;for(b=0;b<a.length;b++)c=a[b],c.top=this.computeDateTop(c.start,c.start),c.bottom=this.computeDateTop(c.end,c.start)},fgSegHtml:function(a,b){var c,d,e,f=this.view,g=a.event,h=f.isEventDraggable(g),i=!b&&a.isStart&&f.isEventResizableFromStart(g),j=!b&&a.isEnd&&f.isEventResizableFromEnd(g),k=this.getSegClasses(a,h,i||j),l=$(this.getEventSkinCss(g));return k.unshift("fc-time-grid-event","fc-v-event"),f.isMultiDayEvent(g)?(a.isStart||a.isEnd)&&(c=this.getEventTimeText(a),d=this.getEventTimeText(a,"LT"),e=this.getEventTimeText(a,null,!1)):(c=this.getEventTimeText(g),d=this.getEventTimeText(g,"LT"),e=this.getEventTimeText(g,null,!1)),'<a class="'+k.join(" ")+'"'+(g.url?' href="'+Y(g.url)+'"':"")+(l?' style="'+l+'"':"")+'><div class="fc-content">'+(c?'<div class="fc-time" data-start="'+Y(e)+'" data-full="'+Y(d)+'"><span>'+Y(c)+"</span></div>":"")+(g.title?'<div class="fc-title">'+Y(g.title)+"</div>":"")+'</div><div class="fc-bg"/>'+(j?'<div class="fc-resizer fc-end-resizer" />':"")+"</a>"},generateSegPositionCss:function(a){var b,c,d=this.view.opt("slotEventOverlap"),e=a.backwardCoord,f=a.forwardCoord,g=this.generateSegVerticalCss(a);return d&&(f=Math.min(1,e+2*(f-e))),this.isRTL?(b=1-f,c=e):(b=e,c=1-f),g.zIndex=a.level+1,g.left=100*b+"%",g.right=100*c+"%",d&&a.forwardPressure&&(g[this.isRTL?"marginLeft":"marginRight"]=20),g},generateSegVerticalCss:function(a){return{top:a.top,bottom:-a.bottom}},groupSegCols:function(a){var b,c=[];for(b=0;b<this.colCnt;b++)c.push([]);for(b=0;b<a.length;b++)c[a[b].col].push(a[b]);return c},sortForwardSlotSegs:function(a){a.sort(ca(this,"compareForwardSlotSegs"))},compareForwardSlotSegs:function(a,b){return b.forwardPressure-a.forwardPressure||(a.backwardCoord||0)-(b.backwardCoord||0)||this.compareSegs(a,b)}});var mb=Ma.View=ra.extend({type:null,name:null,title:null,calendar:null,options:null,coordMap:null,el:null,displaying:null,isSkeletonRendered:!1,isEventsRendered:!1,start:null,end:null,intervalStart:null,intervalEnd:null,intervalDuration:null,intervalUnit:null,isRTL:!1,isSelected:!1,eventOrderSpecs:null,scrollerEl:null,scrollTop:null,widgetHeaderClass:null,widgetContentClass:null,highlightStateClass:null,nextDayThreshold:null,isHiddenDayHash:null,documentMousedownProxy:null,constructor:function(a,c,d,e){this.calendar=a,this.type=this.name=c,this.options=d,this.intervalDuration=e||b.duration(1,"day"),this.nextDayThreshold=b.duration(this.opt("nextDayThreshold")),this.initThemingProps(),this.initHiddenDays(),this.isRTL=this.opt("isRTL"),this.eventOrderSpecs=A(this.opt("eventOrder")),this.documentMousedownProxy=ca(this,"documentMousedown"),this.initialize()},initialize:function(){},opt:function(a){return this.options[a]},trigger:function(a,b){var c=this.calendar;return c.trigger.apply(c,[a,b||this].concat(Array.prototype.slice.call(arguments,2),[this]))},setDate:function(a){this.setRange(this.computeRange(a))},setRange:function(b){a.extend(this,b),this.updateTitle()},computeRange:function(a){var b,c,d=I(this.intervalDuration),e=a.clone().startOf(d),f=e.clone().add(this.intervalDuration);return/year|month|week|day/.test(d)?(e.stripTime(),f.stripTime()):(e.hasTime()||(e=this.calendar.rezoneDate(e)),f.hasTime()||(f=this.calendar.rezoneDate(f))),b=e.clone(),b=this.skipHiddenDays(b),c=f.clone(),c=this.skipHiddenDays(c,-1,!0),{intervalUnit:d,intervalStart:e,intervalEnd:f,start:b,end:c}},computePrevDate:function(a){return this.massageCurrentDate(a.clone().startOf(this.intervalUnit).subtract(this.intervalDuration),-1)},computeNextDate:function(a){return this.massageCurrentDate(a.clone().startOf(this.intervalUnit).add(this.intervalDuration))},massageCurrentDate:function(a,b){return this.intervalDuration.as("days")<=1&&this.isHiddenDay(a)&&(a=this.skipHiddenDays(a,b),a.startOf("day")),a},updateTitle:function(){this.title=this.computeTitle()},computeTitle:function(){return this.formatRange({start:this.intervalStart,end:this.intervalEnd},this.opt("titleFormat")||this.computeTitleFormat(),this.opt("titleRangeSeparator"))},computeTitleFormat:function(){return"year"==this.intervalUnit?"YYYY":"month"==this.intervalUnit?this.opt("monthYearFormat"):this.intervalDuration.as("days")>1?"ll":"LL"},formatRange:function(a,b,c){var d=a.end;return d.hasTime()||(d=d.clone().subtract(1)),ma(a.start,d,b,c,this.opt("isRTL"))},setElement:function(a){this.el=a,this.bindGlobalHandlers()},removeElement:function(){this.clear(),this.isSkeletonRendered&&(this.unrenderSkeleton(),this.isSkeletonRendered=!1),this.unbindGlobalHandlers(),this.el.remove()},display:function(b){var c=this,d=null;return this.displaying&&(d=this.queryScroll()),this.clear().then(function(){return c.displaying=a.when(c.displayView(b)).then(function(){c.forceScroll(c.computeInitialScroll(d)),c.triggerRender()})})},clear:function(){var b=this,c=this.displaying;return c?c.then(function(){return b.displaying=null,b.clearEvents(),b.clearView()}):a.when()},displayView:function(a){this.isSkeletonRendered||(this.renderSkeleton(),this.isSkeletonRendered=!0),this.setDate(a),this.render&&this.render(),this.renderDates(),this.updateSize(),this.renderBusinessHours()},clearView:function(){this.unselect(),this.triggerUnrender(),this.unrenderBusinessHours(),this.unrenderDates(),this.destroy&&this.destroy()},renderSkeleton:function(){},unrenderSkeleton:function(){},renderDates:function(){},unrenderDates:function(){},renderBusinessHours:function(){},unrenderBusinessHours:function(){},triggerRender:function(){this.trigger("viewRender",this,this,this.el)},triggerUnrender:function(){this.trigger("viewDestroy",this,this,this.el)},bindGlobalHandlers:function(){a(document).on("mousedown",this.documentMousedownProxy)},unbindGlobalHandlers:function(){a(document).off("mousedown",this.documentMousedownProxy)},initThemingProps:function(){var a=this.opt("theme")?"ui":"fc";this.widgetHeaderClass=a+"-widget-header",this.widgetContentClass=a+"-widget-content",this.highlightStateClass=a+"-state-highlight"},updateSize:function(a){var b;a&&(b=this.queryScroll()),this.updateHeight(a),this.updateWidth(a),a&&this.setScroll(b)},updateWidth:function(a){},updateHeight:function(a){var b=this.calendar;this.setHeight(b.getSuggestedViewHeight(),b.isHeightAuto())},setHeight:function(a,b){},computeScrollerHeight:function(a){var b,c,d=this.scrollerEl;return b=this.el.add(d),b.css({position:"relative",left:-1}),c=this.el.outerHeight()-d.height(),b.css({position:"",left:""}),a-c},computeInitialScroll:function(a){return 0},queryScroll:function(){return this.scrollerEl?this.scrollerEl.scrollTop():void 0},setScroll:function(a){return this.scrollerEl?this.scrollerEl.scrollTop(a):void 0},forceScroll:function(a){var b=this;this.setScroll(a),setTimeout(function(){b.setScroll(a)},0)},displayEvents:function(a){var b=this.queryScroll();this.clearEvents(),this.renderEvents(a),this.isEventsRendered=!0,this.setScroll(b),this.triggerEventRender()},clearEvents:function(){this.isEventsRendered&&(this.triggerEventUnrender(),this.destroyEvents&&this.destroyEvents(),this.unrenderEvents(),this.isEventsRendered=!1)},renderEvents:function(a){},unrenderEvents:function(){},triggerEventRender:function(){this.renderedEventSegEach(function(a){this.trigger("eventAfterRender",a.event,a.event,a.el)}),this.trigger("eventAfterAllRender")},triggerEventUnrender:function(){this.renderedEventSegEach(function(a){this.trigger("eventDestroy",a.event,a.event,a.el)})},resolveEventEl:function(b,c){var d=this.trigger("eventRender",b,b,c);return d===!1?c=null:d&&d!==!0&&(c=a(d)),c},showEvent:function(a){this.renderedEventSegEach(function(a){a.el.css("visibility","")},a)},hideEvent:function(a){this.renderedEventSegEach(function(a){a.el.css("visibility","hidden")},a)},renderedEventSegEach:function(a,b){var c,d=this.getEventSegs();for(c=0;c<d.length;c++)b&&d[c].event._id!==b._id||d[c].el&&a.call(this,d[c])},getEventSegs:function(){return[]},isEventDraggable:function(a){var b=a.source||{};return X(a.startEditable,b.startEditable,this.opt("eventStartEditable"),a.editable,b.editable,this.opt("editable"))},reportEventDrop:function(a,b,c,d,e){var f=this.calendar,g=f.mutateEvent(a,b,c),h=function(){g.undo(),f.reportEventChange()};this.triggerEventDrop(a,g.dateDelta,h,d,e),f.reportEventChange()},triggerEventDrop:function(a,b,c,d,e){this.trigger("eventDrop",d[0],a,b,c,e,{})},reportExternalDrop:function(b,c,d,e,f){var g,h,i=b.eventProps;i&&(g=a.extend({},i,c),h=this.calendar.renderEvent(g,b.stick)[0]),this.triggerExternalDrop(h,c,d,e,f)},triggerExternalDrop:function(a,b,c,d,e){this.trigger("drop",c[0],b.start,d,e),a&&this.trigger("eventReceive",null,a)},renderDrag:function(a,b){},unrenderDrag:function(){},isEventResizableFromStart:function(a){return this.opt("eventResizableFromStart")&&this.isEventResizable(a)},isEventResizableFromEnd:function(a){return this.isEventResizable(a)},isEventResizable:function(a){var b=a.source||{};return X(a.durationEditable,b.durationEditable,this.opt("eventDurationEditable"),a.editable,b.editable,this.opt("editable"))},reportEventResize:function(a,b,c,d,e){var f=this.calendar,g=f.mutateEvent(a,b,c),h=function(){g.undo(),f.reportEventChange()};this.triggerEventResize(a,g.durationDelta,h,d,e),f.reportEventChange()},triggerEventResize:function(a,b,c,d,e){this.trigger("eventResize",d[0],a,b,c,e,{})},select:function(a,b){this.unselect(b),this.renderSelection(a),this.reportSelection(a,b)},renderSelection:function(a){},reportSelection:function(a,b){this.isSelected=!0,this.triggerSelect(a,b)},triggerSelect:function(a,b){this.trigger("select",null,a.start,a.end,b)},unselect:function(a){this.isSelected&&(this.isSelected=!1,this.destroySelection&&this.destroySelection(),this.unrenderSelection(),this.trigger("unselect",null,a))},unrenderSelection:function(){},documentMousedown:function(b){var c;this.isSelected&&this.opt("unselectAuto")&&v(b)&&(c=this.opt("unselectCancel"),c&&a(b.target).closest(c).length||this.unselect(b))},triggerDayClick:function(a,b,c){this.trigger("dayClick",b,a.start,c)},initHiddenDays:function(){var b,c=this.opt("hiddenDays")||[],d=[],e=0;for(this.opt("weekends")===!1&&c.push(0,6),b=0;7>b;b++)(d[b]=-1!==a.inArray(b,c))||e++;if(!e)throw"invalid hiddenDays";this.isHiddenDayHash=d},isHiddenDay:function(a){return b.isMoment(a)&&(a=a.day()),this.isHiddenDayHash[a]},skipHiddenDays:function(a,b,c){var d=a.clone();for(b=b||1;this.isHiddenDayHash[(d.day()+(c?b:0)+7)%7];)d.add(b,"days");return d},computeDayRange:function(a){var b,c=a.start.clone().stripTime(),d=a.end,e=null;return d&&(e=d.clone().stripTime(),b=+d.time(),b&&b>=this.nextDayThreshold&&e.add(1,"days")),(!d||c>=e)&&(e=c.clone().add(1,"days")),{start:c,end:e}},isMultiDayEvent:function(a){var b=this.computeDayRange(a);return b.end.diff(b.start,"days")>1}}),nb=Ma.Calendar=ra.extend({dirDefaults:null,langDefaults:null,overrides:null,options:null,viewSpecCache:null,view:null,header:null,loadingLevel:0,constructor:Ga,initialize:function(){},initOptions:function(a){var b,e,f,g;a=d(a),b=a.lang,e=ob[b],e||(b=nb.defaults.lang,e=ob[b]||{}),f=X(a.isRTL,e.isRTL,nb.defaults.isRTL),g=f?nb.rtlDefaults:{},this.dirDefaults=g,this.langDefaults=e,this.overrides=a,this.options=c([nb.defaults,g,e,a]),Ha(this.options),this.viewSpecCache={}},getViewSpec:function(a){var b=this.viewSpecCache;return b[a]||(b[a]=this.buildViewSpec(a))},getUnitViewSpec:function(b){var c,d,e;if(-1!=a.inArray(b,Ra))for(c=this.header.getViewsWithButtons(),a.each(Ma.views,function(a){c.push(a)}),d=0;d<c.length;d++)if(e=this.getViewSpec(c[d]),e&&e.singleUnit==b)return e},buildViewSpec:function(a){for(var d,e,f,g,h=this.overrides.views||{},i=[],j=[],k=[],l=a;l;)d=Na[l],e=h[l],l=null,"function"==typeof d&&(d={"class":d}),d&&(i.unshift(d),j.unshift(d.defaults||{}),f=f||d.duration,l=l||d.type),e&&(k.unshift(e),f=f||e.duration,l=l||e.type);return d=Q(i),d.type=a,d["class"]?(f&&(f=b.duration(f),f.valueOf()&&(d.duration=f,g=I(f),1===f.as(g)&&(d.singleUnit=g,k.unshift(h[g]||{})))),d.defaults=c(j),d.overrides=c(k),this.buildViewSpecOptions(d),this.buildViewSpecButtonText(d,a),d):!1},buildViewSpecOptions:function(a){a.options=c([nb.defaults,a.defaults,this.dirDefaults,this.langDefaults,this.overrides,a.overrides]),Ha(a.options)},buildViewSpecButtonText:function(a,b){function c(c){var d=c.buttonText||{};return d[b]||(a.singleUnit?d[a.singleUnit]:null)}a.buttonTextOverride=c(this.overrides)||a.overrides.buttonText,a.buttonTextDefault=c(this.langDefaults)||c(this.dirDefaults)||a.defaults.buttonText||c(nb.defaults)||(a.duration?this.humanizeDuration(a.duration):null)||b},instantiateView:function(a){var b=this.getViewSpec(a);return new b["class"](this,a,b.options,b.duration)},isValidViewType:function(a){return Boolean(this.getViewSpec(a))},pushLoading:function(){this.loadingLevel++||this.trigger("loading",null,!0,this.view)},popLoading:function(){--this.loadingLevel||this.trigger("loading",null,!1,this.view)},buildSelectRange:function(a,b){return a=this.moment(a),b=b?this.moment(b):a.hasTime()?a.clone().add(this.defaultTimedEventDuration):a.clone().add(this.defaultAllDayEventDuration),{start:a,end:b}}});nb.mixin(bb),nb.defaults={titleRangeSeparator:" — ",monthYearFormat:"MMMM YYYY",defaultTimedEventDuration:"02:00:00",defaultAllDayEventDuration:{days:1},forceEventDuration:!1,nextDayThreshold:"09:00:00",defaultView:"month",aspectRatio:1.35,header:{left:"title",center:"",right:"today prev,next"},weekends:!0,weekNumbers:!1,weekNumberTitle:"W",weekNumberCalculation:"local",scrollTime:"06:00:00",lazyFetching:!0,startParam:"start",endParam:"end",timezoneParam:"timezone",timezone:!1,isRTL:!1,buttonText:{prev:"prev",next:"next",prevYear:"prev year",nextYear:"next year",year:"year",today:"today",month:"month",week:"week",day:"day"},buttonIcons:{prev:"left-single-arrow",next:"right-single-arrow",prevYear:"left-double-arrow",nextYear:"right-double-arrow"},theme:!1,themeButtonIcons:{prev:"circle-triangle-w",next:"circle-triangle-e",prevYear:"seek-prev",nextYear:"seek-next"},dragOpacity:.75,dragRevertDuration:500,dragScroll:!0,unselectAuto:!0,dropAccept:"*",eventOrder:"title",eventLimit:!1,eventLimitText:"more",eventLimitClick:"popover",dayPopoverFormat:"LL",handleWindowResize:!0,windowResizeDelay:200},nb.englishDefaults={dayPopoverFormat:"dddd, MMMM D"},nb.rtlDefaults={header:{left:"next,prev today",center:"",right:"title"},buttonIcons:{prev:"right-single-arrow",next:"left-single-arrow",prevYear:"right-double-arrow",nextYear:"left-double-arrow"},themeButtonIcons:{prev:"circle-triangle-e",next:"circle-triangle-w",nextYear:"seek-prev",prevYear:"seek-next"}};var ob=Ma.langs={};Ma.datepickerLang=function(b,c,d){var e=ob[b]||(ob[b]={});e.isRTL=d.isRTL,e.weekNumberTitle=d.weekHeader,a.each(pb,function(a,b){e[a]=b(d)}),a.datepicker&&(a.datepicker.regional[c]=a.datepicker.regional[b]=d,a.datepicker.regional.en=a.datepicker.regional[""],a.datepicker.setDefaults(d))},Ma.lang=function(b,d){var e,f;e=ob[b]||(ob[b]={}),d&&(e=ob[b]=c([e,d])),f=Ia(b),a.each(qb,function(a,b){null==e[a]&&(e[a]=b(f,e))}),nb.defaults.lang=b};var pb={buttonText:function(a){return{prev:Z(a.prevText),next:Z(a.nextText),today:Z(a.currentText)}},monthYearFormat:function(a){return a.showMonthAfterYear?"YYYY["+a.yearSuffix+"] MMMM":"MMMM YYYY["+a.yearSuffix+"]"}},qb={dayOfMonthFormat:function(a,b){var c=a.longDateFormat("l");return c=c.replace(/^Y+[^\w\s]*|[^\w\s]*Y+$/g,""),b.isRTL?c+=" ddd":c="ddd "+c,c},mediumTimeFormat:function(a){return a.longDateFormat("LT").replace(/\s*a$/i,"a")},smallTimeFormat:function(a){return a.longDateFormat("LT").replace(":mm","(:mm)").replace(/(\Wmm)$/,"($1)").replace(/\s*a$/i,"a")},extraSmallTimeFormat:function(a){return a.longDateFormat("LT").replace(":mm","(:mm)").replace(/(\Wmm)$/,"($1)").replace(/\s*a$/i,"t")},hourFormat:function(a){return a.longDateFormat("LT").replace(":mm","").replace(/(\Wmm)$/,"").replace(/\s*a$/i,"a")},noMeridiemTimeFormat:function(a){return a.longDateFormat("LT").replace(/\s*a$/i,"")}},rb={smallDayDateFormat:function(a){return a.isRTL?"D dd":"dd D"},weekFormat:function(a){return a.isRTL?"w[ "+a.weekNumberTitle+"]":"["+a.weekNumberTitle+" ]w"},smallWeekFormat:function(a){return a.isRTL?"w["+a.weekNumberTitle+"]":"["+a.weekNumberTitle+"]w"}};Ma.lang("en",nb.englishDefaults),Ma.sourceNormalizers=[],Ma.sourceFetchers=[];var sb={dataType:"json",cache:!1},tb=1;nb.prototype.getPeerEvents=function(a,b){var c,d,e=this.getEventCache(),f=[];for(c=0;c<e.length;c++)d=e[c],a&&a._id===d._id||f.push(d);return f};var ub=mb.extend({dayGrid:null,dayNumbersVisible:!1,weekNumbersVisible:!1,weekNumberWidth:null,headRowEl:null,initialize:function(){this.dayGrid=new kb(this),this.coordMap=this.dayGrid.coordMap},setRange:function(a){mb.prototype.setRange.call(this,a),this.dayGrid.breakOnWeeks=/year|month|week/.test(this.intervalUnit),this.dayGrid.setRange(a)},computeRange:function(a){var b=mb.prototype.computeRange.call(this,a);return/year|month/.test(b.intervalUnit)&&(b.start.startOf("week"),b.start=this.skipHiddenDays(b.start),b.end.weekday()&&(b.end.add(1,"week").startOf("week"),b.end=this.skipHiddenDays(b.end,-1,!0))),b},renderDates:function(){this.dayNumbersVisible=this.dayGrid.rowCnt>1,this.weekNumbersVisible=this.opt("weekNumbers"),this.dayGrid.numbersVisible=this.dayNumbersVisible||this.weekNumbersVisible,this.el.addClass("fc-basic-view").html(this.renderHtml()),this.headRowEl=this.el.find("thead .fc-row"),this.scrollerEl=this.el.find(".fc-day-grid-container"),this.dayGrid.coordMap.containerEl=this.scrollerEl,this.dayGrid.setElement(this.el.find(".fc-day-grid")),this.dayGrid.renderDates(this.hasRigidRows())},unrenderDates:function(){this.dayGrid.unrenderDates(),this.dayGrid.removeElement()},renderBusinessHours:function(){this.dayGrid.renderBusinessHours()},renderHtml:function(){return'<table><thead class="fc-head"><tr><td class="'+this.widgetHeaderClass+'">'+this.dayGrid.headHtml()+'</td></tr></thead><tbody class="fc-body"><tr><td class="'+this.widgetContentClass+'"><div class="fc-day-grid-container"><div class="fc-day-grid"/></div></td></tr></tbody></table>'},headIntroHtml:function(){return this.weekNumbersVisible?'<th class="fc-week-number '+this.widgetHeaderClass+'" '+this.weekNumberStyleAttr()+"><span>"+Y(this.opt("weekNumberTitle"))+"</span></th>":void 0},numberIntroHtml:function(a){return this.weekNumbersVisible?'<td class="fc-week-number" '+this.weekNumberStyleAttr()+"><span>"+this.dayGrid.getCell(a,0).start.format("w")+"</span></td>":void 0},dayIntroHtml:function(){return this.weekNumbersVisible?'<td class="fc-week-number '+this.widgetContentClass+'" '+this.weekNumberStyleAttr()+"></td>":void 0},introHtml:function(){return this.weekNumbersVisible?'<td class="fc-week-number" '+this.weekNumberStyleAttr()+"></td>":void 0},numberCellHtml:function(a){var b,c=a.start;return this.dayNumbersVisible?(b=this.dayGrid.getDayClasses(c),b.unshift("fc-day-number"),'<td class="'+b.join(" ")+'" data-date="'+c.format()+'">'+c.date()+"</td>"):"<td/>"},weekNumberStyleAttr:function(){return null!==this.weekNumberWidth?'style="width:'+this.weekNumberWidth+'px"':""},hasRigidRows:function(){var a=this.opt("eventLimit");return a&&"number"!=typeof a},updateWidth:function(){this.weekNumbersVisible&&(this.weekNumberWidth=k(this.el.find(".fc-week-number")))},setHeight:function(a,b){var c,d=this.opt("eventLimit");m(this.scrollerEl),f(this.headRowEl),this.dayGrid.removeSegPopover(),d&&"number"==typeof d&&this.dayGrid.limitRows(d),c=this.computeScrollerHeight(a),this.setGridHeight(c,b),d&&"number"!=typeof d&&this.dayGrid.limitRows(d),!b&&l(this.scrollerEl,c)&&(e(this.headRowEl,r(this.scrollerEl)),c=this.computeScrollerHeight(a),this.scrollerEl.height(c))},setGridHeight:function(a,b){b?j(this.dayGrid.rowEls):i(this.dayGrid.rowEls,a,!0)},renderEvents:function(a){this.dayGrid.renderEvents(a),this.updateHeight()},getEventSegs:function(){return this.dayGrid.getEventSegs()},unrenderEvents:function(){this.dayGrid.unrenderEvents()},renderDrag:function(a,b){return this.dayGrid.renderDrag(a,b)},unrenderDrag:function(){this.dayGrid.unrenderDrag()},renderSelection:function(a){this.dayGrid.renderSelection(a)},unrenderSelection:function(){this.dayGrid.unrenderSelection()}}),vb=ub.extend({computeRange:function(a){var b,c=ub.prototype.computeRange.call(this,a);return this.isFixedWeeks()&&(b=Math.ceil(c.end.diff(c.start,"weeks",!0)),c.end.add(6-b,"weeks")),c},setGridHeight:function(a,b){b=b||"variable"===this.opt("weekMode"),b&&(a*=this.rowCnt/6),i(this.dayGrid.rowEls,a,!b)},isFixedWeeks:function(){var a=this.opt("weekMode");return a?"fixed"===a:this.opt("fixedWeekCount")}});Na.basic={"class":ub},Na.basicDay={type:"basic",duration:{days:1}},Na.basicWeek={type:"basic",duration:{weeks:1}},Na.month={"class":vb,duration:{months:1},defaults:{fixedWeekCount:!0}};var wb=mb.extend({timeGrid:null,dayGrid:null,axisWidth:null,noScrollRowEls:null,bottomRuleEl:null,bottomRuleHeight:null,initialize:function(){this.timeGrid=new lb(this),this.opt("allDaySlot")?(this.dayGrid=new kb(this),this.coordMap=new eb([this.dayGrid.coordMap,this.timeGrid.coordMap])):this.coordMap=this.timeGrid.coordMap},setRange:function(a){mb.prototype.setRange.call(this,a),this.timeGrid.setRange(a),this.dayGrid&&this.dayGrid.setRange(a)},renderDates:function(){this.el.addClass("fc-agenda-view").html(this.renderHtml()),this.scrollerEl=this.el.find(".fc-time-grid-container"),this.timeGrid.coordMap.containerEl=this.scrollerEl,this.timeGrid.setElement(this.el.find(".fc-time-grid")),this.timeGrid.renderDates(),this.bottomRuleEl=a('<hr class="fc-divider '+this.widgetHeaderClass+'"/>').appendTo(this.timeGrid.el),this.dayGrid&&(this.dayGrid.setElement(this.el.find(".fc-day-grid")),this.dayGrid.renderDates(),this.dayGrid.bottomCoordPadding=this.dayGrid.el.next("hr").outerHeight()),this.noScrollRowEls=this.el.find(".fc-row:not(.fc-scroller *)")},unrenderDates:function(){this.timeGrid.unrenderDates(),this.timeGrid.removeElement(),this.dayGrid&&(this.dayGrid.unrenderDates(),this.dayGrid.removeElement())},renderBusinessHours:function(){this.timeGrid.renderBusinessHours(),this.dayGrid&&this.dayGrid.renderBusinessHours()},renderHtml:function(){return'<table><thead class="fc-head"><tr><td class="'+this.widgetHeaderClass+'">'+this.timeGrid.headHtml()+'</td></tr></thead><tbody class="fc-body"><tr><td class="'+this.widgetContentClass+'">'+(this.dayGrid?'<div class="fc-day-grid"/><hr class="fc-divider '+this.widgetHeaderClass+'"/>':"")+'<div class="fc-time-grid-container"><div class="fc-time-grid"/></div></td></tr></tbody></table>'},headIntroHtml:function(){var a,b;return this.opt("weekNumbers")?(a=this.timeGrid.getCell(0).start,b=a.format(this.opt("smallWeekFormat")),'<th class="fc-axis fc-week-number '+this.widgetHeaderClass+'" '+this.axisStyleAttr()+"><span>"+Y(b)+"</span></th>"):'<th class="fc-axis '+this.widgetHeaderClass+'" '+this.axisStyleAttr()+"></th>"},dayIntroHtml:function(){return'<td class="fc-axis '+this.widgetContentClass+'" '+this.axisStyleAttr()+"><span>"+(this.opt("allDayHtml")||Y(this.opt("allDayText")))+"</span></td>"},slotBgIntroHtml:function(){return'<td class="fc-axis '+this.widgetContentClass+'" '+this.axisStyleAttr()+"></td>";
 },introHtml:function(){return'<td class="fc-axis" '+this.axisStyleAttr()+"></td>"},axisStyleAttr:function(){return null!==this.axisWidth?'style="width:'+this.axisWidth+'px"':""},updateSize:function(a){this.timeGrid.updateSize(a),mb.prototype.updateSize.call(this,a)},updateWidth:function(){this.axisWidth=k(this.el.find(".fc-axis"))},setHeight:function(a,b){var c,d;null===this.bottomRuleHeight&&(this.bottomRuleHeight=this.bottomRuleEl.outerHeight()),this.bottomRuleEl.hide(),this.scrollerEl.css("overflow",""),m(this.scrollerEl),f(this.noScrollRowEls),this.dayGrid&&(this.dayGrid.removeSegPopover(),c=this.opt("eventLimit"),c&&"number"!=typeof c&&(c=xb),c&&this.dayGrid.limitRows(c)),b||(d=this.computeScrollerHeight(a),l(this.scrollerEl,d)?(e(this.noScrollRowEls,r(this.scrollerEl)),d=this.computeScrollerHeight(a),this.scrollerEl.height(d)):(this.scrollerEl.height(d).css("overflow","hidden"),this.bottomRuleEl.show()))},computeInitialScroll:function(){var a=b.duration(this.opt("scrollTime")),c=this.timeGrid.computeTimeTop(a);return c=Math.ceil(c),c&&c++,c},renderEvents:function(a){var b,c,d=[],e=[],f=[];for(c=0;c<a.length;c++)a[c].allDay?d.push(a[c]):e.push(a[c]);b=this.timeGrid.renderEvents(e),this.dayGrid&&(f=this.dayGrid.renderEvents(d)),this.updateHeight()},getEventSegs:function(){return this.timeGrid.getEventSegs().concat(this.dayGrid?this.dayGrid.getEventSegs():[])},unrenderEvents:function(){this.timeGrid.unrenderEvents(),this.dayGrid&&this.dayGrid.unrenderEvents()},renderDrag:function(a,b){return a.start.hasTime()?this.timeGrid.renderDrag(a,b):this.dayGrid?this.dayGrid.renderDrag(a,b):void 0},unrenderDrag:function(){this.timeGrid.unrenderDrag(),this.dayGrid&&this.dayGrid.unrenderDrag()},renderSelection:function(a){a.start.hasTime()||a.end.hasTime()?this.timeGrid.renderSelection(a):this.dayGrid&&this.dayGrid.renderSelection(a)},unrenderSelection:function(){this.timeGrid.unrenderSelection(),this.dayGrid&&this.dayGrid.unrenderSelection()}}),xb=5,yb=[{hours:1},{minutes:30},{minutes:15},{seconds:30},{seconds:15}];return Na.agenda={"class":wb,defaults:{allDaySlot:!0,allDayText:"all-day",slotDuration:"00:30:00",minTime:"00:00:00",maxTime:"24:00:00",slotEventOverlap:!0}},Na.agendaDay={type:"agenda",duration:{days:1}},Na.agendaWeek={type:"agenda",duration:{weeks:1}},Ma});
-},{"jquery":51,"moment":56}],70:[function(require,module,exports){
+},{"jquery":54,"moment":59}],76:[function(require,module,exports){
  /**
  * jquery.mask.js
  * @version: v1.5.3
@@ -96518,7 +104331,7 @@ unlimitRow:function(a){var b=this.rowStructs[a];b.moreEls&&(b.moreEls.remove(),b
 
 })(window.jQuery || window.Zepto);
 
-},{}],71:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 'use strict';
 
 var $ = require('jquery');
@@ -96529,6 +104342,10 @@ if (window.jQuery === undefined) {
 
 if (window.swal === undefined) {
     window.swal = require('sweetalert');
+}
+
+if (window.ColorThief === undefined) {
+    window.ColorThief = require('ng-img-crop-full-extended/source/js/color-thief.min.js');
 }
 
 //require('mediaelement');
@@ -96558,7 +104375,7 @@ require('./entities');
 
 module.exports = 'app';
 
-},{"./assets/fullcalendar.min":69,"./assets/input-mask":70,"./config":73,"./directives":85,"./entities":96,"./home":102,"./modules":120,"./services":130,"./template":143,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":47,"bootstrap-notify/bootstrap-notify":48,"flot.tooltip/js/jquery.flot.tooltip":49,"flot/jquery.flot":50,"jquery":51,"malihu-custom-scrollbar-plugin":54,"sweetalert":68}],72:[function(require,module,exports){
+},{"./assets/fullcalendar.min":75,"./assets/input-mask":76,"./config":79,"./directives":91,"./entities":102,"./home":108,"./modules":127,"./services":137,"./template":150,"CurvedLines/curvedLines":1,"bootstrap-datetimepicker":50,"bootstrap-notify/bootstrap-notify":51,"flot.tooltip/js/jquery.flot.tooltip":52,"flot/jquery.flot":53,"jquery":54,"malihu-custom-scrollbar-plugin":57,"ng-img-crop-full-extended/source/js/color-thief.min.js":62,"sweetalert":74}],78:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -96577,7 +104394,9 @@ var globalDependencies = [
     require('angular-input-masks/br'),
     require('angular-facebook') && 'facebook',
     require('angular-summernote/dist/angular-summernote') && 'summernote',
-    require('angular-spotify') && 'spotify'
+    require('angular-spotify') && 'spotify',
+    require('ng-file-upload') && 'ngFileUpload',
+    require('ng-img-crop-full-extended/compile/unminified/ng-img-crop.js') && 'ngImgCrop'
 ];
 
 module.exports = angular.module('webAdminApp', globalDependencies)
@@ -96589,14 +104408,14 @@ module.exports = angular.module('webAdminApp', globalDependencies)
         SpotifyProvider.setScope('user-read-private playlist-read-private playlist-modify-private playlist-modify-public');
     });
 
-},{"angular":45,"angular-animate":3,"angular-facebook":4,"angular-input-masks":6,"angular-input-masks/br":5,"angular-loading-bar":33,"angular-resource":35,"angular-sanitize":37,"angular-spotify":38,"angular-summernote/dist/angular-summernote":39,"angular-translate":40,"angular-ui-bootstrap":41,"angular-ui-router":43,"ng-table/dist/ng-table":57,"oclazyload":59}],73:[function(require,module,exports){
+},{"angular":48,"angular-animate":3,"angular-facebook":4,"angular-input-masks":6,"angular-input-masks/br":5,"angular-loading-bar":36,"angular-resource":38,"angular-sanitize":40,"angular-spotify":41,"angular-summernote/dist/angular-summernote":42,"angular-translate":43,"angular-ui-bootstrap":44,"angular-ui-router":46,"ng-file-upload":60,"ng-img-crop-full-extended/compile/unminified/ng-img-crop.js":61,"ng-table/dist/ng-table":63,"oclazyload":65}],79:[function(require,module,exports){
 require('./app');
 require('./route');
 require('./translate');
 
 module.exports = 'config';
 
-},{"./app":72,"./route":74,"./translate":75}],74:[function(require,module,exports){
+},{"./app":78,"./route":80,"./translate":81}],80:[function(require,module,exports){
 'use strict';
 
 require('./app')
@@ -96658,6 +104477,10 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
             url: '/invites',
             templateUrl: 'views/events/detail/invites.html'
         })
+        .state ('events.detail.images', {
+            url: '/images',
+            templateUrl: 'views/events/detail/images.html'
+        })
         .state ('events.detail.videos', {
             url: '/videos',
             templateUrl: 'views/events/detail/videos.html'
@@ -96676,7 +104499,7 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
         });
 };
 
-},{"./app":72}],75:[function(require,module,exports){
+},{"./app":78}],81:[function(require,module,exports){
 'use strict';
 
 require('./app')
@@ -96689,7 +104512,7 @@ function TranslateConfig($translateProvider) {
     $translateProvider.preferredLanguage('pt-br');
 }
 
-},{"../../resources/i18n/en":144,"../../resources/i18n/pt-br":145,"./app":72}],76:[function(require,module,exports){
+},{"../../resources/i18n/en":151,"../../resources/i18n/pt-br":152,"./app":78}],82:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -96709,7 +104532,7 @@ function aPrevent() {
     }
 }
 
-},{"angular":45}],77:[function(require,module,exports){
+},{"angular":48}],83:[function(require,module,exports){
 'use strict';
 
 var $ = require('jquery');
@@ -96731,7 +104554,7 @@ function cOverflow(scrollService) {
     };
 }
 
-},{"angular":45,"jquery":51}],78:[function(require,module,exports){
+},{"angular":48,"jquery":54}],84:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -96954,7 +104777,7 @@ angular
     })
 
 
-},{"angular":45,"jquery":51}],79:[function(require,module,exports){
+},{"angular":48,"jquery":54}],85:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97003,7 +104826,7 @@ function ChangeLayout() {
 
 
 
-},{"angular":45}],80:[function(require,module,exports){
+},{"angular":48}],86:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97024,7 +104847,7 @@ function autoSize() {
     }
 }
 
-},{"angular":45,"autosize":46}],81:[function(require,module,exports){
+},{"angular":48,"autosize":49}],87:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97055,7 +104878,7 @@ function btn() {
     }
 }
 
-},{"angular":45,"node-waves":58}],82:[function(require,module,exports){
+},{"angular":48,"node-waves":64}],88:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97182,7 +105005,7 @@ function fgLine() {
     //     }
     // })
 
-},{"angular":45,"jquery":51}],83:[function(require,module,exports){
+},{"angular":48,"jquery":54}],89:[function(require,module,exports){
 require('./fg-line');
 require('./auto-size');
 require('./btn');
@@ -97190,7 +105013,7 @@ require('./input-mask');
 
 module.exports = 'form';
 
-},{"./auto-size":80,"./btn":81,"./fg-line":82,"./input-mask":84}],84:[function(require,module,exports){
+},{"./auto-size":86,"./btn":87,"./fg-line":88,"./input-mask":90}],90:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97210,7 +105033,7 @@ function inputMask() {
         }
     }
 }
-},{"angular":45}],85:[function(require,module,exports){
+},{"angular":48}],91:[function(require,module,exports){
 require('./a-prevent');
 require('./change-layout');
 require('./print');
@@ -97228,7 +105051,7 @@ require('./form');
 
 module.exports = 'directives';
 
-},{"./a-prevent":76,"./c-overflow":77,"./calendar":78,"./change-layout":79,"./form":83,"./lightbox":86,"./maps-directive":87,"./media-element":88,"./print":89,"./stop-propagate":90,"./toggle-sidebar":91,"./toggle-submenu":92,"./youtube-directive":93}],86:[function(require,module,exports){
+},{"./a-prevent":82,"./c-overflow":83,"./calendar":84,"./change-layout":85,"./form":89,"./lightbox":92,"./maps-directive":93,"./media-element":94,"./print":95,"./stop-propagate":96,"./toggle-sidebar":97,"./toggle-submenu":98,"./youtube-directive":99}],92:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97248,7 +105071,7 @@ function lightbox() {
     }
 }
 
-},{"angular":45}],87:[function(require,module,exports){
+},{"angular":48}],93:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97360,7 +105183,7 @@ function maps() {
     }
 }
 
-},{"angular":45,"jquery":51}],88:[function(require,module,exports){
+},{"angular":48,"jquery":54}],94:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97378,7 +105201,7 @@ function mediaElement() {
     }
 }
 
-},{"angular":45}],89:[function(require,module,exports){
+},{"angular":48}],95:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97398,7 +105221,7 @@ function print() {
     }
 }
 
-},{"angular":45}],90:[function(require,module,exports){
+},{"angular":48}],96:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97418,7 +105241,7 @@ function stopPropagate() {
     }
 }
 
-},{"angular":45}],91:[function(require,module,exports){
+},{"angular":48}],97:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97469,7 +105292,7 @@ function toggleSidebar() {
     }
 }
 
-},{"angular":45}],92:[function(require,module,exports){
+},{"angular":48}],98:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97490,7 +105313,7 @@ function toggleSubmenu() {
     }
 }
 
-},{"angular":45}],93:[function(require,module,exports){
+},{"angular":48}],99:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97529,7 +105352,7 @@ function Youtube($sce, youtubeService) {
   };
 }
 
-},{"angular":45}],94:[function(require,module,exports){
+},{"angular":48}],100:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97551,7 +105374,7 @@ function Comment($resource) {
     return $resource(url, params, options);
 }
 
-},{"angular":45}],95:[function(require,module,exports){
+},{"angular":48}],101:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97573,7 +105396,7 @@ function Event($resource) {
     return $resource(url, params, options);
 }
 
-},{"angular":45}],96:[function(require,module,exports){
+},{"angular":48}],102:[function(require,module,exports){
 require('./comment');
 require('./event');
 require('./media');
@@ -97581,7 +105404,7 @@ require('./user');
 
 module.exports = 'entities';
 
-},{"./comment":94,"./event":95,"./media":97,"./user":98}],97:[function(require,module,exports){
+},{"./comment":100,"./event":101,"./media":103,"./user":104}],103:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97603,7 +105426,7 @@ function Media($resource) {
     return $resource(url, params, options);
 }
 
-},{"angular":45}],98:[function(require,module,exports){
+},{"angular":48}],104:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97625,12 +105448,12 @@ function User($resource) {
     return $resource(url, params, options);
 }
 
-},{"angular":45}],99:[function(require,module,exports){
+},{"angular":48}],105:[function(require,module,exports){
 require('./main');
 
 module.exports = 'controllers';
 
-},{"./main":100}],100:[function(require,module,exports){
+},{"./main":106}],106:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97647,20 +105470,20 @@ function MainController() {
 
 }
 
-},{"angular":45}],101:[function(require,module,exports){
+},{"angular":48}],107:[function(require,module,exports){
 module.exports = 'directives';
 
-},{}],102:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 require('./controllers');
 require('./directives');
 require('./resources');
 
 module.exports = 'home';
 
-},{"./controllers":99,"./directives":101,"./resources":103}],103:[function(require,module,exports){
+},{"./controllers":105,"./directives":107,"./resources":109}],109:[function(require,module,exports){
 module.exports = 'resources';
 
-},{}],104:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97696,17 +105519,17 @@ function AddCommentController($scope, Comment) {
     };
 }
 
-},{"angular":45}],105:[function(require,module,exports){
+},{"angular":48}],111:[function(require,module,exports){
 require('./add-comment-controller');
 
 module.exports = 'controllers';
 
-},{"./add-comment-controller":104}],106:[function(require,module,exports){
+},{"./add-comment-controller":110}],112:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'comments';
 
-},{"./controllers/index":105}],107:[function(require,module,exports){
+},{"./controllers/index":111}],113:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97735,7 +105558,74 @@ function AddEventController($scope, Event) {
     };
 }
 
-},{"angular":45}],108:[function(require,module,exports){
+},{"angular":48}],114:[function(require,module,exports){
+'use strict';
+
+var angular = require('angular');
+
+angular
+    .module('webAdminApp')
+    .controller('AddImageEventController', AddImageEventController);
+
+function AddImageEventController($scope, $stateParams, Media, modalService) {
+
+    var self = this;
+
+    self.photoColumn = 'col-md-2';
+    self.photoColumnSize = 2;
+
+    self.photoOptions = [
+        { value: 1, column: 6 },
+        { value: 2, column: 4 },
+        { value: 3, column: 3 }
+    ];
+
+    self.photoGrid = function(size) {
+        self.photoColumn = 'col-md-'+size;
+        self.photoColumnSize = size;
+    };
+
+    self.cropImage = function () {
+        var modalOptions = {
+            animation: true,
+            backdrop: 'static',
+            templateUrl: 'views/events/detail/crop-image.html',
+            controller: 'CropImageController',
+            size: 'lg'
+        };
+
+        modalService.showModal(modalOptions).then(load_);
+    };
+
+    self.image = {
+        url: '',
+        event_id: $stateParams.eventId,
+        type: 1
+    };
+
+    var load_ = function () {
+        Media.query({event_id: $stateParams.eventId, type: 1}, function (images) {
+            console.log('videos', images);
+
+            self.images = images;
+        });
+    };
+
+    load_();
+
+    self.save = function() {
+        var media = new Media(self.image);
+        media.user_id = 1;
+
+        media.$save(load_);
+    };
+
+    self.close = function() {
+        $scope.$close();
+    };
+}
+
+},{"angular":48}],115:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97781,7 +105671,7 @@ function AddVideoEventController($scope, Media, $stateParams) {
     };
 }
 
-},{"angular":45}],109:[function(require,module,exports){
+},{"angular":48}],116:[function(require,module,exports){
 var angular = require('angular');
 var $ = require('jquery');
 
@@ -97892,7 +105782,7 @@ angular
         }
     })
 
-},{"angular":45,"jquery":51}],110:[function(require,module,exports){
+},{"angular":48,"jquery":54}],117:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97924,7 +105814,7 @@ function CommentController($scope, Comment) {
     load_();
 }
 
-},{"angular":45}],111:[function(require,module,exports){
+},{"angular":48}],118:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -97933,11 +105823,12 @@ angular
     .module('webAdminApp')
     .controller('CropImageController', CropImageController);
 
-function CropImageController($scope, $timeout, $stateParams) {
+function CropImageController($scope, $timeout, $stateParams, Upload, growlService) {
 
   $scope.enabledSave = true;
   $scope.image = '';
   $scope.resultBlob = '';
+  $scope.resultImage = '';
 
   var handleFileSelect = function(evt) {
     $scope.isLoadImage = true;
@@ -97955,26 +105846,30 @@ function CropImageController($scope, $timeout, $stateParams) {
 
   $scope.uploadCover = function() {
     Upload.upload({
-      url: server.formatCampaignAddImagesUrl(session.getAccessToken(), $stateParams.campaignId),
-      file: $scope.resultBlob
+        method: 'POST',
+        url: 'http://localhost:8000/medias/upload',
+        file: $scope.resultBlob,
+        data: {
+            id: $stateParams.eventId,
+            user_id: 1,
+            type: 1
+        }
     }).progress(function() {
-      $scope.$emit(toastConstants.PROGRESS, 'Adicionando imagem');
     }).success(function (data, status) {
+        console.log('data', data);
       if (status === 200) {
-        syncService.sync().then(function () {
-          $scope.$emit(toastConstants.INFO, 'Imagem adicionada com sucesso');
+          growlService.growl('Imagem adicionada com sucesso', 'inverse');
           $scope.$close();
-        });
       } else {
-        $scope.$emit(toastConstants.ERROR, 'Falha ao adicionar imagem');
+          growlService.growl('Erro ao realizar upload', 'inverse');
       }
     }).catch(function () {
-      $scope.$emit(toastConstants.ERROR, 'Falha ao adicionar imagem');
+        growlService.growl('Erro ao realizar upload', 'inverse');
     });
   };
 
   $scope.onLoadError = function() {
-    $scope.$emit(toastConstants.WARNING, 'There was an error loading the image');
+    console.log('sdfsdfds');
   };
 
   $scope.close = function() {
@@ -97987,7 +105882,7 @@ function CropImageController($scope, $timeout, $stateParams) {
 }
 
 
-},{"angular":45}],112:[function(require,module,exports){
+},{"angular":48}],119:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98077,7 +105972,7 @@ function DetailEventController($scope, $stateParams, Facebook, Event, userServic
     };
 }
 
-},{"angular":45}],113:[function(require,module,exports){
+},{"angular":48}],120:[function(require,module,exports){
 require('./add-events-controller');
 require('./list-events-controller');
 require('./calendar');
@@ -98085,6 +105980,7 @@ require('./comment-controller');
 require('./detail-events-controller');
 require('./crop-image-controller');
 require('./add-video-event-controller');
+require('./add-image-event-controller');
 require('./invites-event-controller');
 
 module.exports = 'controllers';
@@ -98112,7 +106008,7 @@ module.exports = 'controllers';
 //     //});
 // };
 
-},{"./add-events-controller":107,"./add-video-event-controller":108,"./calendar":109,"./comment-controller":110,"./crop-image-controller":111,"./detail-events-controller":112,"./invites-event-controller":114,"./list-events-controller":115}],114:[function(require,module,exports){
+},{"./add-events-controller":113,"./add-image-event-controller":114,"./add-video-event-controller":115,"./calendar":116,"./comment-controller":117,"./crop-image-controller":118,"./detail-events-controller":119,"./invites-event-controller":121,"./list-events-controller":122}],121:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98133,7 +106029,7 @@ function InvitesEventController(Facebook, userService) {
     });
 }
 
-},{"angular":45}],115:[function(require,module,exports){
+},{"angular":48}],122:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98194,17 +106090,17 @@ function ListEventController($scope, modalService, routesService, Event) {
     loadEvents_();
 }
 
-},{"angular":45}],116:[function(require,module,exports){
+},{"angular":48}],123:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'events';
 
-},{"./controllers/index":113}],117:[function(require,module,exports){
+},{"./controllers/index":120}],124:[function(require,module,exports){
 require('./list-friends-controller');
 
 module.exports = 'controllers';
 
-},{"./list-friends-controller":118}],118:[function(require,module,exports){
+},{"./list-friends-controller":125}],125:[function(require,module,exports){
 'use strict';
 
 
@@ -98226,12 +106122,12 @@ function ListFriedsController(Facebook, userService) {
     });
 }
 
-},{"angular":45}],119:[function(require,module,exports){
+},{"angular":48}],126:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'friends';
 
-},{"./controllers/index":117}],120:[function(require,module,exports){
+},{"./controllers/index":124}],127:[function(require,module,exports){
 require('./comments/index');
 require('./events/index');
 require('./friends/index');
@@ -98240,7 +106136,7 @@ require('./profile/index');
 
 module.exports = 'modules';
 
-},{"./comments/index":106,"./events/index":116,"./friends/index":119,"./pages/index":123,"./profile/index":126}],121:[function(require,module,exports){
+},{"./comments/index":112,"./events/index":123,"./friends/index":126,"./pages/index":130,"./profile/index":133}],128:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98272,19 +106168,19 @@ function AboutCtrl() {
     }];
 }
 
-},{"angular":45}],122:[function(require,module,exports){
+},{"angular":48}],129:[function(require,module,exports){
 require('./about');
 
 module.exports = 'controllers';
 
-},{"./about":121}],123:[function(require,module,exports){
+},{"./about":128}],130:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'pages';
 
-},{"./controllers/index":122}],124:[function(require,module,exports){
-arguments[4][99][0].apply(exports,arguments)
-},{"./main":125,"dup":99}],125:[function(require,module,exports){
+},{"./controllers/index":129}],131:[function(require,module,exports){
+arguments[4][105][0].apply(exports,arguments)
+},{"./main":132,"dup":105}],132:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98306,7 +106202,7 @@ function ProfileCtrl($q, Media, eventService, growlService, userService, Faceboo
             self.events = response;
         });
     };
-
+    
     var loadMedias_ = function() {
         Media.query({}, function (medias) {
             var medias = medias;
@@ -98364,12 +106260,12 @@ function ProfileCtrl($q, Media, eventService, growlService, userService, Faceboo
     }
 }
 
-},{"angular":45,"lightgallery/dist/js/lightgallery":52,"lodash":53}],126:[function(require,module,exports){
+},{"angular":48,"lightgallery/dist/js/lightgallery":55,"lodash":56}],133:[function(require,module,exports){
 require('./controllers/index');
 
 module.exports = 'profile';
 
-},{"./controllers/index":124}],127:[function(require,module,exports){
+},{"./controllers/index":131}],134:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98390,7 +106286,7 @@ function BestsellingService($resource) {
     }
 }
 
-},{"angular":45}],128:[function(require,module,exports){
+},{"angular":48}],135:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98412,7 +106308,7 @@ function EventService($http) {
     };
 }
 
-},{"angular":45}],129:[function(require,module,exports){
+},{"angular":48}],136:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98451,7 +106347,7 @@ function growlService() {
     return gs;
 }
 
-},{"angular":45,"jquery":51}],130:[function(require,module,exports){
+},{"angular":48,"jquery":54}],137:[function(require,module,exports){
 require('./best-selling-service');
 require('./event-service');
 require('./growl-service');
@@ -98466,7 +106362,7 @@ require('./youtube-service');
 
 module.exports = 'services';
 
-},{"./best-selling-service":127,"./event-service":128,"./growl-service":129,"./message-service":131,"./modal-service":132,"./routes-service":133,"./scroll-service":134,"./table-service":135,"./user-service":136,"./utils-service":137,"./youtube-service":138}],131:[function(require,module,exports){
+},{"./best-selling-service":134,"./event-service":135,"./growl-service":136,"./message-service":138,"./modal-service":139,"./routes-service":140,"./scroll-service":141,"./table-service":142,"./user-service":143,"./utils-service":144,"./youtube-service":145}],138:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98487,7 +106383,7 @@ function MessageService($resource) {
     }
 }
 
-},{"angular":45}],132:[function(require,module,exports){
+},{"angular":48}],139:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98547,7 +106443,7 @@ function ModalService($uibModal) {
   };
 }
 
-},{"angular":45}],133:[function(require,module,exports){
+},{"angular":48}],140:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98616,7 +106512,7 @@ function RoutesService($state, $stateParams) {
   };
 }
 
-},{"angular":45}],134:[function(require,module,exports){
+},{"angular":48}],141:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98645,7 +106541,7 @@ function scrollService() {
     return ss;
 }
 
-},{"angular":45,"jquery":51}],135:[function(require,module,exports){
+},{"angular":48,"jquery":54}],142:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98799,7 +106695,7 @@ function tableService() {
         }
     ];
 }
-},{"angular":45}],136:[function(require,module,exports){
+},{"angular":48}],143:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98833,7 +106729,7 @@ function UserService(Facebook) {
     };
 }
 
-},{"angular":45}],137:[function(require,module,exports){
+},{"angular":48}],144:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98851,7 +106747,7 @@ function UtilsService() {
   };
 }
 
-},{"angular":45}],138:[function(require,module,exports){
+},{"angular":48}],145:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98873,7 +106769,7 @@ function YoutubeService() {
     };
 }
 
-},{"angular":45}],139:[function(require,module,exports){
+},{"angular":48}],146:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -98890,7 +106786,7 @@ function BestSellingController(bestSellingService) {
     this.bsResult = bestSellingService.getBestselling(this.img, this.name, this.range);
 }
 
-},{"angular":45}],140:[function(require,module,exports){
+},{"angular":48}],147:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -99001,14 +106897,14 @@ function HeaderController($timeout, messageService){
     }
 };
 
-},{"angular":45,"jquery":51}],141:[function(require,module,exports){
+},{"angular":48,"jquery":54}],148:[function(require,module,exports){
 require('./layout');
 require('./header');
 require('./best-selling');
 
 module.exports = 'controllers';
 
-},{"./best-selling":139,"./header":140,"./layout":142}],142:[function(require,module,exports){
+},{"./best-selling":146,"./header":147,"./layout":149}],149:[function(require,module,exports){
 'use strict';
 
 var angular = require('angular');
@@ -99123,15 +107019,15 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
     };
 };
 
-},{"angular":45}],143:[function(require,module,exports){
+},{"angular":48}],150:[function(require,module,exports){
 require('./controllers');
 
 module.exports = 'template';
 
-},{"./controllers":141}],144:[function(require,module,exports){
+},{"./controllers":148}],151:[function(require,module,exports){
 module.exports={
 }
 
-},{}],145:[function(require,module,exports){
-arguments[4][144][0].apply(exports,arguments)
-},{"dup":144}]},{},[71]);
+},{}],152:[function(require,module,exports){
+arguments[4][151][0].apply(exports,arguments)
+},{"dup":151}]},{},[77]);

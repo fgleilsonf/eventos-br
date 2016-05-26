@@ -19,7 +19,7 @@ function ProfileCtrl($q, Media, eventService, growlService, userService, Faceboo
             self.events = response;
         });
     };
-
+    
     var loadMedias_ = function() {
         Media.query({}, function (medias) {
             var medias = medias;

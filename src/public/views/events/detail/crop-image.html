@@ -12,10 +12,9 @@
     <div class="cropArea">
         <img-crop image="image"
                   area-type="rectangle"
+                  result-image="resultImage"
                   result-image-quality="1"
-                  result-image-size='{w: 1024,h: 500}'
-                  chargement="'Loading' | translate"
-                  aspect-ratio="1024/500"
+                  chargement="'Carregando...'"
                   on-load-error="onLoadError()"
                   result-blob="resultBlob">
         </img-crop>

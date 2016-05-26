@@ -16,7 +16,9 @@ var globalDependencies = [
     require('angular-input-masks/br'),
     require('angular-facebook') && 'facebook',
     require('angular-summernote/dist/angular-summernote') && 'summernote',
-    require('angular-spotify') && 'spotify'
+    require('angular-spotify') && 'spotify',
+    require('ng-file-upload') && 'ngFileUpload',
+    require('ng-img-crop-full-extended/compile/unminified/ng-img-crop.js') && 'ngImgCrop'
 ];
 
 module.exports = angular.module('webAdminApp', globalDependencies)
