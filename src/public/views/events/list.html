@@ -63,75 +63,22 @@
                     </ul>
                 </div>
 
-                <div ng-include="'views/comments/list-comment.html'"></div>
+                <div ng-controller="CommentController as commentCtrl"
+                     ng-init="commentCtrl.eventId = event.id;"
+                     ng-include="'views/comments/list-comment.html'"></div>
             </div>
         </div>
         <div class="col-md-4 hidden-sm">
             <div class="card picture-list">
                 <div class="card-header">
-                    <h2>Fotos <small>ùltimos eventos</small></h2>
+                    <h2>Fotos <small>Fotos do evento</small></h2>
                 </div>
 
-                <div class="pl-body card-padding">
-                    <div class="col-xs-3">
-                        <a href="">
-                            <img src="assets/img/headers/square/1.png" alt="">
-                        </a>
-                    </div>
-
-                    <div class="col-xs-3">
-                        <a href="">
-                            <img src="assets/img/headers/square/2.png" alt="">
-                        </a>
-                    </div>
-                    <div class="col-xs-3">
-                        <a href="">
-                            <img src="assets/img/headers/square/3.png" alt="">
-                        </a>
-                    </div>
-                    <div class="col-xs-3">
-                        <a href="">
-                            <img src="assets/img/headers/square/4.png" alt="">
-                        </a>
-                    </div>
-                    <div class="col-xs-3">
-                        <a href="">
-                            <img src="assets/img/headers/square/5.png" alt="">
-                        </a>
-                    </div>
-                    <div class="col-xs-3">
-                        <a href="">
-                            <img src="assets/img/headers/square/6.png" alt="">
-                        </a>
-                    </div>
-                    <div class="col-xs-3">
-                        <a href="">
-                            <img src="assets/img/headers/square/7.png" alt="">
-                        </a>
-                    </div>
-                    <div class="col-xs-3">
-                        <a href="">
-                            <img src="assets/img/headers/square/8.png" alt="">
-                        </a>
-                    </div>
-                    <div class="col-xs-3">
-                        <a href="">
-                            <img src="assets/img/headers/square/9.png" alt="">
-                        </a>
-                    </div>
-                    <div class="col-xs-3">
-                        <a href="">
-                            <img src="assets/img/headers/square/1.png" alt="">
-                        </a>
-                    </div>
-                    <div class="col-xs-3">
-                        <a href="">
-                            <img src="assets/img/headers/square/2.png" alt="">
-                        </a>
-                    </div>
-                    <div class="col-xs-3">
-                        <a href="">
-                            <img src="assets/img/headers/square/3.png" alt="">
+                <div class="pl-body card-padding" ng-init="listEventCtrl.loadImages(event);">
+                    <div class="col-xs-3"
+                         ng-repeat="image in event.images">
+                        <a>
+                            <img ng-src="{{ 'uploads/' + image.url}}" alt="">
                         </a>
                     </div>
                 </div>

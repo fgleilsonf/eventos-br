@@ -9,6 +9,7 @@ angular
 function AddCommentController($scope, Comment) {
     var self = this;
 
+    self.eventId = '';
     self.isOpenForm = false;
 
     self.openForm = function (flag) {
@@ -22,7 +23,7 @@ function AddCommentController($scope, Comment) {
     self.save = function() {
         var comment = new Comment();
         comment.user_id = 1;
-        comment.event_id = 6;
+        comment.event_id = self.eventId;
         comment.message = self.comment.message;
 
         comment.$save(function () {

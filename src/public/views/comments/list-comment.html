@@ -1,4 +1,4 @@
-<div class="wall-comment-list" ng-controller="CommentController as commentCtrl">
+<div class="wall-comment-list">
     <div class="wcl-list" ng-repeat="comment in commentCtrl.comments">
         <div class="media">
             <a href="" class="pull-left">
@@ -20,5 +20,7 @@
             </div>
         </div>
     </div>
-    <div class="m-t-5" ng-include="'views/comments/add-comment.html'"></div>
+    <div ng-controller="AddCommentController as addCommentCtrl"
+         ng-init="addCommentCtrl.eventId = event.id;"
+         ng-include="'views/comments/add-comment.html'"></div>
 </div>

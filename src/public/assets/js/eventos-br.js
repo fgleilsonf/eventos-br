@@ -105495,6 +105495,7 @@ angular
 function AddCommentController($scope, Comment) {
     var self = this;
 
+    self.eventId = '';
     self.isOpenForm = false;
 
     self.openForm = function (flag) {
@@ -105508,7 +105509,7 @@ function AddCommentController($scope, Comment) {
     self.save = function() {
         var comment = new Comment();
         comment.user_id = 1;
-        comment.event_id = 6;
+        comment.event_id = self.eventId;
         comment.message = self.comment.message;
 
         comment.$save(function () {
@@ -105794,7 +105795,7 @@ angular
 function CommentController($scope, Comment) {
 
     var self = this;
-
+    self.eventId = '';
     self.comments = [];
 
     self.delete = function (comment) {
@@ -105802,7 +105803,7 @@ function CommentController($scope, Comment) {
     };
 
     var load_ = function () {
-        Comment.query({event_id: 6}, function (comments) {
+        Comment.query({event_id: self.eventId}, function (comments) {
             self.comments = comments;
 
             $scope.$emit('call-load-list-comments', self.comments.length);
@@ -106038,7 +106039,8 @@ angular
     .module('webAdminApp')
     .controller('ListEventController', ListEventController);
 
-function ListEventController($scope, modalService, routesService, Event) {
+function ListEventController($scope, modalService, routesService,
+                             Event, Media) {
     var self = this;
 
     self.events = [];
@@ -106086,6 +106088,12 @@ function ListEventController($scope, modalService, routesService, Event) {
     };
 
     $scope.$on('call-load-list-comments', onLoadListComments_);
+
+    self.loadImages = function(event) {
+        Media.query({event_id: event.id, type: 1}, function (images) {
+            event.images = images;
+        });
+    };
 
     loadEvents_();
 }

@@ -6,7 +6,8 @@ angular
     .module('webAdminApp')
     .controller('ListEventController', ListEventController);
 
-function ListEventController($scope, modalService, routesService, Event) {
+function ListEventController($scope, modalService, routesService,
+                             Event, Media) {
     var self = this;
 
     self.events = [];
@@ -54,6 +55,12 @@ function ListEventController($scope, modalService, routesService, Event) {
     };
 
     $scope.$on('call-load-list-comments', onLoadListComments_);
+
+    self.loadImages = function(event) {
+        Media.query({event_id: event.id, type: 1}, function (images) {
+            event.images = images;
+        });
+    };
 
     loadEvents_();
 }

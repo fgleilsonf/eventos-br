@@ -9,7 +9,7 @@ angular
 function CommentController($scope, Comment) {
 
     var self = this;
-
+    self.eventId = '';
     self.comments = [];
 
     self.delete = function (comment) {
@@ -17,7 +17,7 @@ function CommentController($scope, Comment) {
     };
 
     var load_ = function () {
-        Comment.query({event_id: 6}, function (comments) {
+        Comment.query({event_id: self.eventId}, function (comments) {
             self.comments = comments;
 
             $scope.$emit('call-load-list-comments', self.comments.length);
