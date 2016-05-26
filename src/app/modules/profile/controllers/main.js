@@ -1,6 +1,7 @@
 'use strict';
 
 var angular = require('angular');
+var _ = require('lodash');
 
 require('lightgallery/dist/js/lightgallery');
 
@@ -21,10 +22,10 @@ function ProfileCtrl($q, Media, eventService, growlService, userService, Faceboo
 
     var loadMedias_ = function() {
         Media.query({event_id: 6}, function (medias) {
-            self.medias = medias;
+            var medias = medias;
 
-            console.log('self.medias', self.medias);
-
+            self.images = _.filter(medias, {type: 1});
+            self.videos = _.filter(medias, {type: 2});
         });
     };
 

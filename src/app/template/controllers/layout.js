@@ -6,7 +6,7 @@ angular
     .module('webAdminApp')
     .controller('LayoutController', LayoutController);
 
-function LayoutController($timeout, $state, $scope, growlService, Facebook, userService) {
+function LayoutController($timeout, $state, $scope, growlService, Facebook, userService, User) {
     //Welcome Message
     // growlService.growl('Bem vindo ao Eventos BR', 'inverse');
 
@@ -14,12 +14,17 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
 
     self.getUser = function() {
         userService.get().then(function(data) {
-            self.user = data;
+            var user = new User();
+            user.facebook_id = data.id;
+            user.photo_cover = data.cover.source;
+            user.photo_profile = data.picture.data.url;
+            user.name = data.name;
 
-            self.user.cover_image = data.cover.source;
-            self.user.profile_image = data.picture.data.url;
+            user.$save(function (user) {
+                self.user = user;
 
-            console.log('self.user ', self.user );
+                console.log('RESGISTRO REALIZADO COM SUCESSO', user);
+            });
         });
     };
 
@@ -50,23 +55,19 @@ function LayoutController($timeout, $state, $scope, growlService, Facebook, user
         right: false
     };
 
-    // By default template has a boxed layout
     this.layoutType = localStorage.getItem('ma-layout-status');
+    this.$state = $state;
 
-    // For Mainmenu Active Class
-    // this.$state = $state;
-
-    //Close sidebar on click
-    // this.sidebarStat = function(event) {
-    //
-    //     console.log('this.sidebarStat: event', event);
-    //
-    //     if (!angular.element(event.target).parent().hasClass('active')) {
-    //         this.sidebarToggle.left = false;
-    //     }
-    //
-    //     console.log('this.sidebarToggle.left', this.sidebarToggle.left);
-    // };
+    this.sidebarStat = function(event) {
+    
+        console.log('this.sidebarStat: event', event);
+    
+        if (!angular.element(event.target).parent().hasClass('active')) {
+            this.sidebarToggle.left = false;
+        }
+    
+        console.log('this.sidebarToggle.left', this.sidebarToggle.left);
+    };
 
     //Listview Search (Check listview pages)
     this.listviewSearchStat = false;

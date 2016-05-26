@@ -13,6 +13,7 @@ var globalDependencies = [
     require('ng-table/dist/ng-table') && 'ngTable',
     require('angular-animate'),
     require('angular-input-masks'),
+    require('angular-input-masks/br'),
     require('angular-facebook') && 'facebook',
     require('angular-summernote/dist/angular-summernote') && 'summernote',
     require('angular-spotify') && 'spotify'

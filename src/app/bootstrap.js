@@ -21,7 +21,8 @@ require('bootstrap-datetimepicker');
 // require('ng-img-crop-full-extended/compile/unminified/ng-img-crop.js') && 'ngImgCrop',
 
 require('./assets/fullcalendar.min');
-require('./assets/jquery-ui.custom.min');
+require('./assets/fullcalendar.min');
+require('./assets/input-mask');
 
 require('./config');
 

@@ -11,6 +11,26 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
         .otherwise('/events/list');
 
     $stateProvider
+        .state ('profile', {
+            url: '/profile',
+            templateUrl: 'views/profile/index.html'
+        })
+        .state ('profile.about', {
+            url: '/about',
+            templateUrl: 'views/profile/about.html'
+        })
+        .state ('profile.timeline', {
+            url: '/timeline',
+            templateUrl: 'views/profile/timeline.html'
+        })
+        .state ('profile.medias', {
+            url: '/medias',
+            templateUrl: 'views/profile/medias.html'
+        })
+        .state ('profile.connections', {
+            url: '/connections',
+            templateUrl: 'views/profile/connections.html'
+        })
         .state ('friends', {
             url: '/friends',
             templateUrl: 'views/friends/index.html'
@@ -54,25 +74,5 @@ function RouteConfig($stateProvider, $urlRouterProvider) {
         .state ('about', {
             url: '/about',
             templateUrl: 'views/pages/about.html'
-        })
-        .state ('profile', {
-            url: '/profile',
-            templateUrl: 'views/profile/index.html'
-        })
-        .state ('profile.about', {
-            url: '/profile-about',
-            templateUrl: 'views/profile/about.html'
-        })
-        .state ('profile.timeline', {
-            url: '/profile-timeline',
-            templateUrl: 'views/profile/timeline.html'
-        })
-        .state ('profile.photos', {
-            url: '/profile-photos',
-            templateUrl: 'views/profile/medias.html'
-        })
-        .state ('profile.connections', {
-            url: '/profile-connections',
-            templateUrl: 'views/profile/connections.html'
         });
 };

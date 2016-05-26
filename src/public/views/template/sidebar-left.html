@@ -1,10 +1,10 @@
 <div class="sidebar-inner c-overflow">
     <div class="profile-menu" ng-show="mactrl.user">
         <a href=""
-           ng-style="{'background': 'url('+ mactrl.user.cover_image + ') no-repeat'}"
+           ng-style="{'background': 'url('+ mactrl.user.photo_cover + ') no-repeat'}"
            toggle-submenu>
             <div class="profile-pic">
-                <img ng-src="{{ mactrl.user.profile_image }}" alt="">
+                <img ng-src="{{ mactrl.user.photo_profile }}" alt="">
             </div>
             <div class="profile-info">
                 {{ mactrl.user.name }}

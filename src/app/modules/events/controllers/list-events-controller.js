@@ -44,6 +44,8 @@ function ListEventController($scope, modalService, routesService, Event) {
     var loadEvents_ = function() {
         Event.query({user_id: 1}, function (events) {
             self.events = events;
+        }, function(error) {
+            self.error = "Falha ao carregar eventos";
         });
     };
 

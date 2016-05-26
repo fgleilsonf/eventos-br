@@ -13,18 +13,26 @@
         </ul>
     </div>
 
-    <div class="lightbox row" ng-show="profileCtrl.showMedia === 1">
-        <div ng-repeat="media in profileCtrl.medias  | filter: { type_media: 1 } " class="col-md-3 col-sm-4 col-xs-6">
+    <p class="c-red lead" ng-show="!profileCtrl.images.length && profileCtrl.showMedia === 1">
+            <i class="zmdi zmdi-collection-image"></i>
+            Não há imagens adicionadas
+        </p>
+    <div ng-if="profileCtrl.images.length" class="lightbox row" ng-show="profileCtrl.showMedia === 1">
+        <div ng-repeat="image in profileCtrl.images" class="col-md-3 col-sm-4 col-xs-6">
             <div class="lightbox-item p-item">
-                <img src="uploads/{{ media.url }}" alt="" />
+                <img src="uploads/{{ image.url }}" alt="" />
             </div>
         </div>
     </div>
 
     <div class="m-l-5 row" ng-show="profileCtrl.showMedia === 2">
-        <div ng-repeat="media in profileCtrl.medias  | filter: { type_media: 2 } "
+        <p class="c-red lead" ng-hide="profileCtrl.videos.length">
+            <i class="zmdi zmdi-play-circle"></i>
+            Não há vídeos adicionadas
+        </p>
+        <div ng-repeat="video in profileCtrl.videos"
              class="embed-responsive embed-responsive-4by3 m-r-10 col-md-3 col-sm-4 col-xs-6" >
-            <div youtube data-height="'155px'" path="media.url"></div>
+            <div youtube data-height="'155px'" path="video.url"></div>
         </div>
     </div>
 

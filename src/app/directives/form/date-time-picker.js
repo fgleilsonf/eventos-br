@@ -9,10 +9,8 @@ angular
 function dateTimePicker() {
     return {
         restrict: 'C',
+        require: '?ngModel',
         link: function(scope, element) {
-
-            console.log('asdasdasdas');
-
             element.datetimepicker();
         }
     }

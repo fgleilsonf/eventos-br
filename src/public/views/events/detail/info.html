@@ -13,8 +13,10 @@
             <dt class="p-t-10">Inicio</dt>
             <dd>
                 <div class="fg-line">
-                    <input type="text" ng-model="detailEventCtrl.event.start_date" name="start_date" id="start_date"
-                           class="form-control date-time-picker" placeholder="Inicio">
+                    <input type="text" ng-model="detailEventCtrl.event.start_date" 
+                           name="start_date" id="start_date"
+                           class="form-control" placeholder="Inicio"
+                           data-input-mask="{mask: '0000/00/00 00:00:00'}" />
                 </div>
             </dd>
         </dl>
@@ -22,8 +24,10 @@
             <dt class="p-t-10">Termino</dt>
             <dd>
                 <div class="fg-line">
-                    <input ng-model="addEventCtrl.event.end_date" name="end_date" id="end_date"
-                           class="form-control date-time-picker" placeholder="Termino">
+                    <input type="text" ng-model="detailEventCtrl.event.end_date" 
+                           name="end_date" id="end_date"
+                           class="form-control" placeholder="Termino"
+                           data-input-mask="{mask: '0000/00/00 00:00:00'}" />
                 </div>
             </dd>
         </dl>

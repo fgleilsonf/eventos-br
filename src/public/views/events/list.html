@@ -2,6 +2,13 @@
     <a class="btn btn-float btn-danger m-btn" ng-click="listEventCtrl.openModalAddEvent();">
         <i class="zmdi zmdi-plus"></i>
     </a>
+
+    <p class="c-red lead" ng-hide="listEventCtrl.events.length">Não eventos adicionados ainda...</p>
+
+    <div class="alert alert-danger" role="alert" ng-show="listEventCtrl.error">
+        {{ listEventCtrl.error }}
+    </div>
+
     <div class="row" ng-repeat="event in listEventCtrl.events">
         <div class="col-md-8">
             <div class="card">
